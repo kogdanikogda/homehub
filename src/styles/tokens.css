@@ -1,0 +1,61 @@
+/* Токены HomeHub. Источник — переменные в Figma (HomeHub Color / Size / Palette). */
+:root {
+  color-scheme: dark;
+
+  /* Палитра */
+  --accent-50: #f6f1e9;  --accent-100: #f1e6d8; --accent-200: #e8d4bb; --accent-300: #dcba9a;
+  --accent-400: #c5957d; --accent-500: #a77661; --accent-600: #855a4a; --accent-700: #664436;
+  --accent-800: #4b3127; --accent-900: #311f18; --accent-950: #1c110c;
+
+  --success-300: #b2d1b7; --success-400: #97bc9d; --success-500: #7d9f83;
+  --warning-300: #dbc99f; --warning-400: #ceb885; --warning-500: #b09c6d;
+  --danger-300: #f8b1ba;  --danger-400: #dc8995;  --danger-500: #bc6f7b;
+  --danger-700: #6f4047;  --danger-950: #16090b;
+  --info-400: #90b7d3;
+
+  /* Поверхности */
+  --surface-bezel: #000000;
+  --surface-0: #0b0b0b;
+  --surface-rail: #121212;
+  --surface-1: #171717;
+  --surface-2: #242424;
+  --surface-3: #333333;
+  --fill-subtle: rgb(255 255 255 / 0.07);
+  --fill-muted: rgb(52 52 56 / 0.45);
+  --overlay-scrim: rgb(0 0 0 / 0.66);
+
+  /* Текст */
+  --text-primary: #dedcd7;
+  --text-secondary: #a3a19c;
+  --text-tertiary: #8f8d89;
+  --text-disabled: #5c5b58;
+  --text-on-light: #0b0b0b;
+
+  /* Акцент и состояния */
+  --accent-default: var(--accent-400);
+  --accent-text: var(--accent-300);
+  --accent-soft: #322e2c;
+  --accent-on: var(--accent-950);
+  --accent-track: var(--accent-800);
+  --control-knob-off: #8c8c8c;
+  --control-knob-disabled: #4a4a4a;
+  --status-ok: var(--success-400);
+  --status-ok-soft: rgb(255 255 255 / 0.06);
+  --status-warn: var(--warning-400);
+  --status-warn-soft: rgb(255 255 255 / 0.06);
+  --status-crit: var(--danger-400);
+  --status-crit-soft: rgb(255 255 255 / 0.06);
+  --status-crit-fill: var(--danger-700);
+  --status-on-crit: #16090b;
+  --status-info: var(--info-400);
+  --static-white: #ffffff;
+
+  /* Размеры */
+  --space-4: 4px;  --space-8: 8px;  --space-12: 12px;
+  --space-16: 16px; --space-24: 24px; --space-32: 32px;
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-dialog: 26px;
+  --radius-full: 999px;
+  --touch-min: 56px;
+}
