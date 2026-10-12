@@ -8,4 +8,4 @@
 .btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
 .num { min-width: 31px; text-align: center; color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .md .num { font-size: 14px; font-weight: 600; }
-.sm .num { font-size: 13px; font-weight: 700; min-width: 29px; }
+.sm .num { font-size: 13px; font-weight: 700; min-width: 42px; }

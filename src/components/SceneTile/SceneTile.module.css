@@ -1,4 +1,4 @@
-.tile { display: flex; align-items: center; gap: 10px; min-width: 276px; padding: 8px 12px 8px 8px; border-radius: 16px; text-align: left; background: var(--surface-2); color: var(--text-secondary); }
+.tile { display: flex; align-items: center; gap: 10px; min-width: 276px; height: 64px; padding: 8px 12px 8px 8px; border-radius: 16px; text-align: left; background: var(--surface-2); color: var(--text-secondary); }
 .tile:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .ic { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; background: var(--fill-subtle); flex: none; }
 .tx { display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
