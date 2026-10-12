@@ -1,0 +1,12 @@
+.root { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.dots { display: flex; gap: 16px; padding-top: 6px; }
+.dot { width: 18px; height: 18px; border-radius: 50%; background: var(--surface-2); transition: background .12s; }
+.on { background: var(--text-primary); }
+.error { margin: 0; min-height: 19px; font-size: 14px; font-weight: 600; color: var(--status-crit); }
+.pad { display: grid; grid-template-columns: repeat(3, 96px); gap: 12px; }
+.key { height: 68px; border-radius: 16px; background: var(--surface-2); color: var(--text-primary); font-size: 26px; font-weight: 600; }
+.key:active { background: var(--surface-3); }
+.key:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.del { background: none; display: flex; align-items: center; justify-content: center; }
+.del:active { background: var(--surface-2); }
+.hint { margin: 6px 0 0; font-size: 13px; color: var(--text-tertiary); }

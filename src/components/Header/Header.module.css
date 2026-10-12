@@ -1,0 +1,19 @@
+.header { display: flex; align-items: center; gap: 20px; height: 84px; padding: 0 32px; flex: none; }
+.clock { display: flex; flex-direction: column; }
+.time { font-size: 28px; font-weight: 600; line-height: 31px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.date { font-size: 12px; font-weight: 500; line-height: 13px; color: var(--text-secondary); }
+.stats { display: flex; gap: 4px; padding-right: 8px; }
+.grow { flex: 1; }
+
+.mode { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px 0 16px; border-radius: 22px; background: var(--surface-1); font-size: 13.5px; }
+.mode:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.part { display: flex; align-items: center; gap: 7px; color: var(--text-secondary); }
+.key { font-weight: 500; color: var(--text-secondary); }
+.accent, .plain { font-weight: 600; }
+.accent { color: var(--accent-text); }
+.plain { color: var(--text-primary); }
+.divider { width: 1px; height: 18px; background: var(--surface-2); }
+.chevDown { transform: rotate(90deg); color: var(--text-secondary); }
+.chevUp { transform: rotate(-90deg); color: var(--text-secondary); }
+
+.popover { z-index: 40; width: 400px; padding: 10px; border-radius: 22px; background: var(--surface-1); box-shadow: var(--shadow-overlay); }

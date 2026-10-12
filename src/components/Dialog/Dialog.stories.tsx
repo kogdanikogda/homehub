@@ -7,13 +7,13 @@ const meta = { title: 'Overlays/Dialog', component: Dialog, parameters: { layout
 export default meta
 
 export const Confirm: StoryObj<typeof meta> = {
-  args: { open: false, onOpenChange: () => {}, onPrimary: () => {}, title: 'Turn on Away?', primaryLabel: 'Turn on Away' },
+  args: { open: false, onOpenChange: () => {}, title: 'Turn on Away?' },
   render: (args) => {
     const [open, setOpen] = useState(false)
     return (
       <>
         <Button onClick={() => setOpen(true)}>Open dialog</Button>
-        <Dialog {...args} open={open} onOpenChange={setOpen} onPrimary={() => setOpen(false)}
+        <Dialog {...args} open={open} onOpenChange={setOpen} primary={{ label: 'Turn on Away', onClick: () => setOpen(false) }}
           lead="Lights will turn off and the alarm will arm in 60 seconds." />
       </>
     )

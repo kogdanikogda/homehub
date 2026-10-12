@@ -11,3 +11,6 @@
 .md .thumb[data-state='checked'] { transform: translateX(16px); background: var(--accent-on); }
 .sm .thumb[data-state='checked'] { transform: translateX(14px); background: var(--accent-on); }
 .root:disabled .thumb { background: var(--control-knob-disabled); }
+
+.field { display: inline-flex; align-items: center; gap: 12px; }
+.state { font-size: 13px; color: var(--text-secondary); }

@@ -1,0 +1,5 @@
+.card { display: flex; flex-direction: column; gap: 18px; padding: 24px 26px; border-radius: var(--radius-card); background: var(--surface-1); }
+.title { margin: 0; font-size: 16px; font-weight: 600; line-height: 24px; color: var(--text-primary); }
+.tiles { display: flex; gap: 10px; }
+.tiles > * { flex: 1; }
+.hint { margin: 0; font-size: 13.5px; line-height: 20px; color: var(--text-secondary); }
