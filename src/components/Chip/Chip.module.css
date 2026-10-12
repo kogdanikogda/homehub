@@ -1,0 +1,14 @@
+.chip { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; white-space: nowrap; }
+.xs { height: 20px; padding: 0 8px; border-radius: 10px; font-size: 11px; }
+.sm { height: 22px; padding: 0 9px; border-radius: 11px; font-size: 11.5px; }
+.md { height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12px; }
+.lg { height: 32px; padding: 0 12px; border-radius: 16px; font-size: 13px; }
+
+.accent { background: var(--accent-soft); color: var(--accent-text); }
+.neutral { background: var(--surface-2); color: var(--text-secondary); }
+.warning { background: var(--status-warn-soft); color: var(--status-warn); }
+.success { background: var(--status-ok-soft); color: var(--status-ok); }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.tag { display: inline-flex; align-items: center; height: 17px; padding: 0 7px 0 5px; border-radius: 8.5px; font-size: 10.5px; font-weight: 700; }

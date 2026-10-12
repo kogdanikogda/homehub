@@ -1,0 +1,6 @@
+.overlay { position: fixed; inset: 0; background: var(--overlay-scrim); }
+.content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(660px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 14px; padding: 30px 32px; background: var(--surface-1); border-radius: var(--radius-dialog); box-shadow: var(--shadow-overlay); }
+.title { margin: 0; font-size: 22px; font-weight: 600; line-height: 28px; color: var(--text-primary); }
+.lead { margin: 0; font-size: 15px; line-height: 21px; color: var(--text-primary); }
+.body { background: var(--fill-subtle); border-radius: 14px; }
+.actions { display: flex; justify-content: flex-end; gap: 12px; padding-top: 12px; }

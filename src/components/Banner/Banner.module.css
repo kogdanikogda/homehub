@@ -1,0 +1,7 @@
+.banner { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; }
+.warning { background: var(--status-warn-soft); }
+.critical { background: var(--status-crit-soft); }
+.warning .icon { color: var(--status-warn); }
+.critical .icon { color: var(--status-crit); }
+.icon { flex: none; }
+.banner p { margin: 0; font-size: 15px; line-height: 21px; color: var(--text-primary); }

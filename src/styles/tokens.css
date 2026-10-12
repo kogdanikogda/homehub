@@ -59,3 +59,9 @@
   --radius-full: 999px;
   --touch-min: 56px;
 }
+
+:root {
+  --grad-accent: linear-gradient(135deg, var(--accent-300), var(--accent-400));
+  --glow-accent: 0 0 22px rgb(205 163 138 / 0.32);
+  --shadow-overlay: 0 18px 48px rgb(0 0 0 / 0.6);
+}

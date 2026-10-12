@@ -1,0 +1,11 @@
+.root { display: inline-flex; align-items: center; justify-content: center; background: var(--surface-2); flex: none; }
+.md { height: 34px; border-radius: 17px; }
+.sm { height: 30px; border-radius: 10px; }
+.btn { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-primary); border-radius: inherit; }
+.md .btn { width: 38px; }
+.sm .btn { width: 32px; }
+.btn:disabled { color: var(--text-disabled); cursor: not-allowed; }
+.btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
+.num { min-width: 31px; text-align: center; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.md .num { font-size: 14px; font-weight: 600; }
+.sm .num { font-size: 13px; font-weight: 700; min-width: 29px; }

@@ -21,6 +21,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npx storybook build -o dist/storybook --disable-telemetry
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

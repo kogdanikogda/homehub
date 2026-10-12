@@ -22,3 +22,6 @@ React, TypeScript, Vite, CSS-переменные, Zustand. Шрифт Inter п�
 - `src/screens` — экраны планшета и телефонов
 - `src/store` — состояние дома (комнаты, устройства, режимы, сцены)
 - `src/lib` — вспомогательный код
+- `scripts/contrast.mjs` — проверка контраста WCAG для пар токенов (`node scripts/contrast.mjs`)
+
+

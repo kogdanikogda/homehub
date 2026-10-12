@@ -1,0 +1,16 @@
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tablet { min-height: 48px; }
+.phone { min-height: 52px; padding: 8px 10px 8px 12px; background: var(--surface-1); border-radius: 12px; }
+
+.label { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.phone .label { gap: 8px; }
+.icon { flex: none; color: var(--text-secondary); }
+.name, .dim { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone .name, .phone .dim { font-size: 14px; }
+.name { color: var(--text-primary); }
+.dim { color: var(--text-tertiary); }
+
+.mark { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-text); flex: none; }
+
+.status { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 18px; background: var(--surface-2); color: var(--text-secondary); font-size: 15px; font-weight: 600; }
+.phone .status { height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12px; }
