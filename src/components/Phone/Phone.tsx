@@ -1,4 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react'
+import entrance from '../../assets/cams/entrance.jpg'
+import garage from '../../assets/cams/garage.jpg'
+import living from '../../assets/cams/living.jpg'
+import yard from '../../assets/cams/yard.jpg'
 import { Chip, Tag } from '../Chip/Chip'
 import { Icon, type IconName } from '../Icon/Icon'
 import styles from './Phone.module.css'
@@ -164,12 +168,12 @@ export function GroupLabel({ children, tag }: { children: ReactNode; tag?: strin
 
 export type CamId = 'yard' | 'entrance' | 'garage' | 'living'
 
-/** Фон камеры. Это рисованные заглушки: реальные кадры в прототипе не нужны */
+/** Кадры камер (из макета) */
 export const CAM_STYLE: Record<CamId, CSSProperties> = {
-  yard: { background: 'radial-gradient(120% 90% at 30% 110%, #2b3a22 0%, transparent 60%), linear-gradient(#14202e, #1b2a1d)' },
-  entrance: { background: 'radial-gradient(60% 70% at 70% 40%, #8a6a3a 0%, transparent 55%), linear-gradient(#12161d, #1d1812)' },
-  garage: { background: 'radial-gradient(70% 60% at 55% 60%, #3b4a58 0%, transparent 65%), linear-gradient(#1a2028, #0e1218)' },
-  living: { background: 'radial-gradient(80% 80% at 40% 50%, #5a4a3c 0%, transparent 70%), linear-gradient(#2a2420, #171412)' },
+  yard: { backgroundImage: `url(${yard})`, backgroundSize: 'cover', backgroundPosition: 'center' },
+  entrance: { backgroundImage: `url(${entrance})`, backgroundSize: 'cover', backgroundPosition: 'center' },
+  garage: { backgroundImage: `url(${garage})`, backgroundSize: 'cover', backgroundPosition: 'center' },
+  living: { backgroundImage: `url(${living})`, backgroundSize: 'cover', backgroundPosition: 'center' },
 }
 
 export function CameraTile({ id, name, off, onClick }: { id: CamId; name: string; off?: boolean; onClick: () => void }) {
