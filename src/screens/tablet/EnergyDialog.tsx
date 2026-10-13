@@ -14,6 +14,8 @@ export function EnergyDialog({ onClose, now = new Date() }: { onClose: () => voi
   const [period, setPeriod] = useState<EnergyPeriod>('day')
   const e = ENERGY[period]
   const labels = axisLabels(period, now)
+  // За день показываем все 24 часа: будущие часы остаются пустыми
+  const slots = period === 'day' ? 24 : e.bars.length
   const peak = e.bars.indexOf(Math.max(...e.bars))
   const caption = period === 'day'
     ? `${e.caption} · until ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
@@ -40,11 +42,13 @@ export function EnergyDialog({ onClose, now = new Date() }: { onClose: () => voi
             <div key={g} className={styles.grid} style={{ bottom: `${(g / e.axisMax) * 100}%` }}><span>{g}</span></div>
           ))}
           <div className={styles.bars}>
-            {e.bars.map((v, i) => (
+            {Array.from({ length: slots }, (_, i) => e.bars[i]).map((v, i) => (
               <div key={i} className={styles.slot}>
-                <div className={`${styles.bar} ${i === e.bars.length - 1 ? styles.last : ''}`} style={{ height: `${(v / e.axisMax) * 100}%` }}>
-                  {i === peak && <span className={styles.peak}>{v}</span>}
-                </div>
+                {v !== undefined && (
+                  <div className={`${styles.bar} ${i === e.bars.length - 1 ? styles.last : ''}`} style={{ height: `${(v / e.axisMax) * 100}%` }}>
+                    {i === peak && <span className={styles.peak}>{v}</span>}
+                  </div>
+                )}
                 {labels.has(i) && <span className={styles.tick}>{labels.get(i)}</span>}
               </div>
             ))}
