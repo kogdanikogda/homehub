@@ -1,4 +1,4 @@
 .dim { position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--surface-bezel); }
 .time { font-size: 168px; font-weight: 300; line-height: 168px; letter-spacing: -0.03em; color: #d5dae0; }
 .line { font-size: 24px; line-height: 29px; color: #9a9a9a; }
-.wake { margin-top: 36px; font-size: 15px; color: #9a9a9a; }
+.wake { margin-top: 36px; font-size: 15px; color: #9a9a9a; opacity: .6; }
