@@ -48,3 +48,4 @@ export type DialogState =
   | { type: 'confirmAway'; windows: RoomId[] }
   | { type: 'pin'; purpose: 'home' | 'alarm' }
   | { type: 'windows' }
+  | { type: 'energy' }

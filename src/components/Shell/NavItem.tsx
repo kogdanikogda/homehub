@@ -10,14 +10,15 @@ export function NavItem({ label, icon, selected, onClick }: { label: string; ico
   )
 }
 
-export function HeaderStat({ icon, label, value, attention }: { icon: IconName; label: string; value: string; attention?: boolean }) {
+export function HeaderStat({ icon, label, value, attention, onClick }: { icon: IconName; label: string; value: string; attention?: boolean; /** Если задан, плитка — кнопка */ onClick?: () => void }) {
+  const Tag = onClick ? 'button' : 'div'
   return (
-    <div className={`${styles.stat} ${attention ? styles.statWarn : ''}`}>
+    <Tag className={`${styles.stat} ${attention ? styles.statWarn : ''} ${onClick ? styles.statBtn : ''}`} {...(onClick ? { type: 'button' as const, onClick } : {})}>
       <span className={styles.statIc}><Icon name={icon} size={20} /></span>
       <span className={styles.statTx}>
         <span className={styles.statK}>{label}</span>
         <span className={styles.statV}>{value}</span>
       </span>
-    </div>
+    </Tag>
   )
 }

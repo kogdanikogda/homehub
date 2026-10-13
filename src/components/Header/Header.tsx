@@ -8,7 +8,7 @@ import styles from './Header.module.css'
 type Props = {
   time: string
   date: string
-  stats: { icon: IconName; label: string; value: string; attention?: boolean }[]
+  stats: { icon: IconName; label: string; value: string; attention?: boolean; onClick?: () => void }[]
   mode: { icon: IconName; name: string; armed: boolean; alarmOn: boolean }
   menuOpen: boolean
   onMenuOpenChange: (open: boolean) => void

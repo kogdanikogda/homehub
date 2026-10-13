@@ -13,6 +13,8 @@ type Props = {
   lead?: string
   /** Например «3 of 7» справа от заголовка */
   counter?: string
+  /** Что-то справа от заголовка, например переключатель периода */
+  headerExtra?: ReactNode
   /** 0…1 — тонкая полоса прогресса (4 px) */
   progress?: number
   children?: ReactNode
@@ -27,7 +29,7 @@ type Props = {
 }
 
 export function Dialog({
-  open, onOpenChange, title, lead, counter, progress, children, note, width = 660, dismissible = true, primary, secondary,
+  open, onOpenChange, title, lead, counter, headerExtra, progress, children, note, width = 660, dismissible = true, primary, secondary,
 }: Props) {
   const container = usePortalContainer()
   const cancel = secondary === undefined ? { label: 'Cancel' } : secondary
@@ -46,6 +48,7 @@ export function Dialog({
           <div className={styles.header}>
             <RadixDialog.Title className={styles.title}>{title}</RadixDialog.Title>
             {counter && <span className={styles.counter}>{counter}</span>}
+            {headerExtra}
           </div>
           {progress !== undefined && (
             <div className={styles.track}><div className={styles.fill} style={{ width: `${Math.round(progress * 100)}%` }} /></div>

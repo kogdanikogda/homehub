@@ -81,3 +81,23 @@ describe('страница комнат', () => {
     expect(sceneControlledCount('corridor', 'general')).toBe(1)
   })
 })
+
+import { ENERGY, axisLabels, percentOf } from './energy'
+describe('энергия', () => {
+  it('сумма столбиков сходится с итогом', () => {
+    expect(ENERGY.day.bars.reduce((a, b) => a + b, 0)).toBeCloseTo(ENERGY.day.total, 0)
+    expect(ENERGY.week.bars.reduce((a, b) => a + b, 0)).toBeCloseTo(ENERGY.week.total, 0)
+    expect(ENERGY.month.bars.reduce((a, b) => a + b, 0)).toBeCloseTo(ENERGY.month.total, -1)
+  })
+  it('части равны итогу и дают 100%', () => {
+    for (const p of ['day', 'week', 'month'] as const) {
+      const e = ENERGY[p]
+      expect(e.split.reduce((a, b) => a + b.value, 0)).toBeCloseTo(e.total, 0)
+      expect(e.split.reduce((a, b) => a + percentOf(b.value, e.total), 0)).toBeGreaterThanOrEqual(99)
+    }
+  })
+  it('подписи недели: последняя — Today', () => {
+    expect(axisLabels('week', new Date(2026, 9, 13)).get(6)).toBe('Today')
+    expect(axisLabels('week', new Date(2026, 9, 13)).get(0)).toBe('Wed')
+  })
+})

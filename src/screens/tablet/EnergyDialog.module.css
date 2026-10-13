@@ -1,0 +1,26 @@
+.hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 6px; }
+.big { display: flex; align-items: baseline; gap: 8px; }
+.num { font-size: 34px; font-weight: 600; line-height: 41px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.unit { font-size: 16px; font-weight: 600; color: var(--text-secondary); }
+.cap { margin-left: 6px; font-size: 14px; color: var(--text-secondary); }
+
+.chart { padding: 12px 0 4px; }
+.plot { position: relative; height: 174px; margin: 0 0 24px 34px; }
+.grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--surface-2); }
+.grid span { position: absolute; left: -34px; top: -8px; width: 26px; text-align: right; font-size: 12px; line-height: 15px; color: var(--text-tertiary); }
+.bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 5px; }
+.slot { position: relative; flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.bar { position: relative; width: 100%; border-radius: 4px 4px 0 0; background: var(--accent-soft); }
+.bar.last { background: var(--grad-accent); }
+.peak { position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -3px); font-size: 12px; line-height: 15px; color: var(--text-secondary); }
+.tick { position: absolute; top: 100%; left: 50%; margin-top: 8px; transform: translateX(-50%); white-space: nowrap; font-size: 12px; line-height: 15px; color: var(--text-tertiary); }
+
+.h3 { margin: 6px 0 0; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+.split { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.row { display: flex; align-items: center; gap: 12px; }
+.what { display: flex; align-items: center; gap: 14px; width: 232px; flex: none; font-size: 14.5px; color: var(--text-primary); }
+.what svg { color: var(--text-secondary); }
+.trk { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+.trk span { display: block; height: 100%; border-radius: 2px; background: var(--grad-accent); }
+.val { width: 57px; text-align: right; font-size: 14.5px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.pct { width: 37px; text-align: right; font-size: 12.5px; color: var(--text-secondary); }

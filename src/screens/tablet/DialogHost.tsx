@@ -7,6 +7,7 @@ import { DEVICE_BY_KEY, PROTOTYPE_PIN, ROOM_NAMES, ROOM_ORDER, SCENES } from '..
 import { deviceTitle, formatValue, modifiedChanges } from '../../store/logic'
 import type { Change } from '../../store/types'
 import { useHome } from '../../store/useHome'
+import { EnergyDialog } from './EnergyDialog'
 
 const arrow = (c: Change) => `${formatValue(c.key, c.from)} → ${formatValue(c.key, c.to)}`
 const joinNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0])
@@ -100,6 +101,8 @@ export function DialogHost() {
           <PinPad onSubmit={a.submitPin} hint={`Prototype PIN: ${PROTOTYPE_PIN}`} />
         </Dialog>
       )
+    case 'energy':
+      return <EnergyDialog onClose={close} />
     case 'windows':
       return (
         <Dialog open onOpenChange={close} title="Windows" secondary={{ label: 'Close' }}>

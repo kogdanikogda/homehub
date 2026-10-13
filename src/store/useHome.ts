@@ -41,6 +41,7 @@ export interface HomeState {
   /** true — PIN верный */
   submitPin: (pin: string) => boolean
   openWindows: () => void
+  openEnergy: () => void
   closeDialog: () => void
   showToast: (text: string) => void
   clearToast: (id: number) => void
@@ -208,6 +209,7 @@ export const useHome = create<HomeState>()((set, get) => {
     },
 
     openWindows: () => set({ dialog: { type: 'windows' } }),
+    openEnergy: () => set({ dialog: { type: 'energy' } }),
     closeDialog: () => {
       runToken++ // закрытие окна прогресса не отменяет сцену, но останавливает автозакрытие
       set({ dialog: null })

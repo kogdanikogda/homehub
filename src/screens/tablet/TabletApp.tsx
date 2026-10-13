@@ -71,7 +71,7 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
           stats={[
             { icon: 'temp', label: 'Average temperature', value: `${averageTemperature(devices, mode).toFixed(1)}°C` },
             { icon: 'window', label: 'Windows', value: windowsText(openRooms), attention: openRooms.length > 0 },
-            { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh` },
+            { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh`, onClick: act.openEnergy },
           ]}
           mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: mode !== 'home', alarmOn: mode !== 'home' }}
           menuOpen={menuOpen}
