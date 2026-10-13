@@ -20,7 +20,7 @@ describe('смена сцены', () => {
   it('Cinema → Night сначала спрашивает про ТВ и звук', async () => {
     s().tapScene('cinema'); await whenIdle()
     s().tapScene('night')
-    expect(s().dialog?.type).toBe('conflict')
+    expect(s().dialogs.tablet?.type).toBe('conflict')
     expect(s().activeScene).toBe('cinema') // пока ничего не изменилось
     s().confirmConflict(); await whenIdle()
     expect(s().activeScene).toBe('night')
@@ -40,19 +40,19 @@ describe('смена сцены', () => {
     s().tapScene('cinema'); await whenIdle()
     expect(s().activeScene).toBe('cinema')
     expect(s().unresponsive).toEqual(['living.tv'])
-    expect(s().dialog).toMatchObject({ type: 'progress', phase: 'failed' })
+    expect(s().dialogs.tablet).toMatchObject({ type: 'progress', phase: 'failed' })
   })
 })
 
 describe('правка активной сцены', () => {
   it('предупреждение один раз, потом правки идут сразу', () => {
     s().setDevice('living.light', 20)
-    expect(s().dialog?.type).toBe('override')
+    expect(s().dialogs.tablet?.type).toBe('override')
     expect(s().devices['living.light']).toBe(80) // пока не применено
     s().confirmOverride()
     expect(s().devices['living.light']).toBe(20)
     s().setDevice('living.rgb', 'high')
-    expect(s().dialog).toBeNull()
+    expect(s().dialogs.tablet).toBeNull()
     expect(s().devices['living.rgb']).toBe('high')
   })
 
@@ -79,7 +79,7 @@ describe('правка активной сцены', () => {
 describe('режимы дома', () => {
   it('Away: подтверждение, потом тревога включена, сцена закончилась, свет выключен', () => {
     s().requestAway()
-    expect(s().dialog?.type).toBe('confirmAway')
+    expect(s().dialogs.tablet?.type).toBe('confirmAway')
     s().confirmAway()
     expect(s().mode).toBe('away')
     expect(s().activeScene).toBeNull()
@@ -90,7 +90,7 @@ describe('режимы дома', () => {
   it('в Away сцены недоступны', () => {
     s().requestAway(); s().confirmAway()
     s().tapScene('night')
-    expect(s().dialog).toBeNull()
+    expect(s().dialogs.tablet).toBeNull()
     expect(s().activeScene).toBeNull()
   })
 
@@ -108,7 +108,7 @@ describe('режимы дома', () => {
   it('предупреждение об открытых окнах в окне подтверждения Away', () => {
     s().toggleWindow('living')
     s().requestAway()
-    expect(s().dialog).toMatchObject({ type: 'confirmAway', windows: ['living'] })
+    expect(s().dialogs.tablet).toMatchObject({ type: 'confirmAway', windows: ['living'] })
   })
 })
 

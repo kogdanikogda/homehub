@@ -14,7 +14,7 @@ const joinNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1)
 
 /** Показывает окно, которое просит состояние (одновременно открыто не больше одного) */
 export function DialogHost() {
-  const dialog = useHome((s) => s.dialog)
+  const dialog = useHome((s) => s.dialogs.tablet)
   const devices = useHome((s) => s.devices)
   const unresponsive = useHome((s) => s.unresponsive)
   const windowsOpen = useHome((s) => s.windowsOpen)

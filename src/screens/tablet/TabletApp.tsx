@@ -37,7 +37,7 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
   const onboarding = useHome((s) => s.onboarding)
   const dimmed = useHome((s) => s.dimmed)
   const alert = useHome((s) => s.alert)
-  const toast = useHome((s) => s.toast)
+  const toast = useHome((s) => s.toasts.tablet)
   const act = useHome.getState()
 
   const openRooms = ROOM_ORDER.filter((r) => windowsOpen[r])

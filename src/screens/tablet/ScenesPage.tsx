@@ -75,7 +75,7 @@ export function ScenesPage({ scene, onScene }: { scene: SceneId; onScene: (s: Sc
           {modified ? (
             <>
               <Button variant="secondary" onClick={() => tapScene(scene)}>See changes</Button>
-              <Button onClick={resetToScene}>Reset to scene</Button>
+              <Button onClick={() => resetToScene()}>Reset to scene</Button>
             </>
           ) : isActive ? (
             <Button variant="secondary" disabled icon="check">Active</Button>

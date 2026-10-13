@@ -3,7 +3,9 @@ import {
   DEVICE_BY_KEY, INITIAL_EXTRAS, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
 } from './data'
 import { conflictTurnOff, diffToScene, modifiedChanges } from './logic'
-import type { AlertKind, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
+import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
+
+type Toast = { id: number; text: string } | null
 
 type Windows = Record<RoomId, boolean>
 
@@ -18,12 +20,13 @@ export interface HomeState {
   windowsOpen: Windows
   /** Кухонные устройства вне сцен */
   extras: Record<ExtraKey, boolean>
-  dialog: DialogState | null
+  /** Открытое окно на каждом устройстве: у планшета и телефонов окна свои */
+  dialogs: Record<DeviceId, DialogState | null>
   /** Первая настройка панели; null — панель уже настроена */
   onboarding: OnboardingStep | null
   /** Для прототипа: владелец отклонит запрос на сопряжение */
   declinePairing: boolean
-  toast: { id: number; text: string } | null
+  toasts: Record<DeviceId, Toast>
   dimmed: boolean
   alert: { kind: AlertKind; at: string } | null
   /** Для прототипа: какие устройства «не ответят» при следующей сцене */
@@ -32,30 +35,30 @@ export interface HomeState {
   stepDelay: number
 
   toggleExtra: (key: ExtraKey, on: boolean) => void
-  setDevice: (key: DeviceKey, value: DeviceValue) => void
-  confirmOverride: () => void
-  tapScene: (id: SceneId) => void
-  confirmConflict: () => void
-  resetToScene: () => void
-  requestAway: () => void
-  confirmAway: () => void
+  setDevice: (key: DeviceKey, value: DeviceValue, by?: DeviceId) => void
+  confirmOverride: (by?: DeviceId) => void
+  tapScene: (id: SceneId, by?: DeviceId) => void
+  confirmConflict: (by?: DeviceId) => void
+  resetToScene: (by?: DeviceId) => void
+  requestAway: (by?: DeviceId) => void
+  confirmAway: (by?: DeviceId) => void
   /** Включается админом с телефона; на публичной панели недоступно */
-  enterVacation: () => void
-  requestHome: () => void
+  enterVacation: (by?: DeviceId) => void
+  requestHome: (by?: DeviceId) => void
   /** true — PIN верный */
-  submitPin: (pin: string) => boolean
-  openWindows: () => void
+  submitPin: (pin: string, by?: DeviceId) => boolean
+  openWindows: (by?: DeviceId) => void
   setOnboarding: (step: OnboardingStep | null) => void
   setDeclinePairing: (v: boolean) => void
-  openEnergy: () => void
-  closeDialog: () => void
-  showToast: (text: string) => void
-  clearToast: (id: number) => void
+  openEnergy: (by?: DeviceId) => void
+  closeDialog: (by?: DeviceId) => void
+  showToast: (text: string, by?: DeviceId) => void
+  clearToast: (id: number, by?: DeviceId) => void
   dim: () => void
   wake: () => void
   triggerAlert: (kind: AlertKind) => void
   acknowledgeSmoke: () => void
-  requestAlarmOff: () => void
+  requestAlarmOff: (by?: DeviceId) => void
   toggleWindow: (room: RoomId) => void
   setFailKeys: (keys: DeviceKey[]) => void
   reset: () => void
@@ -71,10 +74,10 @@ export const initialState = () => ({
   unresponsive: [] as DeviceKey[],
   windowsOpen: closedWindows(),
   extras: { ...INITIAL_EXTRAS },
-  dialog: null as DialogState | null,
+  dialogs: { tablet: null, marina: null, alexey: null } as Record<DeviceId, DialogState | null>,
   onboarding: null as OnboardingStep | null,
   declinePairing: false,
-  toast: null as HomeState['toast'],
+  toasts: { tablet: null, marina: null, alexey: null } as Record<DeviceId, Toast>,
   dimmed: false,
   alert: null as HomeState['alert'],
   failKeys: [] as DeviceKey[],
@@ -91,21 +94,25 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 const nowHHMM = () => new Date().toTimeString().slice(0, 5)
 
 export const useHome = create<HomeState>()((set, get) => {
-  const toast = (text: string) => set({ toast: { id: ++toastId, text } })
+  const toast = (text: string, by: DeviceId = 'tablet') =>
+    set((s) => ({ toasts: { ...s.toasts, [by]: { id: ++toastId, text } } }))
+  const setDialog = (by: DeviceId, d: DialogState | null) =>
+    set((s) => ({ dialogs: { ...s.dialogs, [by]: d } }))
+  const dialogOf = (by: DeviceId) => get().dialogs[by]
 
-  const apply = (key: DeviceKey, value: DeviceValue) => {
+  const apply = (key: DeviceKey, value: DeviceValue, by: DeviceId) => {
     set((s) => ({ devices: { ...s.devices, [key]: value } }))
     const def = DEVICE_BY_KEY[key]
-    if (def.kind === 'toggle') toast(`${def.short} turned ${value ? 'on' : 'off'}`)
+    if (def.kind === 'toggle') toast(`${def.short} turned ${value ? 'on' : 'off'}`, by)
   }
 
-  const runScene = (id: SceneId): Promise<void> => {
+  const runScene = (id: SceneId, by: DeviceId): Promise<void> => {
     const token = ++runToken
     const items: ProgressItem[] = diffToScene(get().devices, id).map((c) => ({ ...c, status: 'waiting' }))
-    set({ dialog: { type: 'progress', scene: id, items, phase: 'running' } })
+    setDialog(by, { type: 'progress', scene: id, items, phase: 'running' })
 
     const publish = (next: ProgressItem[], phase: 'running' | 'done' | 'failed') =>
-      set({ dialog: { type: 'progress', scene: id, items: next, phase } })
+      setDialog(by, { type: 'progress', scene: id, items: next, phase })
 
     const job = (async () => {
       const work = [...items]
@@ -130,7 +137,7 @@ export const useHome = create<HomeState>()((set, get) => {
       publish(work, failed.length ? 'failed' : 'done')
       if (!failed.length) {
         await sleep(get().stepDelay * 3)
-        if (token === runToken && get().dialog?.type === 'progress') set({ dialog: null })
+        if (token === runToken && dialogOf(by)?.type === 'progress') setDialog(by, null)
       }
     })()
     lastRun = job
@@ -140,98 +147,107 @@ export const useHome = create<HomeState>()((set, get) => {
   return {
     ...initialState(),
 
-    setDevice: (key, value) => {
+    setDevice: (key, value, by = 'tablet') => {
       const s = get()
       if (s.devices[key] === value) return
       if (s.mode === 'home' && s.activeScene && !s.overrideAck) {
-        set({ dialog: { type: 'override', key, from: s.devices[key], to: value, scene: s.activeScene } })
+        setDialog(by, { type: 'override', key, from: s.devices[key], to: value, scene: s.activeScene })
         return
       }
-      apply(key, value)
+      apply(key, value, by)
     },
 
-    confirmOverride: () => {
-      const d = get().dialog
+    confirmOverride: (by = 'tablet') => {
+      const d = dialogOf(by)
       if (d?.type !== 'override') return
-      apply(d.key, d.to)
-      set({ overrideAck: true, dialog: null })
+      apply(d.key, d.to, by)
+      set({ overrideAck: true })
+      setDialog(by, null)
     },
 
-    tapScene: (id) => {
+    tapScene: (id, by = 'tablet') => {
       const s = get()
       if (s.mode !== 'home') return
       if (id === s.activeScene) {
-        if (modifiedChanges(s.devices, s.activeScene, s.unresponsive).length) set({ dialog: { type: 'changes', scene: id } })
+        if (modifiedChanges(s.devices, s.activeScene, s.unresponsive).length) setDialog(by, { type: 'changes', scene: id })
         return
       }
       const turnOff = conflictTurnOff(s.devices, s.activeScene, id)
-      if (turnOff.length) set({ dialog: { type: 'conflict', target: id, turnOff } })
-      else void runScene(id)
+      if (turnOff.length) setDialog(by, { type: 'conflict', target: id, turnOff })
+      else void runScene(id, by)
     },
 
-    confirmConflict: () => {
-      const d = get().dialog
-      if (d?.type === 'conflict') void runScene(d.target)
+    confirmConflict: (by = 'tablet') => {
+      const d = dialogOf(by)
+      if (d?.type === 'conflict') void runScene(d.target, by)
     },
 
-    resetToScene: () => {
+    resetToScene: (by = 'tablet') => {
       const s = get()
       if (!s.activeScene) return
-      set({ devices: { ...s.devices, ...SCENES[s.activeScene].values }, dialog: null, unresponsive: [] })
-      toast(`${SCENES[s.activeScene].name} restored`)
+      set({ devices: { ...s.devices, ...SCENES[s.activeScene].values }, unresponsive: [] })
+      setDialog(by, null)
+      toast(`${SCENES[s.activeScene].name} restored`, by)
     },
 
-    requestAway: () => {
+    requestAway: (by = 'tablet') => {
       const windows = ROOM_ORDER.filter((r) => get().windowsOpen[r])
-      set({ dialog: { type: 'confirmAway', windows } })
+      setDialog(by, { type: 'confirmAway', windows })
     },
 
-    confirmAway: () => {
-      set((s) => ({
-        mode: 'away', devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [], dialog: null,
-      }))
-      toast(`${MODE_NAMES.away} mode is on`)
+    confirmAway: (by = 'tablet') => {
+      set((s) => ({ mode: 'away', devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
+      setDialog(by, null)
+      toast(`${MODE_NAMES.away} mode is on`, by)
     },
 
-    enterVacation: () => {
-      set((s) => ({
-        mode: 'vacation', devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [], dialog: null,
-      }))
-      toast(`${MODE_NAMES.vacation} mode is on`)
+    enterVacation: (by = 'alexey') => {
+      set((s) => ({ mode: 'vacation', devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
+      setDialog(by, null)
+      toast(`${MODE_NAMES.vacation} mode is on`, by)
     },
 
-    requestHome: () => set({ dialog: { type: 'pin', purpose: 'home' } }),
+    // На телефоне человек уже вошёл в приложение, поэтому PIN нужен только на общей панели
+    requestHome: (by = 'tablet') => {
+      if (by === 'tablet') setDialog(by, { type: 'pin', purpose: 'home' })
+      else {
+        set({ mode: 'home' })
+        void runScene('general', by)
+      }
+    },
 
-    submitPin: (pin) => {
-      const d = get().dialog
+    submitPin: (pin, by = 'tablet') => {
+      const d = dialogOf(by)
       if (d?.type !== 'pin' || pin !== PROTOTYPE_PIN) return false
       if (d.purpose === 'home') {
         // Возврат из Away/Vacation всегда включает сцену General
-        set({ mode: 'home', dialog: null })
-        void runScene('general')
+        set({ mode: 'home' })
+        setDialog(by, null)
+        void runScene('general', by)
       } else {
-        set({ alert: null, dialog: null })
-        toast('Alarm turned off')
+        set({ alert: null })
+        setDialog(by, null)
+        toast('Alarm turned off', by)
       }
       return true
     },
 
-    openWindows: () => set({ dialog: { type: 'windows' } }),
+    openWindows: (by = 'tablet') => setDialog(by, { type: 'windows' }),
     setOnboarding: (step) => set({ onboarding: step }),
     setDeclinePairing: (v) => set({ declinePairing: v }),
-    openEnergy: () => set({ dialog: { type: 'energy' } }),
-    closeDialog: () => {
+    openEnergy: (by = 'tablet') => setDialog(by, { type: 'energy' }),
+    closeDialog: (by = 'tablet') => {
       runToken++ // закрытие окна прогресса не отменяет сцену, но останавливает автозакрытие
-      set({ dialog: null })
+      setDialog(by, null)
     },
     showToast: toast,
-    clearToast: (id) => set((s) => (s.toast?.id === id ? { toast: null } : s)),
+    clearToast: (id, by = 'tablet') => set((s) => (s.toasts[by]?.id === id ? { toasts: { ...s.toasts, [by]: null } } : s)),
     dim: () => set({ dimmed: true }),
     wake: () => set({ dimmed: false }),
 
-    triggerAlert: (kind) => set({ alert: { kind, at: nowHHMM() }, dimmed: false, dialog: null }),
+    triggerAlert: (kind) => set((s) => ({ alert: { kind, at: nowHHMM() }, dimmed: false, dialogs: { ...s.dialogs, tablet: null } })),
     acknowledgeSmoke: () => set({ alert: null }),
-    requestAlarmOff: () => set({ dialog: { type: 'pin', purpose: 'alarm' } }),
+    requestAlarmOff: (by = 'tablet') => setDialog(by, { type: 'pin', purpose: 'alarm' }),
 
     toggleExtra: (key, on) => set((s) => ({ extras: { ...s.extras, [key]: on } })),
     toggleWindow: (room) => set((s) => ({ windowsOpen: { ...s.windowsOpen, [room]: !s.windowsOpen[room] } })),

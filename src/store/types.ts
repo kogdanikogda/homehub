@@ -1,6 +1,8 @@
 import type { IconName } from '../components/Icon/Icon'
 
 export type RoomId = 'living' | 'kitchen' | 'corridor' | 'kids1' | 'kids2' | 'bedroom'
+/** Устройства дома, у каждого свои окна и уведомления */
+export type DeviceId = 'tablet' | 'marina' | 'alexey'
 export type Mode = 'home' | 'away' | 'vacation'
 export type SceneId = 'general' | 'cinema' | 'night' | 'guests'
 

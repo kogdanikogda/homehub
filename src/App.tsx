@@ -24,7 +24,7 @@ function PrototypePanel() {
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.triggerAlert('intrusion')}>Intrusion alarm</Button>
       <Button size="sm" variant="secondary" onClick={() => a.triggerAlert('smoke')}>Smoke in the kitchen</Button>
-      <Button size="sm" variant="secondary" disabled={mode === 'vacation'} onClick={a.enterVacation}>Vacation (from Alexey’s phone)</Button>
+      <Button size="sm" variant="secondary" disabled={mode === 'vacation'} onClick={() => a.enterVacation()}>Vacation (from Alexey’s phone)</Button>
       <Button size="sm" variant="secondary" onClick={() => a.setFailKeys(tvFails ? [] : ['living.tv'])}>
         TV {tvFails ? 'will not respond' : 'responds'} to scenes
       </Button>
