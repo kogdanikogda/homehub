@@ -74,7 +74,7 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
           stats={[
             { icon: 'temp', label: 'Average temperature', value: `${averageTemperature(devices, mode, privateRooms).toFixed(1)}°C` },
             { icon: 'window', label: 'Windows', value: windowsText(openRooms), attention: openRooms.length > 0 },
-            { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh`, onClick: act.openEnergy },
+            { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh`, onClick: () => act.openEnergy() },
           ]}
           mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: mode !== 'home', alarmOn: mode !== 'home' }}
           menuOpen={menuOpen}
@@ -90,7 +90,7 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
       <ToastHost toast={toast} onDone={act.clearToast} />
       {alert && (alert.kind === 'intrusion'
         ? <CriticalAlert icon="shield" title="Alarm triggered" subtitle={`Intrusion detected · Entrance motion sensor · ${alert.at}`}
-            note="The siren is on." actionLabel="Turn off alarm (PIN)" actionIcon="lock" onAction={act.requestAlarmOff} />
+            note="The siren is on." actionLabel="Turn off alarm (PIN)" actionIcon="lock" onAction={() => act.requestAlarmOff()} />
         : <CriticalAlert icon="fire" title="Smoke detected" subtitle={`Kitchen smoke sensor · ${alert.at}`}
             note="Alarm sound is on until you acknowledge." actionLabel="Acknowledge" actionIcon="check" onAction={act.acknowledgeSmoke} />)}
       {dimmed && !alert && <DimScreen time={clock.time} status={status} onWake={act.wake} />}

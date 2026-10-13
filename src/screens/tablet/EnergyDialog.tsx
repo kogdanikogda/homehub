@@ -46,7 +46,7 @@ export function EnergyDialog({ onClose, now = new Date() }: { onClose: () => voi
               <div key={i} className={styles.slot}>
                 {v !== undefined && (
                   <div className={`${styles.bar} ${i === e.bars.length - 1 ? styles.last : ''}`} style={{ height: `${(v / e.axisMax) * 100}%` }}>
-                    {i === peak && <span className={styles.peak}>{v}</span>}
+                    {i === peak && period !== 'month' && <span className={styles.peak}>{v}</span>}
                   </div>
                 )}
                 {labels.has(i) && <span className={styles.tick}>{labels.get(i)}</span>}

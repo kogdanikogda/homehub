@@ -15,10 +15,10 @@
 
 /* Энергия */
 .hero { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.heroNum { display: flex; align-items: baseline; gap: 6px; }
+.heroNum { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
 .heroNum b { font-size: 30px; line-height: 36px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .heroNum span { font-size: 16px; color: var(--text-secondary); }
-.heroNum small { margin-left: 4px; font-size: 14px; color: var(--text-secondary); }
+.heroNum small { margin-left: 4px; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); }
 .chartCard { padding: 12px 12px 8px; border-radius: 16px; background: var(--surface-1); }
 .plot { position: relative; height: 144px; margin: 14px 0 22px 26px; }
 .grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--surface-2); }
