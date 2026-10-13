@@ -191,3 +191,24 @@ describe('настройки и сцены администратора', () => 
     expect(useHome.getState().scenes.general['living.light']).toBe(50)
   })
 })
+
+describe('три устройства на одном состоянии', () => {
+  it('сцена, выбранная с телефона Марины, видна везде', async () => {
+    s().tapScene('night', 'marina'); await whenIdle()
+    expect(s().activeScene).toBe('night')
+    expect(s().devices).toMatchObject(SCENES.night.values)
+  })
+
+  it('окно конфликта появляется только на том устройстве, где нажали', async () => {
+    s().tapScene('cinema'); await whenIdle()
+    s().tapScene('night', 'marina')
+    expect(s().dialogs.marina?.type).toBe('conflict')
+    expect(s().dialogs.tablet).toBeNull()
+    expect(s().dialogs.alexey).toBeNull()
+  })
+
+  it('замок, закрытый с телефона Алексея, закрыт для всех', () => {
+    s().setDoorLocked(true, 'alexey')
+    expect(s().doorLocked).toBe(true)
+  })
+})

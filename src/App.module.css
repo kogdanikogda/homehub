@@ -3,3 +3,7 @@
 .panel { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; background: var(--surface-rail); }
 .label { margin-right: 4px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); }
 .switch { display: flex; gap: 8px; justify-content: center; padding: 12px 16px 0; }
+.demo { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 3.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 16px 20px; }
+.cell { margin: 0; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: stretch; gap: 8px; }
+.cell figcaption { text-align: center; font-size: 12px; color: var(--text-tertiary); letter-spacing: .02em; }
+.slot { width: 100%; height: 100%; min-height: 0; min-width: 0; contain: size; display: flex; align-items: center; justify-content: center; }

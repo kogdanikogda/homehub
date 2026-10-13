@@ -52,23 +52,39 @@ function PrototypePanel() {
   )
 }
 
-type View = 'tablet' | 'marina' | 'alexey'
+type View = 'all' | 'tablet' | 'marina' | 'alexey'
 
 export function App() {
-  // Пока без общей демо-страницы: одно устройство за раз, состояние дома общее
-  const [view, setView] = useState<View>('tablet')
+  // Стартовая страница — все три устройства на одном состоянии дома
+  const [view, setView] = useState<View>(() => (new URLSearchParams(location.search).get('device') as View) || 'all')
+  const pick = (v: View) => {
+    setView(v)
+    if (v === 'all') useHome.getState().setPairingManual(true)
+  }
+  const tab = (v: View, text: string) => (
+    <Button size="sm" variant={view === v ? 'primary' : 'secondary'} onClick={() => pick(v)}>{text}</Button>
+  )
   return (
     <div className={styles.page}>
       <div className={styles.switch} role="group" aria-label="Device">
-        <Button size="sm" variant={view === 'tablet' ? 'primary' : 'secondary'} onClick={() => setView('tablet')}>Wall tablet</Button>
-        <Button size="sm" variant={view === 'marina' ? 'primary' : 'secondary'} onClick={() => setView('marina')}>Marina’s phone</Button>
-        <Button size="sm" variant={view === 'alexey' ? 'primary' : 'secondary'} onClick={() => setView('alexey')}>Alexey’s phone</Button>
+        {tab('all', 'All 3 devices')}
+        {tab('tablet', 'Wall tablet')}
+        {tab('marina', 'Marina’s phone')}
+        {tab('alexey', 'Alexey’s phone')}
       </div>
-      <div className={styles.stage}>
-        {view === 'tablet'
-          ? <TabletFrame><TabletApp /></TabletFrame>
-          : <PhoneFrame label={view === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}><PhoneApp key={view} user={view} /></PhoneFrame>}
-      </div>
+      {view === 'all' ? (
+        <div className={styles.demo}>
+          <figure className={styles.cell}><div className={styles.slot}><TabletFrame><TabletApp /></TabletFrame></div><figcaption>Wall tablet</figcaption></figure>
+          <figure className={styles.cell}><div className={styles.slot}><PhoneFrame label="Marina’s phone"><PhoneApp user="marina" /></PhoneFrame></div><figcaption>Marina · household</figcaption></figure>
+          <figure className={styles.cell}><div className={styles.slot}><PhoneFrame label="Alexey’s phone"><PhoneApp user="alexey" /></PhoneFrame></div><figcaption>Alexey · administrator</figcaption></figure>
+        </div>
+      ) : (
+        <div className={styles.stage}>
+          {view === 'tablet'
+            ? <TabletFrame><TabletApp /></TabletFrame>
+            : <PhoneFrame label={view === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}><PhoneApp key={view} user={view} /></PhoneFrame>}
+        </div>
+      )}
       <PrototypePanel />
     </div>
   )
