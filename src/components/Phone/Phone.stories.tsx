@@ -10,7 +10,7 @@ export const Blocks: S = {
   render: () => (
     <PhoneFrame>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <PhoneHeader title="Home" subtitle="Household · Marina" />
+        <PhoneHeader mode="home" />
         <PhoneBody gap={12}>
           <PhoneCard title="Scene" aside={<AlarmPill on={false} />}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -39,7 +39,7 @@ export const AdminBlocks: S = {
   render: () => (
     <PhoneFrame>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <PhoneHeader title="Security" subtitle="Administrator · Alexey" />
+        <PhoneHeader mode="away" title="Security" />
         <PhoneBody gap={12}>
           <Steps step={1} name="Find" status="Ready to search" />
           <Steps step={4} name="Connect" status="Connection failed" state="error" />

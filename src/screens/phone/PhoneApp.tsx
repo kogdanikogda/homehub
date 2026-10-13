@@ -38,8 +38,7 @@ const ADMIN_TABS: TabDef<Tab>[] = [
   { id: 'settings', label: 'Settings', icon: 'gear' },
 ]
 
-const TITLES: Record<Tab, string> = { dashboard: 'Home', rooms: 'Rooms', scenes: 'Scenes', security: 'Security', devices: 'Devices', settings: 'Settings' }
-const ROLE = { marina: 'Household · Marina', alexey: 'Administrator · Alexey' } as const
+const TITLES: Record<Tab, string> = { dashboard: '', rooms: 'Rooms', scenes: 'Scenes', security: 'Security', devices: 'Devices', settings: 'Settings' }
 const CAM_NAMES: Record<CamId, string> = { yard: 'Yard', entrance: 'Entrance', garage: 'Garage', living: 'Living room' }
 
 /** Приложение на телефоне: у семьи три вкладки, у администратора шесть */
@@ -48,6 +47,7 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
   const [sub, setSub] = useState<Sub>(null)
   const toast = useHome((s) => s.toasts[user])
   const clearToast = useHome((s) => s.clearToast)
+  const mode = useHome((s) => s.mode)
   const admin = user === 'alexey'
 
   const go = (t: Tab) => { setTab(t); setSub(null) }
@@ -61,7 +61,7 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
 
   return (
     <div className={styles.root}>
-      <PhoneHeader title={title} subtitle={ROLE[user]} />
+      <PhoneHeader mode={mode} title={tab === 'dashboard' && !sub ? undefined : title} />
       <PhoneBody>
         {tab === 'dashboard' && !sub && (
           <Dashboard user={user} onRoom={(id) => { setTab('rooms'); setSub({ kind: 'room', id }) }} onEnergy={() => setSub({ kind: 'energy' })} />

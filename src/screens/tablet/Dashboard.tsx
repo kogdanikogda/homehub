@@ -34,7 +34,7 @@ export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => vo
 
   return (
     <main className={styles.main}>
-      {openRooms.length > 0 && <AlertStrip text={windowAlertText(openRooms)} onAction={openWindows} />}
+      {openRooms.length > 0 && <AlertStrip text={windowAlertText(openRooms)} onAction={() => openWindows()} />}
       <SceneCard hint={hint}>
         {SCENE_ORDER.map((id) => {
           const scene = SCENES[id]

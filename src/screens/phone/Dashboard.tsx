@@ -82,7 +82,7 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
           <StatTile icon="window" value={open.length ? `${open.length} open` : 'Closed'} caption="Windows" attention={open.length > 0} />
           <StatTile icon="bolt" value={String(TODAY_ENERGY_KWH)} caption="kWh today" onClick={onEnergy} />
         </div>
-        {open.length > 0 && <WarningRow>Open: {open.map((r) => ROOM_NAMES[r]).join(', ')}</WarningRow>}
+        {open.length > 0 && <WarningRow onClick={() => a.openWindows(user)}>Open: {open.map((r) => ROOM_NAMES[r]).join(', ')}</WarningRow>}
         {tech && <TechAlert>{tech}</TechAlert>}
       </div>
 
