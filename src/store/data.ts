@@ -44,7 +44,7 @@ export interface SceneDef {
   values: DeviceValues
 }
 
-// Значения General, Cinema и Night взяты из макета. Значения Guests в макете не заданы — это допущение прототипа.
+// Значения всех четырёх сцен взяты из макета.
 export const SCENES: Record<SceneId, SceneDef> = {
   general: {
     id: 'general', name: 'General', description: 'Everyday light and comfort in the shared rooms.', icon: 'sun',
@@ -68,10 +68,10 @@ export const SCENES: Record<SceneId, SceneDef> = {
     },
   },
   guests: {
-    id: 'guests', name: 'Guests', description: 'Bright, warm light and open curtains for visitors.', icon: 'guests',
+    id: 'guests', name: 'Guests', description: 'Bright light, open curtains, a little warmer.', icon: 'guests',
     values: {
-      'living.light': 100, 'living.rgb': 'low', 'living.climate': 22, 'living.curtains': 'open', 'living.tv': false, 'living.sound': false,
-      'kitchen.light': true, 'kitchen.climate': 22, 'corridor.light': 100,
+      'living.light': 100, 'living.rgb': 'off', 'living.climate': 23, 'living.curtains': 'open', 'living.tv': false, 'living.sound': false,
+      'kitchen.light': true, 'kitchen.climate': 23, 'corridor.light': 100,
     },
   },
 }
