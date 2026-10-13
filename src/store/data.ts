@@ -38,6 +38,8 @@ export type DeviceValues = Record<DeviceKey, DeviceValue>
 export interface SceneDef {
   id: SceneId
   name: string
+  /** Короткое описание для страницы сцен */
+  description: string
   icon: IconName
   values: DeviceValues
 }
@@ -45,28 +47,28 @@ export interface SceneDef {
 // Значения General, Cinema и Night взяты из макета. Значения Guests в макете не заданы — это допущение прототипа.
 export const SCENES: Record<SceneId, SceneDef> = {
   general: {
-    id: 'general', name: 'General', icon: 'sun',
+    id: 'general', name: 'General', description: 'Everyday light and comfort in the shared rooms.', icon: 'sun',
     values: {
       'living.light': 80, 'living.rgb': 'off', 'living.climate': 22, 'living.curtains': 'open', 'living.tv': false, 'living.sound': false,
       'kitchen.light': true, 'kitchen.climate': 22, 'corridor.light': 100,
     },
   },
   cinema: {
-    id: 'cinema', name: 'Cinema', icon: 'film',
+    id: 'cinema', name: 'Cinema', description: 'Dim light, closed curtains, TV and sound on.', icon: 'film',
     values: {
       'living.light': 0, 'living.rgb': 'low', 'living.climate': 21, 'living.curtains': 'closed', 'living.tv': true, 'living.sound': true,
       'kitchen.light': true, 'kitchen.climate': 22, 'corridor.light': 100,
     },
   },
   night: {
-    id: 'night', name: 'Night', icon: 'moon',
+    id: 'night', name: 'Night', description: 'Lights and media off, curtains closed, a cooler room. The entrance light dims to a 10% night light.', icon: 'moon',
     values: {
       'living.light': 0, 'living.rgb': 'off', 'living.climate': 20, 'living.curtains': 'closed', 'living.tv': false, 'living.sound': false,
       'kitchen.light': false, 'kitchen.climate': 20, 'corridor.light': 10,
     },
   },
   guests: {
-    id: 'guests', name: 'Guests', icon: 'guests',
+    id: 'guests', name: 'Guests', description: 'Bright, warm light and open curtains for visitors.', icon: 'guests',
     values: {
       'living.light': 100, 'living.rgb': 'low', 'living.climate': 22, 'living.curtains': 'open', 'living.tv': false, 'living.sound': false,
       'kitchen.light': true, 'kitchen.climate': 22, 'corridor.light': 100,

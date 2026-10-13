@@ -1,0 +1,26 @@
+.split { display: flex; gap: 20px; flex: 1; min-height: 0; padding: 8px 32px 28px; }
+.list { display: flex; flex-direction: column; gap: 10px; width: 300px; flex: none; }
+.colh { margin: 0; padding: 6px 6px 2px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+.ul { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.item { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 18px; border-radius: 18px; background: var(--surface-1); text-align: left; }
+.item.sel { background: var(--accent-soft); }
+.item:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.ic { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--surface-2); color: var(--text-secondary); }
+.icOn { background: var(--grad-accent); color: var(--text-on-light); box-shadow: var(--glow-accent); }
+.tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.name { font-size: 16px; font-weight: 600; line-height: 19px; color: var(--text-primary); }
+.sub { font-size: 13px; line-height: 15px; color: var(--text-secondary); }
+.subOn { color: var(--accent-text); }
+
+.note { display: flex; gap: 10px; margin: auto 0 0; padding: 8px 6px; font-size: 15px; line-height: 21px; color: var(--text-secondary); }
+.noteIcon { flex: none; margin-top: 2px; }
+
+.detail { display: flex; flex-direction: column; gap: 18px; flex: 1; min-width: 0; padding: 26px 30px; border-radius: var(--radius-card); background: var(--surface-1); }
+.head { display: flex; flex-direction: column; gap: 3px; }
+.h2 { margin: 0; font-size: 22px; font-weight: 600; line-height: 27px; color: var(--text-primary); }
+.desc { margin: 0; max-width: 660px; font-size: 14.5px; line-height: 18px; color: var(--text-secondary); }
+.rooms { display: flex; flex-direction: column; gap: 18px; padding-top: 14px; }
+.group { display: flex; flex-direction: column; gap: 8px; }
+.groupTitle { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+.acts { display: flex; gap: 12px; margin-top: auto; }
