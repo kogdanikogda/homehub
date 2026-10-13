@@ -1,8 +1,8 @@
 import {
-  AWAY_CLIMATE, CORRIDOR_TEMP, DEVICES, DEVICE_BY_KEY, PRIVATE_CLIMATE, ROOM_NAMES, SCENES,
+  AWAY_CLIMATE, CORRIDOR_TEMP, DEVICES, DEVICE_BY_KEY, INITIAL_PRIVATE, ROOM_NAMES, SCENES,
   type DeviceValues,
 } from './data'
-import type { Change, DeviceKey, DeviceValue, ExtraKey, Mode, RoomId, SceneId } from './types'
+import type { Change, DeviceKey, DeviceValue, ExtraKey, Mode, PrivateRoomId, PrivateRooms, PrivateState, RoomId, SceneId } from './types'
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -42,8 +42,8 @@ export function conflictTurnOff(devices: DeviceValues, active: SceneId | null, t
 }
 
 /** Средняя температура дома: пять комнат с климатом; в Away/Vacation все на энергосбережении */
-export function averageTemperature(devices: DeviceValues, mode: Mode): number {
-  const priv = Object.values(PRIVATE_CLIMATE).map((t) => (mode === 'home' ? t : AWAY_CLIMATE))
+export function averageTemperature(devices: DeviceValues, mode: Mode, privateRooms: PrivateRooms = INITIAL_PRIVATE): number {
+  const priv = Object.values(privateRooms).map((r) => (mode === 'home' ? r.climate : AWAY_CLIMATE))
   const temps = [devices['living.climate'], devices['kitchen.climate']].map(Number).concat(priv)
   return temps.reduce((a, b) => a + b, 0) / temps.length
 }
@@ -72,11 +72,11 @@ export function isOn(key: DeviceKey, v: DeviceValue): boolean {
 }
 
 /** Температура комнаты для списка: «22°» */
-export function roomTemperature(room: RoomId, devices: DeviceValues): number {
+export function roomTemperature(room: RoomId, devices: DeviceValues, privateRooms: PrivateRooms = INITIAL_PRIVATE): number {
   if (room === 'living') return Number(devices['living.climate'])
   if (room === 'kitchen') return Number(devices['kitchen.climate'])
   if (room === 'corridor') return CORRIDOR_TEMP
-  return PRIVATE_CLIMATE[room as keyof typeof PRIVATE_CLIMATE]
+  return privateRooms[room as PrivateRoomId].climate
 }
 
 /** Сколько устройств включено в комнате */
@@ -101,4 +101,16 @@ export function isSceneControlled(key: DeviceKey, scene: SceneId): boolean {
 /** Сколько устройств комнаты задаёт сцена */
 export function sceneControlledCount(room: RoomId, scene: SceneId): number {
   return DEVICES.filter((d) => d.room === room && isSceneControlled(d.key, scene)).length
+}
+
+/** Сколько устройств включено в личной комнате: климат и шторы не считаются */
+export function privateOnCount(r: PrivateState): number {
+  return (r.light ? 1 : 0) + (r.humidifier ? 1 : 0)
+}
+
+/** Как значение личного устройства выглядит на экране */
+export function formatPrivate(key: keyof PrivateState, r: PrivateState): string {
+  if (key === 'climate') return `${r.climate}°`
+  if (key === 'curtains') return r.curtains === 'open' ? 'Open' : 'Closed'
+  return r[key] ? 'On' : 'Off'
 }

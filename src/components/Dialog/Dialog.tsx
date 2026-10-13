@@ -24,12 +24,14 @@ type Props = {
   /** false — окно нельзя закрыть Esc и касанием вне окна (идёт процесс) */
   dismissible?: boolean
   primary?: Action
+  /** Телефон: меньше отступы, кнопки на всю ширину */
+  compact?: boolean
   /** Кнопка-отмена; false — не показывать. По умолчанию «Cancel» */
   secondary?: { label: string; onClick?: () => void } | false
 }
 
 export function Dialog({
-  open, onOpenChange, title, lead, counter, headerExtra, progress, children, note, width = 660, dismissible = true, primary, secondary,
+  open, onOpenChange, title, lead, counter, headerExtra, progress, children, note, width = 660, dismissible = true, compact, primary, secondary,
 }: Props) {
   const container = usePortalContainer()
   const cancel = secondary === undefined ? { label: 'Cancel' } : secondary
@@ -39,8 +41,8 @@ export function Dialog({
       <RadixDialog.Portal container={container}>
         <RadixDialog.Overlay className={styles.overlay} />
         <RadixDialog.Content
-          className={styles.content}
-          style={{ width: `min(${width}px, calc(100vw - 32px))` }}
+          className={`${styles.content} ${compact ? styles.compact : ''}`}
+          style={{ width: `min(${width}px, calc(100% - 32px))` }}
           aria-describedby={undefined}
           onEscapeKeyDown={block}
           onInteractOutside={block}

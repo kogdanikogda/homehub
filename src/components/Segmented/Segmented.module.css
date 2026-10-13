@@ -8,3 +8,7 @@
 .item[data-state='on'] { background: var(--surface-3); color: var(--accent-text); }
 .item:disabled { color: var(--text-disabled); cursor: not-allowed; }
 .item:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
+
+/* Телефон, во всю ширину: три равные части (дом, энергия) */
+.phoneWide { display: flex; width: 100%; gap: 3px; padding: 3px; border-radius: 12px; }
+.phoneWide .item { flex: 1; height: 38px; padding: 0 8px; gap: 6px; border-radius: 9px; font-size: 13.5px; }

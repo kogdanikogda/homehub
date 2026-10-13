@@ -15,6 +15,10 @@ export type DeviceKey =
 /** Дополнительные устройства кухни: сцены ими не управляют */
 export type ExtraKey = 'kitchen.bar' | 'kitchen.floor'
 export type PrivateRoomId = 'kids1' | 'kids2' | 'bedroom'
+/** Устройства личных комнат: ими управляют только телефоны семьи */
+export type PrivateKey = 'light' | 'climate' | 'humidifier' | 'curtains'
+export interface PrivateState { light: boolean; climate: number; humidifier: boolean; curtains: 'open' | 'closed' }
+export type PrivateRooms = Record<PrivateRoomId, PrivateState>
 
 export type DeviceKind = 'dimmer' | 'toggle' | 'rgb' | 'climate' | 'curtains'
 export type DeviceValue = number | boolean | string

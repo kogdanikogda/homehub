@@ -1,0 +1,39 @@
+.root { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; background: var(--surface-0); }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.seg3 { display: flex; flex-direction: column; gap: 12px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stats { display: flex; gap: 8px; }
+.list { display: flex; flex-direction: column; gap: 6px; }
+.group { display: flex; flex-direction: column; gap: 12px; }
+.roomHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.roomHead h2 { margin: 0; font-size: 20px; line-height: 24px; font-weight: 600; color: var(--text-primary); }
+.roomHead p { margin: 0; font-size: 13px; line-height: 16px; color: var(--text-secondary); }
+.h2 { margin: 0; font-size: 20px; line-height: 24px; font-weight: 600; color: var(--text-primary); }
+.diff { display: flex; flex-direction: column; }
+.btn { width: 100%; height: 50px; font-size: 15px; }
+.devices { display: flex; flex-direction: column; gap: 6px; }
+
+/* Энергия */
+.hero { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.heroNum { display: flex; align-items: baseline; gap: 6px; }
+.heroNum b { font-size: 30px; line-height: 36px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.heroNum span { font-size: 16px; color: var(--text-secondary); }
+.heroNum small { margin-left: 4px; font-size: 14px; color: var(--text-secondary); }
+.chartCard { padding: 12px 12px 8px; border-radius: 16px; background: var(--surface-1); }
+.plot { position: relative; height: 144px; margin: 14px 0 22px 26px; }
+.grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--surface-2); }
+.grid span { position: absolute; left: -26px; top: -8px; width: 20px; text-align: right; font-size: 12px; line-height: 15px; color: var(--text-tertiary); }
+.bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 4px; }
+.slot { position: relative; flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.bar { position: relative; width: 100%; border-radius: 4px 4px 0 0; background: var(--accent-soft); }
+.bar.last { background: var(--grad-accent); }
+.peak { position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -3px); font-size: 12px; line-height: 15px; color: var(--text-secondary); white-space: nowrap; }
+.tick { position: absolute; top: 100%; left: 50%; margin-top: 7px; transform: translateX(-50%); white-space: nowrap; font-size: 12px; line-height: 15px; color: var(--text-tertiary); }
+.split { display: flex; flex-direction: column; gap: 12px; }
+.erow { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13.5px; color: var(--text-primary); }
+.ewhat { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ewhat svg { color: var(--text-secondary); flex: none; }
+.eright { display: flex; align-items: center; gap: 8px; flex: none; }
+.trk { width: 70px; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.trk i { display: block; height: 100%; border-radius: 4px; background: var(--grad-accent); }
+.enum { width: 45px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }

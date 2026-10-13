@@ -3,10 +3,10 @@ import { DeviceRow } from '../../components/DeviceRow/DeviceRow'
 import { Icon } from '../../components/Icon/Icon'
 import { Switch } from '../../components/Switch/Switch'
 import {
-  AWAY_CLIMATE, COUNTERTOP, DEVICES, KITCHEN_EXTRAS, MODE_NAMES, PRIVATE_CLIMATE, PRIVATE_ROOMS, PRIVATE_ROOM_IDS,
+  AWAY_CLIMATE, COUNTERTOP, DEVICES, KITCHEN_EXTRAS, MODE_NAMES, PRIVATE_DEVICES, PRIVATE_ROOM_IDS,
   ROOM_NAMES, SCENES, SHARED_ROOMS,
 } from '../../store/data'
-import { isSceneControlled, modifiedChanges, onCount, roomSummary, roomTemperature, sceneControlledCount } from '../../store/logic'
+import { formatPrivate, isSceneControlled, modifiedChanges, onCount, privateOnCount, roomSummary, roomTemperature, sceneControlledCount } from '../../store/logic'
 import type { PrivateRoomId, RoomId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { DeviceControl } from './DeviceControl'
@@ -19,12 +19,13 @@ export function RoomsPage({ room, onRoom }: { room: RoomId; onRoom: (r: RoomId) 
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
   const extras = useHome((s) => s.extras)
+  const privateRooms = useHome((s) => s.privateRooms)
   const windowsOpen = useHome((s) => s.windowsOpen)
 
-  const awayTemp = (r: RoomId) => (mode === 'home' ? roomTemperature(r, devices) : isPrivate(r) ? AWAY_CLIMATE : roomTemperature(r, devices))
+  const awayTemp = (r: RoomId) => (mode === 'home' ? roomTemperature(r, devices, privateRooms) : isPrivate(r) ? AWAY_CLIMATE : roomTemperature(r, devices, privateRooms))
   const item = (r: RoomId) => {
     const priv = isPrivate(r)
-    const on = priv ? PRIVATE_ROOMS[r].filter((d) => d.on).length : onCount(r, devices, extras)
+    const on = priv ? privateOnCount(privateRooms[r]) : onCount(r, devices, extras)
     return (
       <li key={r}>
         <button type="button" className={`${styles.item} ${r === room ? styles.sel : ''}`} aria-current={r === room ? 'true' : undefined} onClick={() => onRoom(r)}>
@@ -60,13 +61,14 @@ function RoomDetail({ room }: { room: RoomId }) {
   const windowsOpen = useHome((s) => s.windowsOpen)
   const extras = useHome((s) => s.extras)
   const toggleExtra = useHome((s) => s.toggleExtra)
+  const privateRooms = useHome((s) => s.privateRooms)
 
   const priv = isPrivate(room)
   const open = windowsOpen[room]
   const changedKeys = new Set(modifiedChanges(devices, activeScene, unresponsive).map((c) => c.key))
   const climateKey = room === 'living' || room === 'kitchen' ? (`${room}.climate` as const) : null
   const subtitle = priv
-    ? `Climate set to ${mode === 'home' ? PRIVATE_CLIMATE[room] : AWAY_CLIMATE}°`
+    ? `Climate set to ${mode === 'home' ? privateRooms[room].climate : AWAY_CLIMATE}°`
     : climateKey ? `Climate set to ${devices[climateKey]}°` : 'No climate control in this room'
 
   const scene = mode === 'home' && activeScene && !priv ? SCENES[activeScene] : null
@@ -101,8 +103,8 @@ function RoomDetail({ room }: { room: RoomId }) {
 
       <div className={styles.grid}>
         {priv
-          ? PRIVATE_ROOMS[room].map((d) => (
-              <DeviceRow key={d.label} icon={d.icon} label={d.label} control={<span className={styles.readonly}>{mode !== 'home' && d.label === 'Climate' ? `${AWAY_CLIMATE}°` : d.value}</span>} />
+          ? PRIVATE_DEVICES[room].map((d) => (
+              <DeviceRow key={d.key} icon={d.icon} label={d.label} control={<span className={styles.readonly}>{mode !== 'home' && d.key === 'climate' ? `${AWAY_CLIMATE}°` : formatPrivate(d.key, privateRooms[room])}</span>} />
             ))
           : (
             <>

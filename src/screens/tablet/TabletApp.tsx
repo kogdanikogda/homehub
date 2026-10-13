@@ -32,6 +32,7 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
 
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
+  const privateRooms = useHome((s) => s.privateRooms)
   const activeScene = useHome((s) => s.activeScene)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const onboarding = useHome((s) => s.onboarding)
@@ -71,7 +72,7 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
           time={clock.time}
           date={clock.date}
           stats={[
-            { icon: 'temp', label: 'Average temperature', value: `${averageTemperature(devices, mode).toFixed(1)}°C` },
+            { icon: 'temp', label: 'Average temperature', value: `${averageTemperature(devices, mode, privateRooms).toFixed(1)}°C` },
             { icon: 'window', label: 'Windows', value: windowsText(openRooms), attention: openRooms.length > 0 },
             { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh`, onClick: act.openEnergy },
           ]}

@@ -8,7 +8,7 @@ type Props = {
   items: SegmentItem[]
   value: string
   onChange: (v: string) => void
-  platform?: 'tablet' | 'phone'
+  platform?: 'tablet' | 'phone' | 'phoneWide'
   label: string
 }
 

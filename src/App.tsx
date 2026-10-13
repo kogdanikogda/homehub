@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Button } from './components/Button/Button'
+import { PhoneFrame } from './components/PhoneFrame/PhoneFrame'
 import { TabletFrame } from './components/TabletFrame/TabletFrame'
 import { ROOM_NAMES } from './store/data'
 import { useHome } from './store/useHome'
+import { PhoneApp } from './screens/phone/PhoneApp'
 import { TabletApp } from './screens/tablet/TabletApp'
 import styles from './App.module.css'
 
@@ -38,13 +41,21 @@ function PrototypePanel() {
   )
 }
 
+type View = 'tablet' | 'marina'
+
 export function App() {
+  // Пока без общей демо-страницы: одно устройство за раз, состояние дома общее
+  const [view, setView] = useState<View>('tablet')
   return (
     <div className={styles.page}>
+      <div className={styles.switch} role="group" aria-label="Device">
+        <Button size="sm" variant={view === 'tablet' ? 'primary' : 'secondary'} onClick={() => setView('tablet')}>Wall tablet</Button>
+        <Button size="sm" variant={view === 'marina' ? 'primary' : 'secondary'} onClick={() => setView('marina')}>Marina’s phone</Button>
+      </div>
       <div className={styles.stage}>
-        <TabletFrame>
-          <TabletApp />
-        </TabletFrame>
+        {view === 'tablet'
+          ? <TabletFrame><TabletApp /></TabletFrame>
+          : <PhoneFrame label="Marina’s phone"><PhoneApp user="marina" /></PhoneFrame>}
       </div>
       <PrototypePanel />
     </div>

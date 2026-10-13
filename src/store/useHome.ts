@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import {
-  DEVICE_BY_KEY, INITIAL_EXTRAS, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
+  DEVICE_BY_KEY, INITIAL_EXTRAS, INITIAL_PRIVATE, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
 } from './data'
 import { conflictTurnOff, diffToScene, modifiedChanges } from './logic'
-import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
+import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
 
 type Toast = { id: number; text: string } | null
 
@@ -18,6 +18,8 @@ export interface HomeState {
   /** Устройства, не ответившие при активации сцены */
   unresponsive: DeviceKey[]
   windowsOpen: Windows
+  /** Личные комнаты: сцены их не трогают, управляют телефоны семьи */
+  privateRooms: PrivateRooms
   /** Кухонные устройства вне сцен */
   extras: Record<ExtraKey, boolean>
   /** Открытое окно на каждом устройстве: у планшета и телефонов окна свои */
@@ -35,6 +37,7 @@ export interface HomeState {
   stepDelay: number
 
   toggleExtra: (key: ExtraKey, on: boolean) => void
+  setPrivate: <K extends keyof PrivateState>(room: PrivateRoomId, key: K, value: PrivateState[K], by?: DeviceId) => void
   setDevice: (key: DeviceKey, value: DeviceValue, by?: DeviceId) => void
   confirmOverride: (by?: DeviceId) => void
   tapScene: (id: SceneId, by?: DeviceId) => void
@@ -73,6 +76,7 @@ export const initialState = () => ({
   overrideAck: false,
   unresponsive: [] as DeviceKey[],
   windowsOpen: closedWindows(),
+  privateRooms: structuredClone(INITIAL_PRIVATE) as PrivateRooms,
   extras: { ...INITIAL_EXTRAS },
   dialogs: { tablet: null, marina: null, alexey: null } as Record<DeviceId, DialogState | null>,
   onboarding: null as OnboardingStep | null,
@@ -249,6 +253,10 @@ export const useHome = create<HomeState>()((set, get) => {
     acknowledgeSmoke: () => set({ alert: null }),
     requestAlarmOff: (by = 'tablet') => setDialog(by, { type: 'pin', purpose: 'alarm' }),
 
+    setPrivate: (room, key, value, by = 'tablet') => {
+      set((s) => ({ privateRooms: { ...s.privateRooms, [room]: { ...s.privateRooms[room], [key]: value } } }))
+      if (key === 'light' || key === 'humidifier') toast(`${key === 'light' ? 'Light' : 'Humidifier'} turned ${value ? 'on' : 'off'}`, by)
+    },
     toggleExtra: (key, on) => set((s) => ({ extras: { ...s.extras, [key]: on } })),
     toggleWindow: (room) => set((s) => ({ windowsOpen: { ...s.windowsOpen, [room]: !s.windowsOpen[room] } })),
     setFailKeys: (keys) => set({ failKeys: keys }),

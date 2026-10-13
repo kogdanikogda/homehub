@@ -144,3 +144,20 @@ describe('первая настройка', () => {
     expect(useHome.getState().declinePairing).toBe(false)
   })
 })
+
+describe('личные комнаты', () => {
+  beforeEach(() => useHome.getState().reset())
+  it('телефон меняет личную комнату, планшет видит это', () => {
+    useHome.getState().setPrivate('kids1', 'light', false, 'marina')
+    expect(useHome.getState().privateRooms.kids1.light).toBe(false)
+    expect(useHome.getState().toasts.marina?.text).toBe('Light turned off')
+    expect(useHome.getState().toasts.tablet).toBeNull()
+  })
+  it('сцена личные комнаты не трогает', async () => {
+    useHome.setState({ stepDelay: 0 })
+    useHome.getState().setPrivate('bedroom', 'climate', 19, 'marina')
+    useHome.getState().tapScene('night')
+    await whenIdle()
+    expect(useHome.getState().privateRooms.bedroom.climate).toBe(19)
+  })
+})
