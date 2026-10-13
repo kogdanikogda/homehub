@@ -5,26 +5,14 @@ import living from '../../assets/cams/living.jpg'
 import yard from '../../assets/cams/yard.jpg'
 import { Chip, Tag } from '../Chip/Chip'
 import { Icon, type IconName } from '../Icon/Icon'
-import { Logo } from '../Logo/Logo'
-import { MODE_NAMES } from '../../store/data'
-import type { Mode } from '../../store/types'
 import styles from './Phone.module.css'
 
-const MODE_ICON = { home: 'home', away: 'lock', vacation: 'case' } as const
-
-/** Шапка телефона: логотип слева, режим дома и сигнализация справа. Название экрана — ниже, кроме главной. */
-export function PhoneHeader({ mode, title }: { mode: Mode; title?: string }) {
-  const armed = mode !== 'home'
+/** Заголовок экрана: название и роль */
+export function PhoneHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <header className={styles.header}>
-      <div className={styles.headRow}>
-        <Logo size={46} />
-        <div className={styles.headStatus} aria-label="House status">
-          <span className={`${styles.pill} ${styles.pillLg}`}><Icon name={MODE_ICON[mode]} size={15} />{MODE_NAMES[mode]}</span>
-          <span className={`${styles.pill} ${styles.pillLg} ${armed ? styles.pillArmed : ''}`}><Icon name="shield" size={15} />{armed ? 'Alarm on' : 'Alarm off'}</span>
-        </div>
-      </div>
-      {title && <h1 className={styles.title}>{title}</h1>}
+      <h1 className={styles.title}>{title}</h1>
+      <p className={styles.subtitle}>{subtitle}</p>
     </header>
   )
 }
