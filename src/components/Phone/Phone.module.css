@@ -55,3 +55,54 @@
 .changeTx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .changeTx small { font-size: 12px; line-height: 16px; color: var(--text-secondary); }
 .change b { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 12px; background: var(--status-warn-soft); }
+.alertCrit { background: var(--status-crit-soft); }
+.critIcon { flex: none; color: var(--status-crit); }
+.alert .warnIcon, .alert .critIcon { margin-top: 1px; }
+.alertTx { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 18px; color: var(--text-primary); }
+.alertTx b { font-size: 13px; font-weight: 700; }
+
+.status { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 10px 12px; border-radius: 12px; background: var(--surface-1); }
+.statusIcon { flex: none; color: var(--text-secondary); }
+.statusName { flex: 1; min-width: 0; font-size: 14px; color: var(--text-primary); }
+.statusVal { flex: none; font-size: 12px; font-weight: 600; }
+.st_ok { color: var(--status-ok); }
+.st_off { color: var(--text-secondary); }
+.st_bad { color: var(--status-warn); }
+.groupLabel { display: flex; align-items: center; gap: 8px; }
+
+.cam { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 1px; height: 96px; padding: 10px; border-radius: 14px; overflow: hidden; background: #0b0f16; text-align: left; color: #fff; }
+.camImg { position: absolute; inset: 0; }
+.camOff .camImg { filter: blur(8px); transform: scale(1.1); }
+.camShade { position: absolute; inset: 0; background: linear-gradient(to top, rgb(5 8 14 / .78), rgb(5 8 14 / 0) 62%); }
+.camLive { position: absolute; top: 8px; left: 8px; display: inline-flex; align-items: center; gap: 4px; height: 17px; padding: 0 7px; border-radius: 9px; background: rgb(5 8 14 / .55); font-size: 10.5px; font-weight: 700; color: #ff8a80; }
+.camOff .camLive, .camOff b, .camOff small { color: #c9d0d8; }
+.cam b, .cam small { position: relative; }
+.cam b { font-size: 14px; }
+.cam small { font-size: 11px; opacity: .75; }
+.cam:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+
+.camAct { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 59px; border-radius: 14px; background: var(--surface-1); font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+.camAct svg { color: var(--accent-text); }
+
+.steps { display: flex; flex-direction: column; gap: 10px; }
+.segs { display: flex; gap: 6px; }
+.seg { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-2); }
+.segDone { background: var(--accent-track); }
+.segNow { background: var(--grad-accent); }
+.segErr { background: var(--status-crit); }
+.stepTx { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; font-size: 12.5px; line-height: 16px; color: var(--text-secondary); }
+.stepTx b { font-weight: 700; color: var(--text-primary); }
+.stepTx em { flex-basis: 100%; margin-top: 2px; font-style: normal; font-size: 13px; color: var(--text-secondary); }
+.stepBad { color: var(--status-crit) !important; }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
+.field input { height: 48px; padding: 0 14px; border-radius: 12px; background: var(--surface-1); border: 1px solid var(--surface-3); font: inherit; font-size: 15px; color: var(--text-primary); }
+.field input:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 1px; }
+
+.checkRow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 0; text-align: left; border-bottom: 1px solid var(--surface-2); font-size: 14px; color: var(--text-primary); }
+.checkRow:last-child { border-bottom: 0; }
+.chk { flex: none; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; border: 1.5px solid var(--surface-3); color: var(--accent-on); }
+.chkOn { background: var(--grad-accent); border-color: transparent; }
+.stepName { margin-left: 5px; }

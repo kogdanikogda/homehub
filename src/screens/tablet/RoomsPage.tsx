@@ -58,21 +58,24 @@ function RoomDetail({ room }: { room: RoomId }) {
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const unresponsive = useHome((s) => s.unresponsive)
+  const scenes = useHome((s) => s.scenes)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const extras = useHome((s) => s.extras)
   const toggleExtra = useHome((s) => s.toggleExtra)
+  const added = useHome((s) => s.addedDevices.filter((d) => d.room === room))
+  const toggleAdded = useHome((s) => s.toggleAdded)
   const privateRooms = useHome((s) => s.privateRooms)
 
   const priv = isPrivate(room)
   const open = windowsOpen[room]
-  const changedKeys = new Set(modifiedChanges(devices, activeScene, unresponsive).map((c) => c.key))
+  const changedKeys = new Set(modifiedChanges(devices, activeScene, unresponsive, scenes).map((c) => c.key))
   const climateKey = room === 'living' || room === 'kitchen' ? (`${room}.climate` as const) : null
   const subtitle = priv
     ? `Climate set to ${mode === 'home' ? privateRooms[room].climate : AWAY_CLIMATE}°`
     : climateKey ? `Climate set to ${devices[climateKey]}°` : 'No climate control in this room'
 
   const scene = mode === 'home' && activeScene && !priv ? SCENES[activeScene] : null
-  const count = scene ? sceneControlledCount(room, scene.id) : 0
+  const count = scene ? sceneControlledCount(room, scene.id, scenes) : 0
   const own = DEVICES.filter((d) => d.room === room)
 
   return (
@@ -112,7 +115,7 @@ function RoomDetail({ room }: { room: RoomId }) {
                 const bad = unresponsive.includes(d.key)
                 return (
                   <DeviceRow key={d.key} icon={d.icon} label={d.label}
-                    inScene={Boolean(scene) && isSceneControlled(d.key, scene!.id)}
+                    inScene={Boolean(scene) && isSceneControlled(d.key, scene!.id, scenes)}
                     changed={changedKeys.has(d.key)} unavailable={bad}
                     control={bad ? <Chip tone="neutral" size="lg">Unavailable</Chip> : <DeviceControl def={d} />} />
                 )
@@ -128,6 +131,10 @@ function RoomDetail({ room }: { room: RoomId }) {
               )}
             </>
           )}
+        {added.map((d) => (
+          <DeviceRow key={`add-${d.id}`} icon="light" label={d.name}
+            control={priv ? <span className={styles.readonly}>{d.on ? 'On' : 'Off'}</span> : <Switch showState aria-label={d.name} checked={d.on} onCheckedChange={(v) => toggleAdded(d.id, v)} />} />
+        ))}
       </div>
 
       {priv && (

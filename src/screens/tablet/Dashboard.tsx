@@ -16,11 +16,12 @@ export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => vo
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const unresponsive = useHome((s) => s.unresponsive)
+  const scenes = useHome((s) => s.scenes)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const tapScene = useHome((s) => s.tapScene)
   const openWindows = useHome((s) => s.openWindows)
 
-  const changes = modifiedChanges(devices, activeScene, unresponsive)
+  const changes = modifiedChanges(devices, activeScene, unresponsive, scenes)
   const changedKeys = new Set(changes.map((c) => c.key))
   const openRooms = ROOM_ORDER.filter((r) => windowsOpen[r])
 

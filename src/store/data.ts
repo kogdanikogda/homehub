@@ -5,7 +5,7 @@ export const HOUSE_NAME = 'Home on Birch Street 12'
 /** Прототипный PIN (показывается подсказкой на экране) */
 export const PROTOTYPE_PIN = '1234'
 /** Глобальный диапазон температур — настраивается только в админке */
-export const TEMP_LIMITS = { min: 16, max: 26 }
+export const TEMP_LIMITS = { min: 18, max: 26 }
 
 export const ROOM_NAMES: Record<RoomId, string> = {
   living: 'Living Room',
@@ -77,6 +77,25 @@ export const SCENES: Record<SceneId, SceneDef> = {
 }
 
 export const SCENE_ORDER: SceneId[] = ['general', 'cinema', 'night', 'guests']
+
+/** Что сцена делает: только устройства, которые в неё входят. У остальных значение остаётся как есть. */
+export type SceneValues = Partial<DeviceValues>
+export type SceneMap = Record<SceneId, SceneValues>
+
+/** Устройства, которых нет в сцене по умолчанию (по макету) */
+const NOT_IN_SCENE: Record<SceneId, DeviceKey[]> = {
+  general: ['living.tv', 'living.sound'],
+  cinema: ['kitchen.light', 'kitchen.climate', 'corridor.light'],
+  night: [],
+  guests: ['living.tv', 'living.sound'],
+}
+
+export const DEFAULT_SCENES: SceneMap = Object.fromEntries(
+  (Object.keys(SCENES) as SceneId[]).map((id) => [
+    id,
+    Object.fromEntries(Object.entries(SCENES[id].values).filter(([k]) => !NOT_IN_SCENE[id].includes(k as DeviceKey))),
+  ]),
+) as SceneMap
 
 /** Режим Away/Vacation: свет и медиа выключены, климат — энергосбережение */
 export const AWAY_CLIMATE = 18

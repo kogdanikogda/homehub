@@ -12,7 +12,7 @@ const STEPS: { id: OnboardingStep[]; label: string }[] = [
   { id: ['done'], label: '4. Done' },
 ]
 const ORDER: OnboardingStep[] = ['welcome', 'role', 'pair', 'done']
-const PAIRING_CODE = 'HH‑4821'
+export const PAIRING_CODE = 'HH‑4821'
 /** Сколько ждём ответа с телефона владельца, мс */
 const APPROVAL_MS = 3500
 
@@ -57,7 +57,8 @@ export function Onboarding({ step, approvalMs = APPROVAL_MS }: { step: Onboardin
 
   // Ждём ответ владельца: прототип сам «одобряет» или «отклоняет» запрос
   useEffect(() => {
-    if (step !== 'pair') return
+    // Если решение принимает человек на телефоне администратора, прототип сам ничего не решает
+    if (step !== 'pair' || useHome.getState().pairingManual) return
     const t = setTimeout(() => set(useHome.getState().declinePairing ? 'declined' : 'done'), approvalMs)
     return () => clearTimeout(t)
   }, [step, set, decline, approvalMs])

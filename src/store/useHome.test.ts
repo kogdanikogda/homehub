@@ -161,3 +161,33 @@ describe('личные комнаты', () => {
     expect(useHome.getState().privateRooms.bedroom.climate).toBe(19)
   })
 })
+
+describe('настройки и сцены администратора', () => {
+  beforeEach(() => useHome.getState().reset())
+  it('«Save to scene» записывает текущие значения в активную сцену', () => {
+    useHome.setState({ stepDelay: 0 })
+    useHome.setState((s) => ({ devices: { ...s.devices, 'living.light': 50 } }))
+    expect(useHome.getState().scenes.general['living.light']).toBe(80)
+    useHome.getState().saveToScene(['living.light'])
+    expect(useHome.getState().scenes.general['living.light']).toBe(50)
+    expect(useHome.getState().toasts.alexey?.text).toBe('1 saved to General')
+  })
+  it('температурный диапазон: нижняя граница всегда ниже верхней', () => {
+    useHome.getState().setTempLimit('min', 26)
+    expect(useHome.getState().tempLimits).toEqual({ min: 18, max: 26 })
+    useHome.getState().setTempLimit('min', 20)
+    expect(useHome.getState().tempLimits.min).toBe(20)
+  })
+  it('добавленное устройство появляется выключенным и включается', () => {
+    useHome.getState().addDevice({ name: 'Floor lamp', room: 'living', type: 'Light' })
+    const d = useHome.getState().addedDevices[0]
+    expect(d.on).toBe(false)
+    useHome.getState().toggleAdded(d.id, true, 'marina')
+    expect(useHome.getState().addedDevices[0].on).toBe(true)
+  })
+  it('сцена только из активной темы: после сохранения изменений «Modified» пропадает', () => {
+    useHome.setState((s) => ({ devices: { ...s.devices, 'living.light': 50 } }))
+    useHome.getState().saveToScene(['living.light'])
+    expect(useHome.getState().scenes.general['living.light']).toBe(50)
+  })
+})

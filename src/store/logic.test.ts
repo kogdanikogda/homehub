@@ -77,6 +77,8 @@ describe('страница комнат', () => {
   it('сколько устройств задаёт сцена', () => {
     expect(sceneControlledCount('living', 'general')).toBe(4)
     expect(sceneControlledCount('living', 'cinema')).toBe(6)
+    expect(sceneControlledCount('kitchen', 'cinema')).toBe(0)
+    expect(sceneControlledCount('living', 'guests')).toBe(4)
     expect(sceneControlledCount('kitchen', 'general')).toBe(2)
     expect(sceneControlledCount('corridor', 'general')).toBe(1)
   })

@@ -37,3 +37,69 @@
 .trk { width: 70px; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
 .trk i { display: block; height: 100%; border-radius: 4px; background: var(--grad-accent); }
 .enum { width: 45px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.noteText { margin: 0; font-size: 12.5px; line-height: 17.5px; color: var(--text-secondary); }
+.cams { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lock { display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; border-radius: 12px; background: var(--surface-1); color: var(--text-secondary); }
+.lockTx { flex: 1; display: flex; flex-direction: column; font-size: 14px; color: var(--text-primary); }
+.lockTx small { font-size: 12px; color: var(--text-secondary); }
+.log { display: flex; flex-direction: column; padding: 4px 12px; border-radius: 12px; background: var(--surface-1); font-size: 13px; }
+.log > div { display: flex; gap: 12px; padding: 8px 0; color: var(--text-primary); }
+.log > div > span:first-child { color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+
+.view { position: relative; height: 190px; border-radius: 14px; overflow: hidden; background: #0b0f16; color: #fff; }
+.viewAlarm { box-shadow: inset 0 0 0 2px var(--status-crit); }
+.viewImg { position: absolute; inset: 0; }
+.viewImg[data-off='true'] { filter: blur(10px); transform: scale(1.1); }
+.viewTop { position: absolute; top: 9px; left: 9px; right: 9px; display: flex; justify-content: space-between; align-items: center; }
+.viewLive { padding: 3px 7px; border-radius: 10px; background: rgb(5 8 14 / .55); font-size: 10.5px; font-weight: 700; color: #ff8a80; }
+.viewTime { font-size: 11px; opacity: .85; font-variant-numeric: tabular-nums; }
+.viewName { position: absolute; left: 9px; bottom: 9px; font-size: 14px; font-weight: 700; }
+.viewBox { position: absolute; left: 90px; top: 60px; width: 54px; height: 99px; border: 2px solid var(--status-crit); border-radius: 4px; font-size: 11px; font-weight: 700; padding: 1px 3px; color: #fff; background: rgb(188 111 123 / .12); }
+.viewOff { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 28px; text-align: center; background: rgb(5 8 14 / .5); }
+.viewOff b { font-size: 15px; }
+.viewOff small { font-size: 12px; line-height: 15px; opacity: .8; }
+.viewOff svg { color: #c9d0d8; }
+.acts { display: flex; gap: 8px; }
+.events { display: flex; flex-direction: column; border-radius: 12px; }
+.events > div { display: flex; align-items: center; gap: 12px; min-height: 48px; font-size: 13px; color: var(--text-primary); }
+.events i { flex: none; width: 64px; height: 36px; border-radius: 6px; }
+.events > div > span:nth-of-type(1) { color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+.strip { display: flex; gap: 8px; }
+.strip button { flex: 1; display: flex; flex-direction: column; gap: 4px; align-items: stretch; font-size: 11px; color: var(--text-secondary); text-align: center; border-radius: 8px; }
+.strip i { display: block; height: 50px; border-radius: 8px; outline-offset: 0; }
+.strip .stripOn { color: var(--accent-text); }
+.strip .stripOn i { outline: 2px solid var(--accent-text); }
+.illu { display: flex; align-items: center; justify-content: center; height: 120px; border-radius: 16px; background: var(--surface-1); color: var(--accent-text); }
+.spin { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--accent-track); border-top-color: var(--accent-default); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } }
+.pick { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 59px; padding: 10px 12px; border-radius: 12px; background: var(--surface-1); text-align: left; color: var(--text-secondary); }
+.pickTx { flex: 1; display: flex; flex-direction: column; }
+.pickTx b { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.pickTx small { font-size: 12.5px; }
+.done { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.done > * { width: 100%; }
+.ok { align-self: center; display: flex; align-items: center; justify-content: center; width: 76px !important; height: 76px; border-radius: 50%; background: var(--status-ok-soft); color: var(--status-ok); }
+.setRow, .setItem { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-primary); }
+.setRow { min-height: 50px; }
+.setItem { min-height: 42px; padding: 8px 12px; border-radius: 12px; background: var(--surface-1); }
+.setName { display: flex; align-items: center; gap: 10px; }
+.setName svg { color: var(--text-secondary); }
+.erow { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; border-radius: 12px; background: var(--surface-1); }
+.erowSkip { padding: 12px; }
+.ehd { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; font-size: 13.5px; color: var(--text-primary); }
+.ehd span { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ehd svg { color: var(--text-secondary); flex: none; }
+.ehd button { flex: none; font-size: 12.5px; font-weight: 600; color: var(--accent-text); padding: 2px 0; }
+.erowSkip .ehd span { color: var(--text-secondary); }
+.req { display: flex; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--accent-soft); }
+.reqIc { flex: none; color: var(--accent-text); margin-top: 2px; }
+.reqBody { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.reqTx { display: flex; flex-direction: column; gap: 2px; }
+.reqTx b { font-size: 15px; color: var(--text-primary); }
+.reqTx small { font-size: 12px; color: var(--text-secondary); }
+.reqActs { display: flex; gap: 8px; }
+.reqActs > * { flex: 1; padding: 0 8px; }
+.sceneNote { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 12.5px; line-height: 17.5px; color: var(--text-secondary); }
+.sceneNote svg { flex: none; margin-top: 2px; color: var(--accent-text); }

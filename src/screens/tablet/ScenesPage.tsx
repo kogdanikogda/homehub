@@ -3,8 +3,8 @@ import { Button } from '../../components/Button/Button'
 import { Icon } from '../../components/Icon/Icon'
 import { ListRow } from '../../components/ListRow/ListRow'
 import { DEVICES, ROOM_NAMES, SCENES, SCENE_ORDER, SHARED_ROOMS } from '../../store/data'
-import { formatValue, modifiedChanges } from '../../store/logic'
-import type { SceneId } from '../../store/types'
+import { formatValue, isSceneControlled, modifiedChanges } from '../../store/logic'
+import type { DeviceValue, SceneId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import styles from './ScenesPage.module.css'
 
@@ -14,10 +14,11 @@ export function ScenesPage({ scene, onScene }: { scene: SceneId; onScene: (s: Sc
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const unresponsive = useHome((s) => s.unresponsive)
+  const scenes = useHome((s) => s.scenes)
   const tapScene = useHome((s) => s.tapScene)
   const resetToScene = useHome((s) => s.resetToScene)
 
-  const changes = modifiedChanges(devices, activeScene, unresponsive)
+  const changes = modifiedChanges(devices, activeScene, unresponsive, scenes)
   const changedKeys = new Set(changes.map((c) => c.key))
   const def = SCENES[scene]
   const isActive = mode === 'home' && scene === activeScene
@@ -61,11 +62,11 @@ export function ScenesPage({ scene, onScene }: { scene: SceneId; onScene: (s: Sc
         </header>
         {mode !== 'home' && <Banner icon="lock">Scenes are unavailable in {mode === 'away' ? 'Away' : 'Vacation'} mode.</Banner>}
         <div className={styles.rooms}>
-          {SHARED_ROOMS.map((room) => (
+          {SHARED_ROOMS.filter((room) => DEVICES.some((d) => d.room === room && isSceneControlled(d.key, scene, scenes))).map((room) => (
             <div key={room} className={styles.group}>
               <h3 className={styles.groupTitle}>{ROOM_NAMES[room]}</h3>
-              {DEVICES.filter((d) => d.room === room).map((d) => (
-                <ListRow key={d.key} icon={d.icon} text={d.label} value={formatValue(d.key, def.values[d.key])}
+              {DEVICES.filter((d) => d.room === room && isSceneControlled(d.key, scene, scenes)).map((d) => (
+                <ListRow key={d.key} icon={d.icon} text={d.label} value={formatValue(d.key, scenes[scene][d.key] as DeviceValue)}
                   badge={isActive && changedKeys.has(d.key) ? 'Changed' : undefined} />
               ))}
             </div>

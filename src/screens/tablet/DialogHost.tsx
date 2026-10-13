@@ -17,6 +17,7 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
   const dialog = useHome((s) => s.dialogs[by])
   const devices = useHome((s) => s.devices)
   const unresponsive = useHome((s) => s.unresponsive)
+  const scenes = useHome((s) => s.scenes)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const a = useHome.getState()
   const close = () => a.closeDialog(by)
@@ -45,7 +46,7 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
       )
     }
     case 'changes': {
-      const list = modifiedChanges(devices, dialog.scene, unresponsive)
+      const list = modifiedChanges(devices, dialog.scene, unresponsive, scenes)
       return (
         <Dialog compact={compact} open onOpenChange={close} title={`${SCENES[dialog.scene].name}: changes from the saved scene`}
           note="Only the administrator can save these changes to the scene. Until then they are temporary and end when another scene is activated."

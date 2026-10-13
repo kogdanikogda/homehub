@@ -19,11 +19,9 @@ import { useClock } from './useClock'
 import styles from './Tablet.module.css'
 
 const MODE_ICON = { home: 'home', away: 'lock', vacation: 'case' } as const
-/** Через сколько миллисекунд бездействия экран приглушается */
-const IDLE_MS = 120_000
 
 /** Публичная настенная панель */
-export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
+export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
   const [page, setPage] = useState<Page>('dashboard')
   const [room, setRoom] = useState<RoomId>('living')
   const [sceneSel, setSceneSel] = useState<SceneId>('general')
@@ -39,7 +37,9 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
   const dimmed = useHome((s) => s.dimmed)
   const alert = useHome((s) => s.alert)
   const toast = useHome((s) => s.toasts.tablet)
+  const idleMinutes = useHome((s) => s.idleMinutes)
   const act = useHome.getState()
+  const idleMs = idleOverride ?? idleMinutes * 60_000
 
   const openRooms = ROOM_ORDER.filter((r) => windowsOpen[r])
 

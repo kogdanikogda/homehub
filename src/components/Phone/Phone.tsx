@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Chip, Tag } from '../Chip/Chip'
 import { Icon, type IconName } from '../Icon/Icon'
 import styles from './Phone.module.css'
@@ -37,18 +37,20 @@ export function PhoneBody({ children, gap = 18 }: { children: ReactNode; gap?: n
 export function PhoneCard({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (
     <section className={styles.card}>
-      <div className={styles.cardHead}>
-        <h2 className={styles.cardTitle}>{title}</h2>
-        {aside}
-      </div>
+      {(title || aside) && (
+        <div className={styles.cardHead}>
+          <h2 className={styles.cardTitle}>{title}</h2>
+          {aside}
+        </div>
+      )}
       {children}
     </section>
   )
 }
 
-export function AlarmPill({ on }: { on: boolean }) {
+export function AlarmPill({ on, label }: { on: boolean; label?: string }) {
   return (
-    <span className={styles.pill}><Icon name="shield" size={14} />{on ? 'Alarm on' : 'Alarm off'}</span>
+    <span className={styles.pill}><Icon name="shield" size={14} />{label ?? (on ? 'Alarm on' : 'Alarm off')}</span>
   )
 }
 
@@ -132,4 +134,96 @@ export function ChangeRow({ label, value, small }: { label: string; value?: stri
 
 export function PrivateChip() {
   return <Chip tone="neutral" size="xs">Private</Chip>
+}
+
+/** Техническое оповещение: устройство не отвечает */
+export function TechAlert({ title = 'Technical alert', children, tone = 'warning' }: { title?: string; children: ReactNode; tone?: 'warning' | 'critical' }) {
+  return (
+    <div className={`${styles.alert} ${tone === 'critical' ? styles.alertCrit : ''}`} role="status">
+      <Icon name="warn" size={20} className={tone === 'critical' ? styles.critIcon : styles.warnIcon} />
+      <span className={styles.alertTx}>{title && <b>{title}</b>}<span>{children}</span></span>
+    </div>
+  )
+}
+
+/** Строка только для чтения: иконка, название, статус цветом */
+export function StatusRow({ icon, name, status, tone = 'ok' }: { icon: IconName; name: string; status: string; tone?: 'ok' | 'off' | 'bad' }) {
+  return (
+    <div className={styles.status}>
+      <Icon name={icon} size={18} className={styles.statusIcon} />
+      <span className={styles.statusName}>{name}</span>
+      <span className={`${styles.statusVal} ${styles[`st_${tone}`]}`}>{status}</span>
+    </div>
+  )
+}
+
+/** Название группы, у которой рядом метка («Kids Room 1 · Private») */
+export function GroupLabel({ children, tag }: { children: ReactNode; tag?: string }) {
+  return <div className={styles.groupLabel}><h2 className={styles.label}>{children}</h2>{tag && <Tag>{tag}</Tag>}</div>
+}
+
+export type CamId = 'yard' | 'entrance' | 'garage' | 'living'
+
+/** Фон камеры. Это рисованные заглушки: реальные кадры в прототипе не нужны */
+export const CAM_STYLE: Record<CamId, CSSProperties> = {
+  yard: { background: 'radial-gradient(120% 90% at 30% 110%, #2b3a22 0%, transparent 60%), linear-gradient(#14202e, #1b2a1d)' },
+  entrance: { background: 'radial-gradient(60% 70% at 70% 40%, #8a6a3a 0%, transparent 55%), linear-gradient(#12161d, #1d1812)' },
+  garage: { background: 'radial-gradient(70% 60% at 55% 60%, #3b4a58 0%, transparent 65%), linear-gradient(#1a2028, #0e1218)' },
+  living: { background: 'radial-gradient(80% 80% at 40% 50%, #5a4a3c 0%, transparent 70%), linear-gradient(#2a2420, #171412)' },
+}
+
+export function CameraTile({ id, name, off, onClick }: { id: CamId; name: string; off?: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className={`${styles.cam} ${off ? styles.camOff : ''}`} onClick={onClick} aria-label={`${name} camera`}>
+      <span className={styles.camImg} style={CAM_STYLE[id]} />
+      <span className={styles.camShade} />
+      <span className={styles.camLive}>{off ? <><Icon name="lock" size={12} />Off</> : '● Live'}</span>
+      <b>{name}</b>
+      <small>{off ? 'Off · privacy at home' : 'Recording'}</small>
+    </button>
+  )
+}
+
+/** Крупная плитка действия камеры (Snapshot, Talk, Security) */
+export function CamAction({ icon, label, onClick }: { icon: IconName; label: string; onClick?: () => void }) {
+  return (
+    <button type="button" className={styles.camAct} onClick={onClick}><Icon name={icon} size={20} />{label}</button>
+  )
+}
+
+/** Полоска шагов добавления устройства: тонкие сегменты и подпись */
+export function Steps({ step, total = 4, name, status, state = 'active' }: { step: number; total?: number; name: string; status: string; state?: 'active' | 'error' | 'done' }) {
+  return (
+    <div className={styles.steps} role="group" aria-label={state === 'done' ? 'Done' : `Step ${step} of ${total}`}>
+      <div className={styles.segs}>
+        {Array.from({ length: total }, (_, i) => {
+          const n = i + 1
+          const cls = state === 'done' || n < step ? styles.segDone : n === step ? (state === 'error' ? styles.segErr : styles.segNow) : ''
+          return <i key={n} className={`${styles.seg} ${cls}`} />
+        })}
+      </div>
+      <p className={styles.stepTx}>
+        <b>{state === 'done' ? 'Done' : `Step ${step} of ${total}`}</b>{name && <span className={styles.stepName}>· {name}</span>}
+        <em className={state === 'error' ? styles.stepBad : ''}>{status}</em>
+      </p>
+    </div>
+  )
+}
+
+export function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label className={styles.field}>
+      <span>{label}</span>
+      <input value={value} onChange={(e) => onChange(e.target.value)} maxLength={32} />
+    </label>
+  )
+}
+
+export function CheckRow({ checked, onChange, label, small }: { checked: boolean; onChange: (v: boolean) => void; label: string; small: string }) {
+  return (
+    <button type="button" role="checkbox" aria-checked={checked} className={styles.checkRow} onClick={() => onChange(!checked)}>
+      <span className={`${styles.chk} ${checked ? styles.chkOn : ''}`}>{checked && <Icon name="check" size={16} />}</span>
+      <span className={styles.changeTx}><span>{label}</span><small>{small}</small></span>
+    </button>
+  )
 }

@@ -14,6 +14,8 @@ export type DeviceKey =
 /** dimmer 0–100 %, toggle вкл/выкл, rgb off|low|high, climate °C, curtains open|closed */
 /** Дополнительные устройства кухни: сцены ими не управляют */
 export type ExtraKey = 'kitchen.bar' | 'kitchen.floor'
+/** Устройство, добавленное через телефон администратора */
+export interface AddedDevice { id: number; name: string; room: RoomId; type: string; on: boolean }
 export type PrivateRoomId = 'kids1' | 'kids2' | 'bedroom'
 /** Устройства личных комнат: ими управляют только телефоны семьи */
 export type PrivateKey = 'light' | 'climate' | 'humidifier' | 'curtains'

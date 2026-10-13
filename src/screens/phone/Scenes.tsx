@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { Button } from '../../components/Button/Button'
-import { BackLink, ChangeRow, Note, SceneRow } from '../../components/Phone/Phone'
+import { BackLink, CheckRow, ChangeRow, Note, SceneRow } from '../../components/Phone/Phone'
 import { DEVICES, MODE_NAMES, SCENES, SCENE_ORDER } from '../../store/data'
 import { deviceTitle, formatValue, isSceneControlled, modifiedChanges } from '../../store/logic'
-import type { SceneId } from '../../store/types'
+import type { DeviceValue, SceneId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import type { PhoneUser } from './PhoneApp'
 import styles from './Phone.module.css'
@@ -12,7 +13,8 @@ export function ScenesList({ onScene }: { onScene: (id: SceneId) => void }) {
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const unresponsive = useHome((s) => s.unresponsive)
-  const changes = modifiedChanges(devices, activeScene, unresponsive).length
+  const scenes = useHome((s) => s.scenes)
+  const changes = modifiedChanges(devices, activeScene, unresponsive, scenes).length
 
   const status = (id: SceneId) => {
     if (mode !== 'home') return `Unavailable in ${MODE_NAMES[mode]} mode`
@@ -32,16 +34,45 @@ export function ScenesList({ onScene }: { onScene: (id: SceneId) => void }) {
   )
 }
 
-export function SceneScreen({ user, scene, onBack }: { user: PhoneUser; scene: SceneId; onBack: () => void }) {
+/** Админ: выбрать, какие правки сохранить в сцену */
+function SaveToScene({ scene, onBack }: { scene: SceneId; onBack: () => void }) {
+  const devices = useHome((s) => s.devices)
+  const scenes = useHome((s) => s.scenes)
+  const unresponsive = useHome((s) => s.unresponsive)
+  const changes = modifiedChanges(devices, scene, unresponsive, scenes)
+  const [off, setOff] = useState<string[]>([])
+  const picked = changes.filter((c) => !off.includes(c.key))
+  return (
+    <>
+      <BackLink label="Scenes" onClick={onBack} />
+      <h2 className={styles.h2}>{SCENES[scene].name} is modified</h2>
+      <Note>The scene is active and differs from its saved settings. Choose what to save to the scene.</Note>
+      <div className={styles.diff}>
+        {changes.map((c) => (
+          <CheckRow key={c.key} checked={!off.includes(c.key)} onChange={(v) => setOff((o) => (v ? o.filter((k) => k !== c.key) : [...o, c.key]))}
+            label={deviceTitle(c.key)} small={`Saved ${formatValue(c.key, c.to)} → Now ${formatValue(c.key, c.from)}`} />
+        ))}
+      </div>
+      <Button size="md" className={styles.btn} disabled={!picked.length} onClick={() => { useHome.getState().saveToScene(picked.map((c) => c.key)); onBack() }}>Save {picked.length} to scene</Button>
+      <Button variant="secondary" size="md" className={styles.btn} onClick={onBack}>Keep as temporary</Button>
+      <Note>Unsaved changes end when another scene is activated.</Note>
+    </>
+  )
+}
+
+export function SceneScreen({ user, scene, onBack, onEdit }: { user: PhoneUser; scene: SceneId; onBack: () => void; onEdit?: () => void }) {
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const unresponsive = useHome((s) => s.unresponsive)
+  const scenes = useHome((s) => s.scenes)
   const a = useHome.getState()
   const def = SCENES[scene]
   const isActive = activeScene === scene && mode === 'home'
-  const changes = isActive ? modifiedChanges(devices, scene, unresponsive) : []
+  const changes = isActive ? modifiedChanges(devices, scene, unresponsive, scenes) : []
   const admin = user === 'alexey'
+
+  if (admin && changes.length) return <SaveToScene scene={scene} onBack={onBack} />
 
   // Сцена изменена вручную: показываем, чем текущее состояние отличается от сохранённого
   if (changes.length) {
@@ -66,13 +97,14 @@ export function SceneScreen({ user, scene, onBack }: { user: PhoneUser; scene: S
       <h2 className={styles.h2}>{def.name}</h2>
       <Note>{def.description}</Note>
       <div className={styles.diff}>
-        {DEVICES.filter((d) => isSceneControlled(d.key, scene)).map((d) => (
-          <ChangeRow key={d.key} label={deviceTitle(d.key)} value={formatValue(d.key, def.values[d.key])} />
+        {DEVICES.filter((d) => isSceneControlled(d.key, scene, scenes)).map((d) => (
+          <ChangeRow key={d.key} label={deviceTitle(d.key)} value={formatValue(d.key, scenes[scene][d.key] as DeviceValue)} />
         ))}
       </div>
       <Button size="md" className={styles.btn} disabled={mode !== 'home' || isActive} onClick={() => a.tapScene(scene, user)}>
         {isActive ? 'Active' : `Activate ${def.name}`}
       </Button>
+      {admin && <Button variant="secondary" size="md" className={styles.btn} onClick={onEdit}>Edit scene</Button>}
       {mode !== 'home' && <Note>Scenes are unavailable in {MODE_NAMES[mode]} mode.</Note>}
       {!admin && mode === 'home' && <Note>Only Alexey can edit scenes.</Note>}
     </>

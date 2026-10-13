@@ -1,6 +1,6 @@
 import {
-  AWAY_CLIMATE, CORRIDOR_TEMP, DEVICES, DEVICE_BY_KEY, INITIAL_PRIVATE, ROOM_NAMES, SCENES,
-  type DeviceValues,
+  AWAY_CLIMATE, CORRIDOR_TEMP, DEFAULT_SCENES, DEVICES, DEVICE_BY_KEY, INITIAL_PRIVATE, ROOM_NAMES,
+  type DeviceValues, type SceneMap,
 } from './data'
 import type { Change, DeviceKey, DeviceValue, ExtraKey, Mode, PrivateRoomId, PrivateRooms, PrivateState, RoomId, SceneId } from './types'
 
@@ -20,23 +20,23 @@ export function deviceTitle(key: DeviceKey): string {
   return `${ROOM_NAMES[d.room]} · ${d.label}`
 }
 
-/** Что изменится, если применить значения сцены к текущему состоянию */
-export function diffToScene(devices: DeviceValues, scene: SceneId): Change[] {
-  const target = SCENES[scene].values
-  return DEVICES.filter((d) => devices[d.key] !== target[d.key]).map((d) => ({
-    key: d.key, from: devices[d.key], to: target[d.key],
+/** Что изменится, если применить сцену к текущему состоянию: считаются только устройства из сцены */
+export function diffToScene(devices: DeviceValues, scene: SceneId, scenes: SceneMap = DEFAULT_SCENES): Change[] {
+  const target = scenes[scene]
+  return DEVICES.filter((d) => d.key in target && devices[d.key] !== target[d.key]).map((d) => ({
+    key: d.key, from: devices[d.key], to: target[d.key] as DeviceValue,
   }))
 }
 
 /** Сцена «изменена», когда текущее состояние отличается от сохранённого */
-export function modifiedChanges(devices: DeviceValues, active: SceneId | null, ignore: DeviceKey[] = []): Change[] {
-  return active ? diffToScene(devices, active).filter((c) => !ignore.includes(c.key)) : []
+export function modifiedChanges(devices: DeviceValues, active: SceneId | null, ignore: DeviceKey[] = [], scenes: SceneMap = DEFAULT_SCENES): Change[] {
+  return active ? diffToScene(devices, active, scenes).filter((c) => !ignore.includes(c.key)) : []
 }
 
 /** Cinema → Night: ТВ и звук выключатся — это нужно подтвердить */
-export function conflictTurnOff(devices: DeviceValues, active: SceneId | null, target: SceneId): Change[] {
+export function conflictTurnOff(devices: DeviceValues, active: SceneId | null, target: SceneId, scenes: SceneMap = DEFAULT_SCENES): Change[] {
   if (active !== 'cinema' || target !== 'night') return []
-  return diffToScene(devices, target).filter(
+  return diffToScene(devices, target, scenes).filter(
     (c) => (c.key === 'living.tv' || c.key === 'living.sound') && c.from === true && c.to === false,
   )
 }
@@ -91,16 +91,14 @@ export function roomSummary(temp: number, on: number): string {
   return `${temp}° · ${on === 0 ? 'All off' : `${on} on`}`
 }
 
-/** Устройство «принадлежит» сцене: медиа — только если сцена его включает */
-export function isSceneControlled(key: DeviceKey, scene: SceneId): boolean {
-  const d = DEVICE_BY_KEY[key]
-  const media = d.icon === 'tv' || d.icon === 'sound'
-  return !media || SCENES[scene].values[key] === true
+/** Устройство входит в сцену */
+export function isSceneControlled(key: DeviceKey, scene: SceneId, scenes: SceneMap = DEFAULT_SCENES): boolean {
+  return key in scenes[scene]
 }
 
 /** Сколько устройств комнаты задаёт сцена */
-export function sceneControlledCount(room: RoomId, scene: SceneId): number {
-  return DEVICES.filter((d) => d.room === room && isSceneControlled(d.key, scene)).length
+export function sceneControlledCount(room: RoomId, scene: SceneId, scenes: SceneMap = DEFAULT_SCENES): number {
+  return DEVICES.filter((d) => d.room === room && isSceneControlled(d.key, scene, scenes)).length
 }
 
 /** Сколько устройств включено в личной комнате: климат и шторы не считаются */

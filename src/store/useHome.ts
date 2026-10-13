@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import {
-  DEVICE_BY_KEY, INITIAL_EXTRAS, INITIAL_PRIVATE, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
+  DEFAULT_SCENES, DEVICE_BY_KEY, INITIAL_EXTRAS, INITIAL_PRIVATE, MODE_NAMES, TEMP_LIMITS, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues, type SceneMap, type SceneValues,
 } from './data'
 import { conflictTurnOff, diffToScene, modifiedChanges } from './logic'
-import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
+import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, AddedDevice, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
 
 type Toast = { id: number; text: string } | null
 
@@ -18,6 +18,23 @@ export interface HomeState {
   /** Устройства, не ответившие при активации сцены */
   unresponsive: DeviceKey[]
   windowsOpen: Windows
+  /** Для демо на трёх устройствах: запрос на подключение панели ждёт решения на телефоне администратора */
+  pairingManual: boolean
+  /** Когда устройство перестало отвечать (для технического оповещения) */
+  offlineAt: string | null
+  /** Диапазон температур, который задаёт администратор */
+  tempLimits: { min: number; max: number }
+  /** Через сколько минут бездействия панель приглушается */
+  idleMinutes: 1 | 2 | 5
+  vacationOpts: { presence: boolean; freeze: boolean; cameras: boolean }
+  doorLocked: boolean
+  /** Камера гостиной временно включена (по умолчанию дома выключена) */
+  camPeek: boolean
+  addedDevices: AddedDevice[]
+  /** Для прототипа: как поведёт себя добавление устройства */
+  addFlow: { searchEmpty: boolean; connectFails: boolean }
+  /** Состав и значения сцен: администратор может их менять */
+  scenes: SceneMap
   /** Личные комнаты: сцены их не трогают, управляют телефоны семьи */
   privateRooms: PrivateRooms
   /** Кухонные устройства вне сцен */
@@ -37,6 +54,19 @@ export interface HomeState {
   stepDelay: number
 
   toggleExtra: (key: ExtraKey, on: boolean) => void
+  setPairingManual: (v: boolean) => void
+  setTempLimit: (which: 'min' | 'max', v: number) => void
+  setIdleMinutes: (m: 1 | 2 | 5) => void
+  setVacationOpt: (k: 'presence' | 'freeze' | 'cameras', v: boolean) => void
+  setDoorLocked: (v: boolean, by?: DeviceId) => void
+  setCamPeek: (v: boolean, by?: DeviceId) => void
+  setAddFlow: (patch: Partial<HomeState['addFlow']>) => void
+  addDevice: (d: Omit<AddedDevice, 'id' | 'on'>) => void
+  toggleAdded: (id: number, on: boolean, by?: DeviceId) => void
+  /** Админ: сохранить сцену целиком (экран «Edit scene») */
+  saveScene: (id: SceneId, values: SceneValues) => void
+  /** Админ: записать текущие значения выбранных устройств в активную сцену */
+  saveToScene: (keys: DeviceKey[], by?: DeviceId) => void
   setPrivate: <K extends keyof PrivateState>(room: PrivateRoomId, key: K, value: PrivateState[K], by?: DeviceId) => void
   setDevice: (key: DeviceKey, value: DeviceValue, by?: DeviceId) => void
   confirmOverride: (by?: DeviceId) => void
@@ -76,6 +106,16 @@ export const initialState = () => ({
   overrideAck: false,
   unresponsive: [] as DeviceKey[],
   windowsOpen: closedWindows(),
+  pairingManual: false,
+  offlineAt: null as string | null,
+  tempLimits: { ...TEMP_LIMITS },
+  idleMinutes: 2 as 1 | 2 | 5,
+  vacationOpts: { presence: true, freeze: true, cameras: true },
+  doorLocked: true,
+  camPeek: false,
+  addedDevices: [] as AddedDevice[],
+  addFlow: { searchEmpty: false, connectFails: false },
+  scenes: structuredClone(DEFAULT_SCENES) as SceneMap,
   privateRooms: structuredClone(INITIAL_PRIVATE) as PrivateRooms,
   extras: { ...INITIAL_EXTRAS },
   dialogs: { tablet: null, marina: null, alexey: null } as Record<DeviceId, DialogState | null>,
@@ -90,6 +130,7 @@ export const initialState = () => ({
 
 let runToken = 0
 let toastId = 0
+let deviceId = 0
 let lastRun: Promise<void> = Promise.resolve()
 /** Для тестов: дождаться окончания прогресса сцены */
 export const whenIdle = () => lastRun
@@ -112,7 +153,7 @@ export const useHome = create<HomeState>()((set, get) => {
 
   const runScene = (id: SceneId, by: DeviceId): Promise<void> => {
     const token = ++runToken
-    const items: ProgressItem[] = diffToScene(get().devices, id).map((c) => ({ ...c, status: 'waiting' }))
+    const items: ProgressItem[] = diffToScene(get().devices, id, get().scenes).map((c) => ({ ...c, status: 'waiting' }))
     setDialog(by, { type: 'progress', scene: id, items, phase: 'running' })
 
     const publish = (next: ProgressItem[], phase: 'running' | 'done' | 'failed') =>
@@ -129,14 +170,15 @@ export const useHome = create<HomeState>()((set, get) => {
         publish([...work], 'running')
       }
       const failed = work.filter((w) => w.status === 'failed').map((w) => w.key)
-      const target = SCENES[id].values
+      const target = get().scenes[id]
       set((s) => ({
         devices: Object.fromEntries(
-          Object.entries(s.devices).map(([k, v]) => [k, work.some((w) => w.key === k && w.status === 'done') ? target[k as DeviceKey] : v]),
+          Object.entries(s.devices).map(([k, v]) => [k, work.some((w) => w.key === k && w.status === 'done') ? (target[k as DeviceKey] as DeviceValue) : v]),
         ) as DeviceValues,
         activeScene: id,
         overrideAck: false,
         unresponsive: failed,
+        offlineAt: failed.length ? nowHHMM() : null,
       }))
       publish(work, failed.length ? 'failed' : 'done')
       if (!failed.length) {
@@ -173,10 +215,10 @@ export const useHome = create<HomeState>()((set, get) => {
       const s = get()
       if (s.mode !== 'home') return
       if (id === s.activeScene) {
-        if (modifiedChanges(s.devices, s.activeScene, s.unresponsive).length) setDialog(by, { type: 'changes', scene: id })
+        if (modifiedChanges(s.devices, s.activeScene, s.unresponsive, s.scenes).length) setDialog(by, { type: 'changes', scene: id })
         return
       }
-      const turnOff = conflictTurnOff(s.devices, s.activeScene, id)
+      const turnOff = conflictTurnOff(s.devices, s.activeScene, id, s.scenes)
       if (turnOff.length) setDialog(by, { type: 'conflict', target: id, turnOff })
       else void runScene(id, by)
     },
@@ -189,7 +231,7 @@ export const useHome = create<HomeState>()((set, get) => {
     resetToScene: (by = 'tablet') => {
       const s = get()
       if (!s.activeScene) return
-      set({ devices: { ...s.devices, ...SCENES[s.activeScene].values }, unresponsive: [] })
+      set({ devices: { ...s.devices, ...s.scenes[s.activeScene] }, unresponsive: [] })
       setDialog(by, null)
       toast(`${SCENES[s.activeScene].name} restored`, by)
     },
@@ -252,6 +294,41 @@ export const useHome = create<HomeState>()((set, get) => {
     triggerAlert: (kind) => set((s) => ({ alert: { kind, at: nowHHMM() }, dimmed: false, dialogs: { ...s.dialogs, tablet: null } })),
     acknowledgeSmoke: () => set({ alert: null }),
     requestAlarmOff: (by = 'tablet') => setDialog(by, { type: 'pin', purpose: 'alarm' }),
+
+    setPairingManual: (v) => set({ pairingManual: v }),
+    setTempLimit: (which, v) =>
+      set((s) => {
+        const next = { ...s.tempLimits, [which]: v }
+        // Нижняя граница не выше верхней: держим хотя бы 1°
+        if (next.min >= next.max) return s
+        return { tempLimits: next }
+      }),
+    setIdleMinutes: (m) => set({ idleMinutes: m }),
+    setVacationOpt: (k, v) => set((s) => ({ vacationOpts: { ...s.vacationOpts, [k]: v } })),
+    setDoorLocked: (v, by = 'alexey') => { set({ doorLocked: v }); toast(v ? 'Front door locked' : 'Front door unlocked', by) },
+    setCamPeek: (v, by = 'alexey') => { set({ camPeek: v }); toast(v ? 'Living room camera on for 10 min' : 'Living room camera off', by) },
+    setAddFlow: (patch) => set((s) => ({ addFlow: { ...s.addFlow, ...patch } })),
+    addDevice: (d) => set((s) => ({ addedDevices: [...s.addedDevices, { ...d, id: ++deviceId, on: false }] })),
+    toggleAdded: (id, on, by = 'tablet') => {
+      set((s) => ({ addedDevices: s.addedDevices.map((d) => (d.id === id ? { ...d, on } : d)) }))
+      const d = get().addedDevices.find((x) => x.id === id)
+      if (d) toast(`${d.name} turned ${on ? 'on' : 'off'}`, by)
+    },
+
+    saveScene: (id, values) => {
+      set((s) => ({ scenes: { ...s.scenes, [id]: values } }))
+      toast(`${SCENES[id].name} saved`, 'alexey')
+    },
+
+    saveToScene: (keys, by = 'alexey') => {
+      const s = get()
+      const id = s.activeScene
+      if (!id || !keys.length) return
+      const next = { ...s.scenes[id] }
+      for (const k of keys) next[k] = s.devices[k]
+      set({ scenes: { ...s.scenes, [id]: next } })
+      toast(`${keys.length} saved to ${SCENES[id].name}`, by)
+    },
 
     setPrivate: (room, key, value, by = 'tablet') => {
       set((s) => ({ privateRooms: { ...s.privateRooms, [room]: { ...s.privateRooms[room], [key]: value } } }))

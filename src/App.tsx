@@ -14,6 +14,8 @@ function PrototypePanel() {
   const failKeys = useHome((s) => s.failKeys)
   const mode = useHome((s) => s.mode)
   const decline = useHome((s) => s.declinePairing)
+  const manual = useHome((s) => s.pairingManual)
+  const flow = useHome((s) => s.addFlow)
   const a = useHome.getState()
   const tvFails = failKeys.includes('living.tv')
   return (
@@ -35,13 +37,22 @@ function PrototypePanel() {
       <Button size="sm" variant="secondary" onClick={() => a.setDeclinePairing(!decline)}>
         Owner {decline ? 'declines' : 'approves'} pairing
       </Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setPairingManual(!manual)}>
+        Pairing: {manual ? 'decided on Alexey’s phone' : 'decided automatically'}
+      </Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setAddFlow({ searchEmpty: !flow.searchEmpty })}>
+        Device search {flow.searchEmpty ? 'finds nothing' : 'finds devices'}
+      </Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setAddFlow({ connectFails: !flow.connectFails })}>
+        Device setup {flow.connectFails ? 'fails' : 'succeeds'}
+      </Button>
       <Button size="sm" variant="secondary" onClick={a.dim}>Dim screen</Button>
       <Button size="sm" variant="secondary" onClick={a.reset}>Reset</Button>
     </aside>
   )
 }
 
-type View = 'tablet' | 'marina'
+type View = 'tablet' | 'marina' | 'alexey'
 
 export function App() {
   // Пока без общей демо-страницы: одно устройство за раз, состояние дома общее
@@ -51,11 +62,12 @@ export function App() {
       <div className={styles.switch} role="group" aria-label="Device">
         <Button size="sm" variant={view === 'tablet' ? 'primary' : 'secondary'} onClick={() => setView('tablet')}>Wall tablet</Button>
         <Button size="sm" variant={view === 'marina' ? 'primary' : 'secondary'} onClick={() => setView('marina')}>Marina’s phone</Button>
+        <Button size="sm" variant={view === 'alexey' ? 'primary' : 'secondary'} onClick={() => setView('alexey')}>Alexey’s phone</Button>
       </div>
       <div className={styles.stage}>
         {view === 'tablet'
           ? <TabletFrame><TabletApp /></TabletFrame>
-          : <PhoneFrame label="Marina’s phone"><PhoneApp user="marina" /></PhoneFrame>}
+          : <PhoneFrame label={view === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}><PhoneApp key={view} user={view} /></PhoneFrame>}
       </div>
       <PrototypePanel />
     </div>

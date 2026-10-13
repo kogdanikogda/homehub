@@ -1,4 +1,4 @@
-import { AlarmPill, PhoneCard, RoomRow, SceneChip, SectionLabel, StatTile, WarningRow } from '../../components/Phone/Phone'
+import { AlarmPill, PhoneCard, RoomRow, SceneChip, SectionLabel, StatTile, TechAlert, WarningRow } from '../../components/Phone/Phone'
 import { Segmented } from '../../components/Segmented/Segmented'
 import { MODE_NAMES, ROOM_NAMES, ROOM_ORDER, SCENES, SCENE_ORDER, TODAY_ENERGY_KWH } from '../../store/data'
 import { averageTemperature, onCount, privateOnCount, roomTemperature } from '../../store/logic'
@@ -6,6 +6,8 @@ import type { Mode, RoomId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { PRIVATE_ROOM_IDS } from '../../store/data'
 import type { PhoneUser } from './PhoneApp'
+import { offlineText } from './TechAlertRow'
+import { PairingRequest } from './PairingRequest'
 import styles from './Phone.module.css'
 
 export const isPrivateRoom = (r: RoomId) => (PRIVATE_ROOM_IDS as RoomId[]).includes(r)
@@ -37,6 +39,9 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
   const priv = useHome((s) => s.privateRooms)
   const activeScene = useHome((s) => s.activeScene)
   const windowsOpen = useHome((s) => s.windowsOpen)
+  const unresponsive = useHome((s) => s.unresponsive)
+  const offlineAt = useHome((s) => s.offlineAt)
+  const pairing = useHome((s) => s.onboarding === 'pair')
   const a = useHome.getState()
   const sub = useRoomSub()
   const open = ROOM_ORDER.filter((r) => windowsOpen[r])
@@ -48,8 +53,11 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
     if (m === 'vacation' && admin && mode !== 'vacation') a.enterVacation(user)
   }
 
+  const tech = admin ? offlineText(unresponsive, offlineAt) : null
+
   return (
     <>
+      {admin && pairing && <PairingRequest />}
       <div className={styles.group}>
         <PhoneCard title="House mode" aside={<AlarmPill on={mode !== 'home'} />}>
           <Segmented platform="phoneWide" label="House mode" value={mode} onChange={pickMode}
@@ -58,7 +66,7 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
               { value: 'away', label: MODE_NAMES.away, icon: 'lock', disabled: mode === 'vacation' },
               { value: 'vacation', label: MODE_NAMES.vacation, icon: 'case', disabled: !admin },
             ]} />
-          <p style={{ margin: 0, fontSize: 12.5, lineHeight: '17.5px', color: 'var(--text-secondary)' }}>{MODE_NOTE[mode]}</p>
+          <p style={{ margin: 0, fontSize: 12.5, lineHeight: '17.5px', color: 'var(--text-secondary)' }}>{admin && mode === 'home' ? 'Alarm off. Normal household operation.' : MODE_NOTE[mode]}</p>
         </PhoneCard>
 
         <PhoneCard title="Scene" aside={<b style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{activeScene ? SCENES[activeScene].name : '—'}</b>}>
@@ -75,6 +83,7 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
           <StatTile icon="bolt" value={String(TODAY_ENERGY_KWH)} caption="kWh today" onClick={onEnergy} />
         </div>
         {open.length > 0 && <WarningRow>Open: {open.map((r) => ROOM_NAMES[r]).join(', ')}</WarningRow>}
+        {tech && <TechAlert>{tech}</TechAlert>}
       </div>
 
       <div className={styles.group}>
