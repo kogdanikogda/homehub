@@ -6,11 +6,12 @@ import { SceneTile } from '../../components/SceneTile/SceneTile'
 import { DEVICES, MODE_NAMES, ROOM_NAMES, SCENES, SCENE_ORDER, SHARED_ROOMS } from '../../store/data'
 import { modifiedChanges, windowAlertText } from '../../store/logic'
 import { ROOM_ORDER } from '../../store/data'
+import type { RoomId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { DeviceControl } from './DeviceControl'
 import styles from './Tablet.module.css'
 
-export function Dashboard({ onAllDevices }: { onAllDevices: () => void }) {
+export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => void }) {
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
@@ -47,7 +48,7 @@ export function Dashboard({ onAllDevices }: { onAllDevices: () => void }) {
       </SceneCard>
       <div className={styles.rooms}>
         {SHARED_ROOMS.map((room) => (
-          <RoomCard key={room} title={ROOM_NAMES[room]} windowOpen={windowsOpen[room]} onAllDevices={onAllDevices}>
+          <RoomCard key={room} title={ROOM_NAMES[room]} windowOpen={windowsOpen[room]} onAllDevices={() => onAllDevices(room)}>
             {DEVICES.filter((d) => d.room === room).map((d) => (
               <DeviceRow key={d.key} icon={d.icon} label={d.label} changed={changedKeys.has(d.key)}
                 unavailable={unresponsive.includes(d.key)} status={unresponsive.includes(d.key) ? 'No response' : undefined}

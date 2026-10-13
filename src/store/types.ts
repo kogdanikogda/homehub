@@ -10,6 +10,10 @@ export type DeviceKey =
   | 'corridor.light'
 
 /** dimmer 0–100 %, toggle вкл/выкл, rgb off|low|high, climate °C, curtains open|closed */
+/** Дополнительные устройства кухни: сцены ими не управляют */
+export type ExtraKey = 'kitchen.bar' | 'kitchen.floor'
+export type PrivateRoomId = 'kids1' | 'kids2' | 'bedroom'
+
 export type DeviceKind = 'dimmer' | 'toggle' | 'rgb' | 'climate' | 'curtains'
 export type DeviceValue = number | boolean | string
 

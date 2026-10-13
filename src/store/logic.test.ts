@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { SCENES, awayValues } from './data'
 import {
-  averageTemperature, conflictTurnOff, diffToScene, formatValue, modifiedChanges, windowAlertText, windowsText,
+  averageTemperature, conflictTurnOff, diffToScene, formatValue, modifiedChanges, onCount, roomSummary,
+  sceneControlledCount, windowAlertText, windowsText,
 } from './logic'
 
 const general = SCENES.general.values
@@ -58,5 +59,25 @@ describe('окна', () => {
     expect(windowsText(['living'])).toBe('1 open')
     expect(windowAlertText(['living'])).toBe('Living Room window is open')
     expect(windowAlertText(['living', 'kids1'])).toBe('2 windows are open: Living Room, Kids Room 1')
+  })
+})
+
+describe('страница комнат', () => {
+  const extras = { 'kitchen.bar': false, 'kitchen.floor': true }
+  it('считает включённые устройства', () => {
+    const d = { ...SCENES.general.values }
+    expect(onCount('living', d, extras)).toBe(1)
+    expect(onCount('kitchen', d, extras)).toBe(2)
+    expect(onCount('corridor', d, extras)).toBe(1)
+  })
+  it('подпись комнаты', () => {
+    expect(roomSummary(22, 2)).toBe('22° · 2 on')
+    expect(roomSummary(21, 0)).toBe('21° · All off')
+  })
+  it('сколько устройств задаёт сцена', () => {
+    expect(sceneControlledCount('living', 'general')).toBe(4)
+    expect(sceneControlledCount('living', 'cinema')).toBe(6)
+    expect(sceneControlledCount('kitchen', 'general')).toBe(2)
+    expect(sceneControlledCount('corridor', 'general')).toBe(1)
   })
 })

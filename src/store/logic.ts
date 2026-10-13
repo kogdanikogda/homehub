@@ -1,8 +1,8 @@
 import {
-  AWAY_CLIMATE, DEVICES, DEVICE_BY_KEY, PRIVATE_CLIMATE, ROOM_NAMES, SCENES,
+  AWAY_CLIMATE, CORRIDOR_TEMP, DEVICES, DEVICE_BY_KEY, PRIVATE_CLIMATE, ROOM_NAMES, SCENES,
   type DeviceValues,
 } from './data'
-import type { Change, DeviceKey, DeviceValue, Mode, RoomId, SceneId } from './types'
+import type { Change, DeviceKey, DeviceValue, ExtraKey, Mode, RoomId, SceneId } from './types'
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -60,4 +60,45 @@ export function windowAlertText(open: RoomId[]): string {
 
 export function clampTemp(v: number, limits: { min: number; max: number }): number {
   return Math.min(limits.max, Math.max(limits.min, v))
+}
+
+/** Включено ли устройство (для подсчёта «N on»): климат и шторы не считаются */
+export function isOn(key: DeviceKey, v: DeviceValue): boolean {
+  const kind = DEVICE_BY_KEY[key].kind
+  if (kind === 'dimmer') return Number(v) > 0
+  if (kind === 'toggle') return Boolean(v)
+  if (kind === 'rgb') return v !== 'off'
+  return false
+}
+
+/** Температура комнаты для списка: «22°» */
+export function roomTemperature(room: RoomId, devices: DeviceValues): number {
+  if (room === 'living') return Number(devices['living.climate'])
+  if (room === 'kitchen') return Number(devices['kitchen.climate'])
+  if (room === 'corridor') return CORRIDOR_TEMP
+  return PRIVATE_CLIMATE[room as keyof typeof PRIVATE_CLIMATE]
+}
+
+/** Сколько устройств включено в комнате */
+export function onCount(room: RoomId, devices: DeviceValues, extras: Record<ExtraKey, boolean>): number {
+  const own = DEVICES.filter((d) => d.room === room && isOn(d.key, devices[d.key])).length
+  const more = room === 'kitchen' ? Object.values(extras).filter(Boolean).length : 0
+  return own + more
+}
+
+/** Подпись в списке комнат: «22° · 2 on» или «21° · All off» */
+export function roomSummary(temp: number, on: number): string {
+  return `${temp}° · ${on === 0 ? 'All off' : `${on} on`}`
+}
+
+/** Устройство «принадлежит» сцене: медиа — только если сцена его включает */
+export function isSceneControlled(key: DeviceKey, scene: SceneId): boolean {
+  const d = DEVICE_BY_KEY[key]
+  const media = d.icon === 'tv' || d.icon === 'sound'
+  return !media || SCENES[scene].values[key] === true
+}
+
+/** Сколько устройств комнаты задаёт сцена */
+export function sceneControlledCount(room: RoomId, scene: SceneId): number {
+  return DEVICES.filter((d) => d.room === room && isSceneControlled(d.key, scene)).length
 }

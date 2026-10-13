@@ -1,0 +1,28 @@
+.split { display: flex; gap: 20px; flex: 1; min-height: 0; padding: 8px 32px 28px; }
+.list { display: flex; flex-direction: column; gap: 10px; width: 300px; flex: none; overflow: hidden; }
+.colh { margin: 0; padding: 6px 6px 2px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+.ul { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.item { position: relative; display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 14px 18px; border-radius: 18px; background: var(--surface-1); text-align: left; }
+.item.sel { background: var(--accent-soft); }
+.item:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.itemName { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; line-height: 19px; color: var(--text-primary); }
+.lockIcon { color: var(--text-tertiary); }
+.itemSub { font-size: 13px; line-height: 16px; color: var(--text-secondary); }
+.itemChip { position: absolute; top: 14px; right: 14px; }
+
+.detail { display: flex; flex-direction: column; gap: 18px; flex: 1; min-width: 0; padding: 26px 30px; border-radius: var(--radius-card); background: var(--surface-1); overflow: hidden; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.h2 { margin: 0; font-size: 22px; font-weight: 600; line-height: 27px; color: var(--text-primary); }
+.num { margin: 3px 0 0; font-size: 14.5px; line-height: 18px; color: var(--text-secondary); }
+.tags { display: flex; gap: 8px; }
+
+.legend, .infobox { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); color: var(--text-secondary); font-size: 13px; line-height: 18.5px; }
+.infobox { align-items: center; gap: 12px; padding: 12px 14px; }
+.legendIcon { flex: none; color: var(--accent-text); }
+.legend .legendIcon { margin-top: 1px; }
+.desc { margin: 0; font-size: 13.5px; line-height: 20px; color: var(--text-secondary); }
+
+.grid { display: flex; flex-direction: column; gap: 12px; }
+.readonly { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+.readonlyDim { font-size: 17px; font-weight: 600; color: var(--text-secondary); }

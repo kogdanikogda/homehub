@@ -8,10 +8,11 @@ import { ToastHost } from '../../components/ToastHost/ToastHost'
 import { MODE_NAMES, TODAY_ENERGY_KWH } from '../../store/data'
 import { averageTemperature, windowsText } from '../../store/logic'
 import { ROOM_ORDER } from '../../store/data'
-import type { Mode } from '../../store/types'
+import type { Mode, RoomId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { Dashboard } from './Dashboard'
 import { DialogHost } from './DialogHost'
+import { RoomsPage } from './RoomsPage'
 import { useClock } from './useClock'
 import styles from './Tablet.module.css'
 
@@ -22,6 +23,7 @@ const IDLE_MS = 120_000
 /** Публичная настенная панель */
 export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
   const [page, setPage] = useState<Page>('dashboard')
+  const [room, setRoom] = useState<RoomId>('living')
   const [menuOpen, setMenuOpen] = useState(false)
   const clock = useClock()
 
@@ -74,9 +76,9 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
           onMenuOpenChange={setMenuOpen}
           menu={<ModeMenu rows={rows} />}
         />
-        {page === 'dashboard'
-          ? <Dashboard onAllDevices={() => setPage('rooms')} />
-          : <div className={styles.placeholder}>{page === 'rooms' ? 'Rooms' : 'Scenes'} — this screen is built in the next stage</div>}
+        {page === 'dashboard' && <Dashboard onAllDevices={(r) => { setRoom(r); setPage('rooms') }} />}
+        {page === 'rooms' && <RoomsPage room={room} onRoom={setRoom} />}
+        {page === 'scenes' && <div className={styles.placeholder}>Scenes — this screen is built in the next stage</div>}
       </div>
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />

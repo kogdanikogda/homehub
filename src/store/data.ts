@@ -1,4 +1,4 @@
-import type { DeviceDef, DeviceKey, DeviceValue, Mode, RoomId, SceneId } from './types'
+import type { DeviceDef, DeviceKey, DeviceValue, ExtraKey, Mode, PrivateRoomId, RoomId, SceneId } from './types'
 import type { IconName } from '../components/Icon/Icon'
 
 export const HOUSE_NAME = 'Home on Birch Street 12'
@@ -87,7 +87,39 @@ export function awayValues(current: DeviceValues): DeviceValues {
 }
 
 /** Температура в комнатах без панели управления (детские, спальня) — для средней температуры дома */
-export const PRIVATE_CLIMATE: Record<'kids1' | 'kids2' | 'bedroom', number> = { kids1: 22, kids2: 22, bedroom: 21 }
+export const PRIVATE_CLIMATE: Record<PrivateRoomId, number> = { kids1: 22, kids2: 21, bedroom: 22 }
+
+/** В коридоре нет климата, но есть датчик температуры */
+export const CORRIDOR_TEMP = 21
+
+/** Устройства, которых нет на главном экране, но есть на странице комнаты (кухня) */
+export const KITCHEN_EXTRAS: { key: ExtraKey; label: string; icon: IconName }[] = [
+  { key: 'kitchen.bar', label: 'Bar lighting', icon: 'light' },
+  { key: 'kitchen.floor', label: 'Floor heating', icon: 'temp' },
+]
+export const COUNTERTOP = { label: 'Countertop lighting', icon: 'light' as IconName, status: 'Off · wall switch only' }
+export const INITIAL_EXTRAS: Record<ExtraKey, boolean> = { 'kitchen.bar': false, 'kitchen.floor': true }
+
+/** Личные комнаты: панель только показывает их состояние, управляют телефоны семьи */
+export const PRIVATE_ROOMS: Record<PrivateRoomId, { label: string; icon: IconName; value: string; on?: boolean }[]> = {
+  kids1: [
+    { label: 'Light', icon: 'light', value: 'On', on: true },
+    { label: 'Climate', icon: 'temp', value: '22°' },
+    { label: 'Humidifier', icon: 'drop', value: 'On', on: true },
+  ],
+  kids2: [
+    { label: 'Light', icon: 'light', value: 'Off' },
+    { label: 'Climate', icon: 'temp', value: '21°' },
+    { label: 'Humidifier', icon: 'drop', value: 'Off' },
+  ],
+  bedroom: [
+    { label: 'Light', icon: 'light', value: 'Off' },
+    { label: 'Climate', icon: 'temp', value: '22°' },
+    { label: 'Humidifier', icon: 'drop', value: 'Off' },
+    { label: 'Curtains', icon: 'curtains', value: 'Closed' },
+  ],
+}
+export const PRIVATE_ROOM_IDS: PrivateRoomId[] = ['kids1', 'kids2', 'bedroom']
 
 export const MODE_NAMES: Record<Mode, string> = { home: 'Home', away: 'Away', vacation: 'Vacation' }
 export const TODAY_ENERGY_KWH = 18.4

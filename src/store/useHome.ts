@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import {
-  DEVICE_BY_KEY, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
+  DEVICE_BY_KEY, INITIAL_EXTRAS, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
 } from './data'
 import { conflictTurnOff, diffToScene, modifiedChanges } from './logic'
-import type { AlertKind, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
+import type { AlertKind, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
 
 type Windows = Record<RoomId, boolean>
 
@@ -16,6 +16,8 @@ export interface HomeState {
   /** Устройства, не ответившие при активации сцены */
   unresponsive: DeviceKey[]
   windowsOpen: Windows
+  /** Кухонные устройства вне сцен */
+  extras: Record<ExtraKey, boolean>
   dialog: DialogState | null
   toast: { id: number; text: string } | null
   dimmed: boolean
@@ -25,6 +27,7 @@ export interface HomeState {
   /** Пауза между шагами прогресса, мс (в тестах 0) */
   stepDelay: number
 
+  toggleExtra: (key: ExtraKey, on: boolean) => void
   setDevice: (key: DeviceKey, value: DeviceValue) => void
   confirmOverride: () => void
   tapScene: (id: SceneId) => void
@@ -60,6 +63,7 @@ export const initialState = () => ({
   overrideAck: false,
   unresponsive: [] as DeviceKey[],
   windowsOpen: closedWindows(),
+  extras: { ...INITIAL_EXTRAS },
   dialog: null as DialogState | null,
   toast: null as HomeState['toast'],
   dimmed: false,
@@ -217,6 +221,7 @@ export const useHome = create<HomeState>()((set, get) => {
     acknowledgeSmoke: () => set({ alert: null }),
     requestAlarmOff: () => set({ dialog: { type: 'pin', purpose: 'alarm' } }),
 
+    toggleExtra: (key, on) => set((s) => ({ extras: { ...s.extras, [key]: on } })),
     toggleWindow: (room) => set((s) => ({ windowsOpen: { ...s.windowsOpen, [room]: !s.windowsOpen[room] } })),
     setFailKeys: (keys) => set({ failKeys: keys }),
     reset: () => { runToken++; set({ ...initialState() }) },
