@@ -49,3 +49,6 @@ export type DialogState =
   | { type: 'pin'; purpose: 'home' | 'alarm' }
   | { type: 'windows' }
   | { type: 'energy' }
+
+/** Шаги первой настройки панели */
+export type OnboardingStep = 'welcome' | 'role' | 'pair' | 'declined' | 'done'

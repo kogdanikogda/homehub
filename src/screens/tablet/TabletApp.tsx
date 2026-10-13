@@ -12,6 +12,7 @@ import type { Mode, RoomId, SceneId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { Dashboard } from './Dashboard'
 import { DialogHost } from './DialogHost'
+import { Onboarding } from './Onboarding'
 import { RoomsPage } from './RoomsPage'
 import { ScenesPage } from './ScenesPage'
 import { useClock } from './useClock'
@@ -33,6 +34,7 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const windowsOpen = useHome((s) => s.windowsOpen)
+  const onboarding = useHome((s) => s.onboarding)
   const dimmed = useHome((s) => s.dimmed)
   const alert = useHome((s) => s.alert)
   const toast = useHome((s) => s.toast)
@@ -82,6 +84,7 @@ export function TabletApp({ idleMs = IDLE_MS }: { idleMs?: number }) {
         {page === 'rooms' && <RoomsPage room={room} onRoom={setRoom} />}
         {page === 'scenes' && <ScenesPage scene={sceneSel} onScene={setSceneSel} />}
       </div>
+      {onboarding && <Onboarding step={onboarding} />}
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />
       {alert && (alert.kind === 'intrusion'

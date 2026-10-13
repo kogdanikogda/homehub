@@ -131,3 +131,16 @@ describe('тревоги', () => {
     expect(s().alert).toBeNull()
   })
 })
+
+describe('первая настройка', () => {
+  it('начинается с приветствия и сбрасывается', () => {
+    const s = useHome.getState()
+    s.setOnboarding('welcome')
+    expect(useHome.getState().onboarding).toBe('welcome')
+    s.setDeclinePairing(true)
+    expect(useHome.getState().declinePairing).toBe(true)
+    s.reset()
+    expect(useHome.getState().onboarding).toBeNull()
+    expect(useHome.getState().declinePairing).toBe(false)
+  })
+})

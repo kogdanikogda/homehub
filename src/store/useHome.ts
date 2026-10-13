@@ -3,7 +3,7 @@ import {
   DEVICE_BY_KEY, INITIAL_EXTRAS, MODE_NAMES, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues,
 } from './data'
 import { conflictTurnOff, diffToScene, modifiedChanges } from './logic'
-import type { AlertKind, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
+import type { AlertKind, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, Mode, ProgressItem, RoomId, SceneId } from './types'
 
 type Windows = Record<RoomId, boolean>
 
@@ -19,6 +19,10 @@ export interface HomeState {
   /** Кухонные устройства вне сцен */
   extras: Record<ExtraKey, boolean>
   dialog: DialogState | null
+  /** Первая настройка панели; null — панель уже настроена */
+  onboarding: OnboardingStep | null
+  /** Для прототипа: владелец отклонит запрос на сопряжение */
+  declinePairing: boolean
   toast: { id: number; text: string } | null
   dimmed: boolean
   alert: { kind: AlertKind; at: string } | null
@@ -41,6 +45,8 @@ export interface HomeState {
   /** true — PIN верный */
   submitPin: (pin: string) => boolean
   openWindows: () => void
+  setOnboarding: (step: OnboardingStep | null) => void
+  setDeclinePairing: (v: boolean) => void
   openEnergy: () => void
   closeDialog: () => void
   showToast: (text: string) => void
@@ -66,6 +72,8 @@ export const initialState = () => ({
   windowsOpen: closedWindows(),
   extras: { ...INITIAL_EXTRAS },
   dialog: null as DialogState | null,
+  onboarding: null as OnboardingStep | null,
+  declinePairing: false,
   toast: null as HomeState['toast'],
   dimmed: false,
   alert: null as HomeState['alert'],
@@ -209,6 +217,8 @@ export const useHome = create<HomeState>()((set, get) => {
     },
 
     openWindows: () => set({ dialog: { type: 'windows' } }),
+    setOnboarding: (step) => set({ onboarding: step }),
+    setDeclinePairing: (v) => set({ declinePairing: v }),
     openEnergy: () => set({ dialog: { type: 'energy' } }),
     closeDialog: () => {
       runToken++ // закрытие окна прогресса не отменяет сцену, но останавливает автозакрытие

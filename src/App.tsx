@@ -10,6 +10,7 @@ function PrototypePanel() {
   const windows = useHome((s) => s.windowsOpen)
   const failKeys = useHome((s) => s.failKeys)
   const mode = useHome((s) => s.mode)
+  const decline = useHome((s) => s.declinePairing)
   const a = useHome.getState()
   const tvFails = failKeys.includes('living.tv')
   return (
@@ -26,6 +27,10 @@ function PrototypePanel() {
       <Button size="sm" variant="secondary" disabled={mode === 'vacation'} onClick={a.enterVacation}>Vacation (from Alexey’s phone)</Button>
       <Button size="sm" variant="secondary" onClick={() => a.setFailKeys(tvFails ? [] : ['living.tv'])}>
         TV {tvFails ? 'will not respond' : 'responds'} to scenes
+      </Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setOnboarding('welcome')}>Setup flow</Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setDeclinePairing(!decline)}>
+        Owner {decline ? 'declines' : 'approves'} pairing
       </Button>
       <Button size="sm" variant="secondary" onClick={a.dim}>Dim screen</Button>
       <Button size="sm" variant="secondary" onClick={a.reset}>Reset</Button>

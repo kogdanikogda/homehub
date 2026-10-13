@@ -1,0 +1,35 @@
+.ob { position: absolute; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 48px; background: var(--surface-0); }
+.steps { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.pill { height: 35px; padding: 8px 14px 9px; border-radius: 17.5px; background: var(--surface-1); color: var(--text-tertiary); font-size: 15px; font-weight: 600; line-height: 18px; }
+.pillOn { background: var(--accent-soft); color: var(--accent-text); }
+
+.card { display: flex; flex-direction: column; gap: 26px; width: 760px; padding: 40px 44px; border-radius: 26px; background: var(--surface-1); }
+.card h1 { margin: 0; font-size: 30px; font-weight: 600; line-height: 36px; color: var(--text-primary); }
+.text { display: flex; flex-direction: column; gap: 18px; }
+.text p { margin: 0; font-size: 20px; line-height: 29px; color: var(--text-secondary); }
+.acts { display: flex; justify-content: space-between; }
+.actsC { display: flex; }
+
+.roles { display: flex; gap: 16px; }
+.role { display: flex; flex-direction: column; flex: 1; gap: 10px; padding: 22px; border-radius: 20px; background: var(--surface-0); }
+.roleOn { background: var(--accent-soft); }
+.role b { font-size: 20px; font-weight: 700; line-height: 24px; color: var(--text-primary); }
+.role span { font-size: 15px; line-height: 21px; color: var(--text-secondary); }
+.roleIcon { color: var(--accent-text); }
+.role:not(.roleOn) .roleIcon { color: var(--text-tertiary); }
+
+.pair { display: flex; gap: 32px; align-items: center; }
+.qr { width: 238px; height: 238px; flex: none; padding: 0; border-radius: 16px; background: #fff; fill: #0b0f16; }
+.pairText { display: flex; flex-direction: column; gap: 12px; }
+.pairText p { margin: 0; font-size: 17px; line-height: 25px; color: var(--text-secondary); }
+.code { font-size: 24px; font-weight: 700; line-height: 35px; color: var(--text-primary); }
+.wait { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; line-height: 25px; color: var(--accent-text); }
+.spinner { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--accent-track); border-top-color: var(--accent-default); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+
+.sum { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.sum li { display: flex; align-items: center; gap: 14px; min-height: 47px; padding: 12px 0; font-size: 15px; color: var(--text-primary); }
+.sum li svg { flex: none; color: var(--text-secondary); }
+.sum li span { flex: 1; }
+.sum li b { font-weight: 600; }
