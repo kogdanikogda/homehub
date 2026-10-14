@@ -15,6 +15,7 @@ function PrototypePanel() {
   const mode = useHome((s) => s.mode)
   const decline = useHome((s) => s.declinePairing)
   const manual = useHome((s) => s.pairingManual)
+  const freeze = useHome((s) => s.freezeProgress)
   const flow = useHome((s) => s.addFlow)
   const a = useHome.getState()
   const tvFails = failKeys.includes('living.tv')
@@ -45,6 +46,9 @@ function PrototypePanel() {
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.setAddFlow({ connectFails: !flow.connectFails })}>
         Device setup {flow.connectFails ? 'fails' : 'succeeds'}
+      </Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setFreezeProgress(!freeze)}>
+        Progress windows: {freeze ? 'freeze halfway (debug)' : 'run normally'}
       </Button>
       <Button size="sm" variant="secondary" onClick={a.dim}>Dim screen</Button>
       <Button size="sm" variant="secondary" onClick={a.reset}>Reset</Button>

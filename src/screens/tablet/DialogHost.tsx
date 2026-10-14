@@ -4,8 +4,8 @@ import { ListRow } from '../../components/ListRow/ListRow'
 import { PinPad } from '../../components/PinPad/PinPad'
 import { ProgressRow } from '../../components/ProgressRow/ProgressRow'
 import { DEVICE_BY_KEY, PROTOTYPE_PIN, ROOM_NAMES, ROOM_ORDER, SCENES } from '../../store/data'
-import { deviceTitle, formatValue, modifiedChanges } from '../../store/logic'
-import type { Change, DeviceId } from '../../store/types'
+import { deviceTitle, formatValue, modifiedChanges, progressText } from '../../store/logic'
+import type { Change, DeviceId, DeviceKey } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { EnergyDialog } from './EnergyDialog'
 
@@ -56,19 +56,19 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
       )
     }
     case 'progress': {
-      const name = SCENES[dialog.scene].name
       const finished = dialog.items.filter((i) => i.status === 'done' || i.status === 'failed').length
       const failed = dialog.items.filter((i) => i.status === 'failed')
       return (
         <Dialog compact={compact} open onOpenChange={close} dismissible={dialog.phase !== 'running'}
-          title={dialog.phase === 'running' ? `Activating “${name}”` : `${name} scene is on`}
+          title={dialog.phase === 'running' ? dialog.title : dialog.doneTitle}
           counter={`${finished} of ${dialog.items.length}`}
           progress={dialog.items.length ? finished / dialog.items.length : 1}
           note={failed.length
-            ? `Done, but ${failed.length} device${failed.length > 1 ? 's' : ''} did not respond: ${failed.map((f) => deviceTitle(f.key)).join(', ')}. The administrator has been notified.`
+            ? `Done, but ${failed.length} device${failed.length > 1 ? 's' : ''} did not respond: ${failed.map((f) => deviceTitle(f.key as DeviceKey)).join(', ')}. The administrator has been notified.`
             : undefined}
-          secondary={dialog.phase === 'failed' ? { label: 'Close' } : false}>
-          {dialog.items.map((i) => <ProgressRow key={i.key} status={i.status} text={`${deviceTitle(i.key)}: ${arrow(i)}`} />)}
+          primary={dialog.holding ? { label: '▶ Resume (debug)', onClick: () => a.resumeProgress() } : undefined}
+          secondary={dialog.phase === 'failed' || (dialog.phase === 'done' && a.freezeProgress) ? { label: 'Close' } : false}>
+          {dialog.items.map((i) => <ProgressRow key={i.key} status={i.status} text={progressText(i)} />)}
         </Dialog>
       )
     }

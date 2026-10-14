@@ -77,25 +77,25 @@ describe('правка активной сцены', () => {
 })
 
 describe('режимы дома', () => {
-  it('Away: подтверждение, потом тревога включена, сцена закончилась, свет выключен', () => {
+  it('Away: подтверждение, потом тревога включена, сцена закончилась, свет выключен', async () => {
     s().requestAway()
     expect(s().dialogs.tablet?.type).toBe('confirmAway')
-    s().confirmAway()
+    s().confirmAway(); await whenIdle()
     expect(s().mode).toBe('away')
     expect(s().activeScene).toBeNull()
     expect(s().devices['kitchen.light']).toBe(false)
     expect(s().devices['living.climate']).toBe(18)
   })
 
-  it('в Away сцены недоступны', () => {
-    s().requestAway(); s().confirmAway()
+  it('в Away сцены недоступны', async () => {
+    s().requestAway(); s().confirmAway(); await whenIdle()
     s().tapScene('night')
     expect(s().dialogs.tablet).toBeNull()
     expect(s().activeScene).toBeNull()
   })
 
   it('Away → Home только по PIN, включается General', async () => {
-    s().requestAway(); s().confirmAway()
+    s().requestAway(); s().confirmAway(); await whenIdle()
     s().requestHome()
     expect(s().submitPin('0000')).toBe(false)
     expect(s().mode).toBe('away')
@@ -216,45 +216,75 @@ describe('три устройства на одном состоянии', () =>
 describe('сигнализация не зависит от режима', () => {
   it('Away включает сигнализацию, Home по PIN выключает', async () => {
     expect(s().alarm).toBe(false)
-    s().requestAway(); s().confirmAway()
+    s().requestAway(); s().confirmAway(); await whenIdle()
     expect(s().alarm).toBe(true)
     s().requestHome(); s().submitPin('1234'); await whenIdle()
     expect(s().alarm).toBe(false)
   })
 
-  it('на планшете сигнализация выключается по PIN, режим не меняется', () => {
-    s().requestAway(); s().confirmAway()
+  it('на планшете сигнализация выключается по PIN, режим не меняется', async () => {
+    s().requestAway(); s().confirmAway(); await whenIdle()
     s().requestAlarmOff()
     expect(s().dialogs.tablet).toMatchObject({ type: 'pin', purpose: 'alarm' })
     expect(s().submitPin('0000')).toBe(false)
     expect(s().alarm).toBe(true)
     expect(s().submitPin('1234')).toBe(true)
+    await whenIdle()
     expect(s().alarm).toBe(false)
     expect(s().mode).toBe('away')
   })
 
-  it('на телефоне выключение просит подтверждение без PIN', () => {
-    s().requestAway('alexey'); s().confirmAway('alexey')
+  it('на телефоне выключение просит подтверждение без PIN', async () => {
+    s().requestAway('alexey'); s().confirmAway('alexey'); await whenIdle()
     s().requestAlarmOff('alexey')
     expect(s().dialogs.alexey?.type).toBe('alarmOff')
     expect(s().alarm).toBe(true)
-    s().confirmAlarmOff('alexey')
+    s().confirmAlarmOff('alexey'); await whenIdle()
     expect(s().alarm).toBe(false)
     expect(s().mode).toBe('away')
-    expect(s().dialogs.alexey).toBeNull()
   })
 
-  it('сигнализацию можно включить в режиме Home', () => {
-    s().armAlarm()
+  it('сигнализацию можно включить в режиме Home', async () => {
+    s().armAlarm(); await whenIdle()
     expect(s().alarm).toBe(true)
     expect(s().mode).toBe('home')
   })
 
-  it('тревога включает сигнализацию, «Turn off alarm» с телефона снимает тревогу', () => {
+  it('тревога включает сигнализацию; выключение с телефона снимает тревогу и возвращает Home', async () => {
+    s().requestAway(); s().confirmAway(); await whenIdle()
     s().triggerAlert('intrusion')
     expect(s().alarm).toBe(true)
-    s().confirmAlarmOff('marina')
+    s().confirmAlarmOff('marina'); await whenIdle()
     expect(s().alert).toBeNull()
     expect(s().alarm).toBe(false)
+    expect(s().mode).toBe('home')
+  })
+})
+
+describe('окна прогресса видны на всех устройствах', () => {
+  it('сигнализация: окно на планшете и обоих телефонах', async () => {
+    s().armAlarm('alexey')
+    for (const d of ['tablet', 'marina', 'alexey'] as const) {
+      expect(s().dialogs[d]).toMatchObject({ type: 'progress', title: 'Turning on the alarm' })
+    }
+    await whenIdle()
+    expect(s().alarm).toBe(true)
+  })
+
+  it('Away: в окне есть шаги «Alarm» и «Security sensors»', () => {
+    s().requestAway('marina'); s().confirmAway('marina')
+    const d = s().dialogs.tablet
+    expect(d?.type).toBe('progress')
+    if (d?.type === 'progress') expect(d.items.slice(0, 2).map((i) => i.key)).toEqual(['sys.alarm', 'sys.sensors'])
+  })
+
+  it('заморозка: прогресс стоит на половине шагов, пока не нажмут «Продолжить»', async () => {
+    s().setFreezeProgress(true)
+    s().requestAway(); s().confirmAway()
+    await new Promise((r) => setTimeout(r, 20))
+    expect(s().dialogs.marina).toMatchObject({ type: 'progress', holding: true, phase: 'running' })
+    expect(s().mode).toBe('home')
+    s().resumeProgress(); await whenIdle()
+    expect(s().mode).toBe('away')
   })
 })

@@ -2,7 +2,7 @@ import {
   AWAY_CLIMATE, CORRIDOR_TEMP, DEFAULT_SCENES, DEVICES, DEVICE_BY_KEY, INITIAL_PRIVATE, ROOM_NAMES,
   type DeviceValues, type SceneMap,
 } from './data'
-import type { Change, DeviceKey, DeviceValue, ExtraKey, Mode, PrivateRoomId, PrivateRooms, PrivateState, RoomId, SceneId } from './types'
+import type { Change, DeviceKey, ProgressItem, DeviceValue, ExtraKey, Mode, PrivateRoomId, PrivateRooms, PrivateState, RoomId, SceneId } from './types'
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -111,4 +111,24 @@ export function formatPrivate(key: keyof PrivateState, r: PrivateState): string 
   if (key === 'climate') return `${r.climate}°`
   if (key === 'curtains') return r.curtains === 'open' ? 'Open' : 'Closed'
   return r[key] ? 'On' : 'Off'
+}
+
+/** Что изменится, если привести устройства к целевым значениям (для режимов Away/Vacation) */
+export function diffValues(current: DeviceValues, target: DeviceValues): Change[] {
+  return DEVICES.filter((d) => current[d.key] !== target[d.key]).map((d) => ({ key: d.key, from: current[d.key], to: target[d.key] }))
+}
+
+/** Служебные шаги: сигнализация и датчики безопасности */
+export function sysItems(on: boolean): ProgressItem[] {
+  return [
+    { key: 'sys.alarm', from: !on, to: on, status: 'waiting' },
+    { key: 'sys.sensors', from: !on, to: on, status: 'waiting' },
+  ]
+}
+
+/** Строка шага прогресса: «Living Room · Main light: 80% → Off» или «Alarm: Off → On» */
+export function progressText(i: Pick<ProgressItem, 'key' | 'from' | 'to'>): string {
+  if (i.key === 'sys.alarm') return `Alarm: ${i.from ? 'On' : 'Off'} → ${i.to ? 'On' : 'Off'}`
+  if (i.key === 'sys.sensors') return `Security sensors: ${i.from ? 'Active' : 'Inactive'} → ${i.to ? 'Active' : 'Inactive'}`
+  return `${deviceTitle(i.key)}: ${formatValue(i.key, i.from)} → ${formatValue(i.key, i.to)}`
 }

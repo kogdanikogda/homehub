@@ -42,7 +42,12 @@ export interface Change {
 }
 
 export type ItemStatus = 'waiting' | 'running' | 'done' | 'failed'
-export interface ProgressItem extends Change {
+/** Служебные шаги переключения режима и сигнализации */
+export type SysKey = 'sys.alarm' | 'sys.sensors'
+export interface ProgressItem {
+  key: DeviceKey | SysKey
+  from: DeviceValue
+  to: DeviceValue
   status: ItemStatus
 }
 
@@ -52,7 +57,8 @@ export type DialogState =
   | { type: 'override'; key: DeviceKey; from: DeviceValue; to: DeviceValue; scene: SceneId }
   | { type: 'conflict'; target: SceneId; turnOff: Change[] }
   | { type: 'changes'; scene: SceneId }
-  | { type: 'progress'; scene: SceneId; items: ProgressItem[]; phase: 'running' | 'done' | 'failed' }
+  /** Окно прогресса видно на всех трёх устройствах сразу */
+  | { type: 'progress'; title: string; doneTitle: string; items: ProgressItem[]; phase: 'running' | 'done' | 'failed'; holding?: boolean }
   | { type: 'confirmAway'; windows: RoomId[] }
   | { type: 'pin'; purpose: 'home' | 'alarm' }
   /** Подтверждение выключения сигнализации на телефоне */

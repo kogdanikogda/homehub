@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import {
   DEFAULT_SCENES, DEVICE_BY_KEY, INITIAL_EXTRAS, INITIAL_PRIVATE, MODE_NAMES, TEMP_LIMITS, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues, type SceneMap, type SceneValues,
 } from './data'
-import { conflictTurnOff, diffToScene, modifiedChanges } from './logic'
+import { conflictTurnOff, diffToScene, diffValues, modifiedChanges, sysItems } from './logic'
 import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, AddedDevice, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
 
 type Toast = { id: number; text: string } | null
@@ -54,6 +54,8 @@ export interface HomeState {
   failKeys: DeviceKey[]
   /** Пауза между шагами прогресса, мс (в тестах 0) */
   stepDelay: number
+  /** Отладка: остановить прогресс на половине шагов, пока не нажмут «Продолжить» */
+  freezeProgress: boolean
 
   toggleExtra: (key: ExtraKey, on: boolean) => void
   setPairingManual: (v: boolean) => void
@@ -99,6 +101,8 @@ export interface HomeState {
   armAlarm: (by?: DeviceId) => void
   toggleWindow: (room: RoomId) => void
   setFailKeys: (keys: DeviceKey[]) => void
+  setFreezeProgress: (v: boolean) => void
+  resumeProgress: () => void
   reset: () => void
 }
 
@@ -132,12 +136,14 @@ export const initialState = () => ({
   alert: null as HomeState['alert'],
   failKeys: [] as DeviceKey[],
   stepDelay: 450,
+  freezeProgress: false,
 })
 
 let runToken = 0
 let toastId = 0
 let deviceId = 0
 let lastRun: Promise<void> = Promise.resolve()
+let gate: (() => void) | null = null
 /** Для тестов: дождаться окончания прогресса сцены */
 export const whenIdle = () => lastRun
 
@@ -157,43 +163,117 @@ export const useHome = create<HomeState>()((set, get) => {
     if (def.kind === 'toggle') toast(`${def.short} turned ${value ? 'on' : 'off'}`, by)
   }
 
-  const runScene = (id: SceneId, by: DeviceId): Promise<void> => {
+  const ALL: DeviceId[] = ['tablet', 'marina', 'alexey']
+  const applyDone = (current: DeviceValues, target: DeviceValues | Partial<DeviceValues>, work: ProgressItem[]): DeviceValues =>
+    Object.fromEntries(
+      Object.entries(current).map(([k, v]) => [k, work.some((w) => w.key === k && w.status === 'done') ? (target as Record<string, DeviceValue>)[k] : v]),
+    ) as DeviceValues
+
+  type Job = {
+    title: string
+    doneTitle: string
+    items: ProgressItem[]
+    /** Вызывается, когда все шаги закончились; принимает итог по шагам */
+    commit: (work: ProgressItem[]) => void
+    /** Уведомление после успешного завершения */
+    toast: string
+  }
+
+  /** Окно прогресса: одно на все устройства, шаги идут по очереди */
+  const runJob = (by: DeviceId, job: Job): Promise<void> => {
     const token = ++runToken
-    const items: ProgressItem[] = diffToScene(get().devices, id, get().scenes).map((c) => ({ ...c, status: 'waiting' }))
-    setDialog(by, { type: 'progress', scene: id, items, phase: 'running' })
+    const publish = (items: ProgressItem[], phase: 'running' | 'done' | 'failed', holding = false) =>
+      set((st) => ({
+        dialogs: { ...st.dialogs, ...Object.fromEntries(ALL.map((d) => [d, { type: 'progress', title: job.title, doneTitle: job.doneTitle, items, phase, holding }])) },
+      }))
+    const closeAll = () =>
+      set((st) => ({ dialogs: Object.fromEntries(ALL.map((d) => [d, st.dialogs[d]?.type === 'progress' ? null : st.dialogs[d]])) as Record<DeviceId, DialogState | null> }))
+    const work: ProgressItem[] = job.items.map((i) => ({ ...i, status: 'waiting' as const }))
+    publish([...work], 'running')
 
-    const publish = (next: ProgressItem[], phase: 'running' | 'done' | 'failed') =>
-      setDialog(by, { type: 'progress', scene: id, items: next, phase })
-
-    const job = (async () => {
-      const work = [...items]
+    const run = (async () => {
+      const half = Math.ceil(work.length / 2)
       for (let i = 0; i < work.length; i++) {
+        if (get().freezeProgress && i === half && work.length > 1) {
+          publish([...work], 'running', true)
+          await new Promise<void>((r) => { gate = r })
+          gate = null
+          if (token !== runToken) return
+        }
         work[i] = { ...work[i], status: 'running' }
         publish([...work], 'running')
         await sleep(get().stepDelay)
         if (token !== runToken) return
-        work[i] = { ...work[i], status: get().failKeys.includes(work[i].key) ? 'failed' : 'done' }
+        const isDevice = !work[i].key.startsWith('sys.')
+        work[i] = { ...work[i], status: isDevice && get().failKeys.includes(work[i].key as DeviceKey) ? 'failed' : 'done' }
         publish([...work], 'running')
       }
-      const failed = work.filter((w) => w.status === 'failed').map((w) => w.key)
-      const target = get().scenes[id]
-      set((s) => ({
-        devices: Object.fromEntries(
-          Object.entries(s.devices).map(([k, v]) => [k, work.some((w) => w.key === k && w.status === 'done') ? (target[k as DeviceKey] as DeviceValue) : v]),
-        ) as DeviceValues,
-        activeScene: id,
-        overrideAck: false,
-        unresponsive: failed,
-        offlineAt: failed.length ? nowHHMM() : null,
-      }))
-      publish(work, failed.length ? 'failed' : 'done')
-      if (!failed.length) {
-        await sleep(get().stepDelay * 3)
-        if (token === runToken && dialogOf(by)?.type === 'progress') setDialog(by, null)
+      job.commit(work)
+      const failed = work.some((w) => w.status === 'failed')
+      publish(work, failed ? 'failed' : 'done')
+      if (!failed) {
+        toast(job.toast, by)
+        if (!get().freezeProgress) {
+          await sleep(get().stepDelay * 3)
+          if (token === runToken) closeAll()
+        }
       }
     })()
-    lastRun = job
-    return job
+    lastRun = run
+    return run
+  }
+
+  const sceneJob = (id: SceneId, by: DeviceId) => {
+    const target = get().scenes[id]
+    const items = diffToScene(get().devices, id, get().scenes).map((c) => ({ ...c, status: 'waiting' as const }))
+    return runJob(by, {
+      title: `Activating “${SCENES[id].name}”`, doneTitle: `${SCENES[id].name} scene is on`, items, toast: `${SCENES[id].name} scene activated`,
+      commit: (work) => {
+        const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
+        set((s) => ({ devices: applyDone(s.devices, target as DeviceValues, work), activeScene: id, overrideAck: false, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+      },
+    })
+  }
+
+  /** Away и Vacation: сигнализация и датчики включаются, свет и медиа выключаются */
+  const awayJob = (mode: 'away' | 'vacation', by: DeviceId) => {
+    const target = awayValues(get().devices)
+    const items: ProgressItem[] = [...sysItems(true), ...diffValues(get().devices, target).map((c) => ({ ...c, status: 'waiting' as const }))]
+    return runJob(by, {
+      title: `Turning on ${MODE_NAMES[mode]} mode`, doneTitle: `${MODE_NAMES[mode]} mode is on`, items, toast: `${MODE_NAMES[mode]} mode on. Alarm is on.`,
+      commit: (work) => {
+        const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
+        set((s) => ({ mode, alarm: true, devices: applyDone(s.devices, target, work), activeScene: null, overrideAck: false, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+      },
+    })
+  }
+
+  /** Возврат домой: сигнализация выключается, включается сцена General */
+  const homeJob = (by: DeviceId, message: string) => {
+    const target = get().scenes.general
+    const items = [...sysItems(false), ...diffToScene(get().devices, 'general', get().scenes).map((c) => ({ ...c, status: 'waiting' as const }))]
+    return runJob(by, {
+      title: 'Switching to Home mode', doneTitle: 'Home mode is on', items, toast: message,
+      commit: (work) => {
+        const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
+        set((s) => ({ mode: 'home', alarm: false, devices: applyDone(s.devices, target as DeviceValues, work), activeScene: 'general', overrideAck: false, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+      },
+    })
+  }
+
+  const alarmJob = (on: boolean, by: DeviceId) =>
+    runJob(by, {
+      title: on ? 'Turning on the alarm' : 'Turning off the alarm', doneTitle: on ? 'Alarm is on' : 'Alarm is off', items: sysItems(on),
+      toast: `Alarm turned ${on ? 'on' : 'off'}`, commit: () => set({ alarm: on }),
+    })
+
+  /** Выключение сигнализации: после тревоги дом возвращается в режим Home */
+  const alarmOff = (by: DeviceId) => {
+    if (get().alert) {
+      set({ alert: null })
+      return homeJob(by, 'Alarm turned off. Home mode is on.')
+    }
+    return alarmJob(false, by)
   }
 
   return {
@@ -226,12 +306,12 @@ export const useHome = create<HomeState>()((set, get) => {
       }
       const turnOff = conflictTurnOff(s.devices, s.activeScene, id, s.scenes)
       if (turnOff.length) setDialog(by, { type: 'conflict', target: id, turnOff })
-      else void runScene(id, by)
+      else void sceneJob(id, by)
     },
 
     confirmConflict: (by = 'tablet') => {
       const d = dialogOf(by)
-      if (d?.type === 'conflict') void runScene(d.target, by)
+      if (d?.type === 'conflict') void sceneJob(d.target, by)
     },
 
     resetToScene: (by = 'tablet') => {
@@ -248,39 +328,27 @@ export const useHome = create<HomeState>()((set, get) => {
     },
 
     confirmAway: (by = 'tablet') => {
-      set((s) => ({ mode: 'away', alarm: true, devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
       setDialog(by, null)
-      toast(`${MODE_NAMES.away} mode is on`, by)
+      void awayJob('away', by)
     },
 
     enterVacation: (by = 'alexey') => {
-      set((s) => ({ mode: 'vacation', alarm: true, devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
       setDialog(by, null)
-      toast(`${MODE_NAMES.vacation} mode is on`, by)
+      void awayJob('vacation', by)
     },
 
     // На телефоне человек уже вошёл в приложение, поэтому PIN нужен только на общей панели
     requestHome: (by = 'tablet') => {
       if (by === 'tablet') setDialog(by, { type: 'pin', purpose: 'home' })
-      else {
-        set({ mode: 'home', alarm: false })
-        void runScene('general', by)
-      }
+      else void homeJob(by, `Home mode turned on from ${by === 'alexey' ? 'Alexey' : 'Marina'}’s phone`)
     },
 
     submitPin: (pin, by = 'tablet') => {
       const d = dialogOf(by)
       if (d?.type !== 'pin' || pin !== PROTOTYPE_PIN) return false
-      if (d.purpose === 'home') {
-        // Возврат из Away/Vacation всегда включает сцену General
-        set({ mode: 'home', alarm: false })
-        setDialog(by, null)
-        void runScene('general', by)
-      } else {
-        set({ alert: null, alarm: false })
-        setDialog(by, null)
-        toast('Alarm turned off', by)
-      }
+      setDialog(by, null)
+      if (d.purpose === 'home') void homeJob(by, 'Alarm off. Welcome home. General scene is active.')
+      else void alarmOff(by)
       return true
     },
 
@@ -302,14 +370,10 @@ export const useHome = create<HomeState>()((set, get) => {
     // На общей панели нужен PIN, на телефоне хватает подтверждения
     requestAlarmOff: (by = 'tablet') => setDialog(by, by === 'tablet' ? { type: 'pin', purpose: 'alarm' } : { type: 'alarmOff' }),
     confirmAlarmOff: (by = 'tablet') => {
-      set({ alarm: false, alert: null })
       setDialog(by, null)
-      toast('Alarm turned off', by)
+      void alarmOff(by)
     },
-    armAlarm: (by = 'tablet') => {
-      set({ alarm: true })
-      toast('Alarm turned on', by)
-    },
+    armAlarm: (by = 'tablet') => { void alarmJob(true, by) },
 
     setPairingManual: (v) => set({ pairingManual: v }),
     setTempLimit: (which, v) =>
@@ -353,6 +417,11 @@ export const useHome = create<HomeState>()((set, get) => {
     toggleExtra: (key, on) => set((s) => ({ extras: { ...s.extras, [key]: on } })),
     toggleWindow: (room) => set((s) => ({ windowsOpen: { ...s.windowsOpen, [room]: !s.windowsOpen[room] } })),
     setFailKeys: (keys) => set({ failKeys: keys }),
-    reset: () => { runToken++; set({ ...initialState() }) },
+    setFreezeProgress: (v) => set({ freezeProgress: v }),
+    resumeProgress: () => {
+      set((st) => ({ dialogs: Object.fromEntries(ALL.map((d) => [d, st.dialogs[d]?.type === 'progress' ? { ...(st.dialogs[d] as Extract<DialogState, { type: 'progress' }>), holding: false } : st.dialogs[d]])) as Record<DeviceId, DialogState | null> }))
+      gate?.()
+    },
+    reset: () => { runToken++; gate?.(); gate = null; set({ ...initialState() }) },
   }
 })
