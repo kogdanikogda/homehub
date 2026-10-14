@@ -134,13 +134,19 @@ button.hst:hover{background:var(--s2)}
 button.tile{cursor:pointer}
 
 /* Rooms */
-.rooms{flex:1;min-height:0;display:grid;grid-template-columns:1.55fr 1.1fr .85fr;gap:16px}
+.rooms{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .room{display:flex;flex-direction:column;min-height:0;padding:16px 20px 12px}
 .room h3{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--t-lg);font-weight:700;margin-bottom:6px;min-height:32px}
 .dev{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--touch);border-top:1px solid var(--line)}
 .dev .lb{font-size:var(--t-body);display:flex;align-items:center;gap:10px;min-width:0}
 .dev .lb .i{color:var(--ink2)}
 .dev.na .lb,.dev.na .lb .i{color:var(--ink3)}
+.fl{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:auto;border:none;border-radius:14px;background:var(--acc-grad,var(--acc));color:var(--on-acc);font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.fl.on{background:var(--s2);color:var(--acc-ink,var(--acc))}
+.fl:focus-visible{outline:2px solid var(--acc-ink,var(--acc));outline-offset:2px}
+.fl+.more{margin-top:12px}
+.p-btn.fl{margin-top:12px;height:50px;font-size:15px}
+.p-btn.fl.on{background:var(--s1);color:var(--acc-ink,var(--acc))}
 .more{margin-top:auto;border:none;background:none;padding:12px 0 2px;font-size:var(--t-sm);font-weight:600;color:var(--acc-ink);cursor:pointer;display:flex;align-items:center;gap:6px;border-top:1px solid var(--line)}
 
 /* Stepper */
@@ -287,10 +293,13 @@ button.tile{cursor:pointer}
 .rd-h{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .rd-h h2{font-size:28px;font-weight:700;letter-spacing:-.01em}
 .rd-h p{font-size:var(--t-body);color:var(--ink2);margin-top:4px;max-width:72ch}
+.rd-r{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.rd-r .fl{width:auto;margin-top:0;padding:0 24px}
 .rd-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .chip.ok{background:var(--ok-soft);color:var(--ok)}
 .chip.acc{background:var(--acc-soft);color:var(--acc-ink)}
-.rgrid{display:grid;grid-template-columns:1fr;max-width:720px}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px;row-gap:12px}
+.rgrid .dev:only-child{grid-column:1/-1}
 .sdet{display:flex;flex-direction:column}
 .grp{font-size:var(--t-sm);color:var(--ink2);font-weight:700;margin:10px 0 2px}
 .acts.left{justify-content:flex-start;margin-top:auto;padding-top:8px}
@@ -344,7 +353,7 @@ button.tile{cursor:pointer}
 /* ================= v4: scene marker, private rooms, onboarding ================= */
 .dev .lb .lt{min-width:0}
 .smk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:var(--acc-soft);color:var(--acc-ink);flex:none}
-.legend{display:flex;gap:10px;align-items:flex-start;font-size:var(--t-sm);color:var(--ink2);line-height:1.4;background:var(--s2);border-radius:12px;padding:10px 14px;max-width:720px}
+.legend{display:flex;gap:10px;align-items:flex-start;font-size:var(--t-sm);color:var(--ink2);line-height:1.4;background:var(--s2);border-radius:12px;padding:10px 14px}
 .legend .i{color:var(--acc-ink);margin-top:1px}
 .rlist .rn{display:flex;align-items:center;gap:8px}
 .rlist.priv{background:transparent;border-style:dashed}
@@ -354,7 +363,7 @@ button.tile{cursor:pointer}
 .chip.ghost{border:1px dashed var(--ink3);color:var(--ink2)}
 .dev.ro .rov{font-size:var(--t-body);font-weight:600;color:var(--ink3)}
 .dev.ro .rov.on{color:var(--ink)}
-.infobox{display:flex;gap:12px;align-items:flex-start;background:var(--s2);border-radius:14px;padding:14px 16px;font-size:var(--t-sm);color:var(--ink2);max-width:720px}
+.infobox{display:flex;gap:12px;align-items:flex-start;background:var(--s2);border-radius:14px;padding:14px 16px;font-size:var(--t-sm);color:var(--ink2)}
 .ob{position:absolute;inset:0;z-index:45;background:var(--s0);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:48px}
 .ob-steps{display:flex;gap:10px}
 .ob-steps span{font-size:var(--t-sm);font-weight:600;color:var(--ink3);padding:8px 14px;border-radius:999px;background:var(--s1)}
@@ -642,7 +651,7 @@ button.tile{cursor:pointer}
 .rdet{padding:26px 30px;gap:18px}
 .rd-h h2{font-size:24px;font-weight:600}
 .rd-h p{font-size:14.5px}
-.rgrid .dev+.dev{margin-top:12px}
+.rgrid .dev+.dev{margin-top:0}
 .legend,.infobox{font-size:13px;padding:12px 14px}
 .lst .r{font-size:15px;padding:12px 0}
 .grp{font-size:12.5px;margin:14px 0 4px}
@@ -751,7 +760,7 @@ button.tile{cursor:pointer}
 
 
 /* ================= no wrapping in device rows ================= */
-.rooms{grid-template-columns:1.3fr 1.15fr 1fr}
+.rooms{grid-template-columns:repeat(3,minmax(0,1fr))}
 .dev .lb{flex-wrap:nowrap;min-width:0;flex:1;overflow:hidden}
 .dev .lb .lt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .dev .lb .chip,.dev .lb .smk,.dev .lb .i{flex:none}
@@ -871,6 +880,8 @@ button.hst{background:none;border:none;color:inherit;font:inherit;text-align:lef
 #phone .veil,#phone2 .veil{border-radius:38px}
 @keyframes veilp{0%,100%{opacity:.7}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.veil{animation:none}}
+.p-topback{flex:none;padding:6px 18px 0;display:flex}
+.p-title.hasback{padding-top:4px}
 .p-title{font-size:22px;font-weight:600;padding:2px 18px 8px;flex:none}
 .ph-in .p-tabs{padding-bottom:34px}
 .psc{position:absolute;inset:0;background:var(--scrim);z-index:46}
@@ -882,6 +893,7 @@ button.hst{background:none;border:none;color:inherit;font:inherit;text-align:lef
 .psh .pa b{display:block;font-size:16px}
 .psh .pa small{font-size:12.5px;color:var(--ink2)}
 .psh .p-seg{background:var(--s2)}
+.psh .p-list .p-dev{padding-left:0;padding-right:0;background:none}
 #phone .ov,#phone2 .ov{z-index:50}
 #phone .ov.pg,#phone2 .ov.pg{z-index:48}
 #phone .dlg,#phone2 .dlg{width:calc(100% - 28px);padding:20px 18px;max-height:calc(100% - 110px);overflow:auto;border-radius:22px}
@@ -1082,7 +1094,7 @@ var S,P,PA,PM,tab='all',tt=null,RUN=0;
 /* ======================= state helpers ======================= */
 function fresh(){
   RUN++;
-  S={mode:'Home',scene:'Home',alarm:false,
+  S={mode:'Home',scene:'Home',alarm:false,fl:{},
      dev:{lr_light:80,lr_rgb:'Off',lr_climate:22,lr_curtains:'Open',lr_tv:'Off',lr_sound:'Off',k_light:'On',k_climate:22,c_light:100,k_counter:'Off',k_bar:'Off',k_floor:'On',
           kids1_light:'On',kids1_climate:22,kids1_hum:'On',kids2_light:'Off',kids2_climate:21,kids2_hum:'Off',m_light:'Off',m_climate:22,m_hum:'Off',m_curtains:'Closed'},
      room:'lr',sceneSel:null,added:[],limits:{min:18,max:26},vac:{sim:true,freeze:true,cams:true},dimAfter:2,lock:'Locked',onb:null,camOn:false,
@@ -1104,14 +1116,14 @@ function fmt(p,v){
 }
 function diff(sc){
   if(!sc) return [];
-  return Object.keys(PARAMS).filter(function(p){return S.cfg[sc][p]!=null && S.cfg[sc][p]!==S.dev[p] && !S.na[p];});
+  return Object.keys(PARAMS).filter(function(p){return S.cfg[sc][p]!=null && S.cfg[sc][p]!==S.dev[p] && !S.na[p] && !flHeld(p);});
 }
 function applyScene(sc){
   Object.keys(PARAMS).forEach(function(p){var v=S.cfg[sc][p]; if(v!=null) S.dev[p]=v;});
-  S.scene=sc; S.asked=false;
+  S.scene=sc; S.asked=false; S.fl={};
 }
 var AWAY_T={lr_light:0,lr_rgb:'Off',lr_climate:18,lr_curtains:'Closed',lr_tv:'Off',lr_sound:'Off',k_light:'Off',k_climate:18,c_light:0,k_bar:'Off',kids1_light:'Off',kids2_light:'Off',m_light:'Off'};
-function applyAway(){Object.assign(S.dev,AWAY_T); S.scene=null; S.asked=false; S.alarm=true;}
+function applyAway(){Object.assign(S.dev,AWAY_T); S.scene=null; S.asked=false; S.alarm=true; S.fl={};}
 function mediaOff(sc){
   var c=S.cfg[sc],items=[];
   if(c.lr_tv==='Off'&&S.dev.lr_tv==='On') items.push('the TV');
@@ -1129,8 +1141,34 @@ function setParam(p,v){
   if(v===S.dev[p]) return;
   var controlled=S.scene && S.cfg[S.scene][p]!=null;
   if(controlled && !S.asked){S.dialog={type:'override',p:p,v:v}; return;}
-  S.dev[p]=v;
+  S.dev[p]=v; flRelease(p);
   if(S.scene && diff(S.scene).length===0) S.asked=false;
+}
+
+/* ======================= full light ======================= */
+var FL_LIGHTS={lr:['lr_light'],k:['k_light'],c:['c_light'],kids1:['kids1_light'],kids2:['kids2_light'],master:['m_light']};
+function flFull(p){return PARAMS[p].type==='step'?PARAMS[p].max:'On';}
+function flHeld(p){return Object.keys(S.fl).some(function(rk){return S.fl[rk]&&p in S.fl[rk];});}
+function flRelease(p){Object.keys(S.fl).forEach(function(rk){if(S.fl[rk]&&p in S.fl[rk]){delete S.fl[rk][p]; if(!Object.keys(S.fl[rk]).length) delete S.fl[rk];}});}
+function flNeeded(rk){return S.mode==='Home'&&(FL_LIGHTS[rk]||[]).some(function(p){return !S.na[p]&&S.dev[p]!==flFull(p);});}
+/* Кнопка: «Full light», пока свет не на 100%; после нажатия — «Back to previous light» */
+function flBtn(rk,phone){
+  var cls=phone?'p-btn pri fl':'fl';
+  if(S.fl[rk]&&S.mode==='Home') return '<button class="'+(phone?'p-btn fl on':'fl on')+'" data-act="fullLightBack" data-room="'+rk+'">'+I('back',18)+'Back to previous light</button>';
+  if(!flNeeded(rk)) return '';
+  return '<button class="'+cls+'" data-act="fullLight" data-room="'+rk+'">'+I('sun',18)+'Full light</button>';
+}
+function fullLight(rk){
+  var prev={};
+  (FL_LIGHTS[rk]||[]).forEach(function(p){ if(S.dev[p]!==flFull(p)&&!S.na[p]){prev[p]=S.dev[p]; S.dev[p]=flFull(p);} });
+  S.fl[rk]=Object.assign(S.fl[rk]||{},prev);
+  toast('Full light in '+RN(rk));
+}
+function fullLightBack(rk){
+  var prev=S.fl[rk]||{};
+  Object.keys(prev).forEach(function(p){S.dev[p]=prev[p];});
+  delete S.fl[rk];
+  toast('Light in '+RN(rk)+' is back as it was');
 }
 
 /* ======================= progress window ======================= */
@@ -1241,7 +1279,7 @@ function devRow(p){
 }
 function roomHTML(rk,plist){
   var chip=((rk==='lr'&&WIN.lr)||(rk==='k'&&WIN.k))?'<span class="chip warn">'+I('window',14)+'Window open</span>':'';
-  return '<section class="card room"><h3><span>'+ROOMS[rk]+'</span>'+chip+'</h3>'+plist.map(devRow).join('')+
+  return '<section class="card room"><h3><span>'+ROOMS[rk]+'</span>'+chip+'</h3>'+plist.map(devRow).join('')+flBtn(rk)+
     '<button class="more" data-act="nav" data-v="rooms" data-room="'+rk+'">All devices'+I('chev',16)+'</button></section>';
 }
 function dashHTML(){
@@ -1291,7 +1329,7 @@ function baseHTML(){
   return '<div class="tb">'+nav+'<div class="col">'+hdr+'<main class="main">'+main+'</main></div></div>';
 }
 function lstRow(ic,text,val,attn){
-  return '<div class="r">'+I(ic,22)+'<span class="tx">'+text+'</span>'+(val?'<span class="v'+(attn?' attn':'')+'">'+val+'</span>':'')+'</div>';
+  return '<div class="r">'+(ic?I(ic,22):'')+'<span class="tx">'+text+'</span>'+(val?'<span class="v'+(attn?' attn':'')+'">'+val+'</span>':'')+'</div>';
 }
 /* ======================= energy ======================= */
 var EN=(function(){
@@ -1387,7 +1425,7 @@ function dialogHTML(){
       '<p>Only the administrator can save these changes to the scene. Until then they are temporary and end when another scene is activated.</p>'+
       '<div class="acts"><button class="btn" data-act="dlgCancel">Close</button><button class="btn pri" data-act="ok">Reset to scene</button></div>';
   }else if(d.type==='windows'){
-    inner='<h2>Windows</h2><div class="lst">'+Object.keys(WN).map(function(k){return lstRow('window',WN[k],WIN[k]?'Open':'Closed',WIN[k]);}).join('')+'</div>'+
+    inner='<h2>Windows</h2><div class="lst">'+Object.keys(WN).map(function(k){return lstRow('',WN[k],WIN[k]?'Open':'Closed',WIN[k]);}).join('')+'</div>'+
       '<div class="acts"><button class="btn pri" data-act="dlgCancel">Close</button></div>';
   }else if(d.type==='pin'){
     var dots=[0,1,2,3].map(function(i){return '<span class="pdot '+(i<S.pin.length?'f':'')+'"></span>';}).join('');
@@ -1474,7 +1512,7 @@ function roomDevices(rk){
 function isOn(p){var v=S.dev[p];return v==='On'||(typeof v==='number'&&PARAMS[p].unit==='%'&&v>0);}
 function roomSummary(rk){
   var on=roomDevices(rk).filter(isOn).length;
-  var parts=[on?on+' on':'All off'];
+  var tot=roomDevices(rk).length, parts=[on?(tot===1?'1 device on':on===tot?'All '+tot+' devices on':on+' of '+tot+' devices on'):(tot===1?'Device off':'All devices off')];
   if(WIN[rk]) parts.push('Window open');
   return parts.join(' · ');
 }
@@ -1498,11 +1536,11 @@ function roomsHTML(){
     '<h3 class="colh">Private rooms · view only</h3>'+Object.keys(PRIV).map(item).join('');
   var rk=S.room, priv=!ROOMS[rk], n=sceneCount(rk);
   var head='<div class="rd-h"><div><h2>'+RN(rk)+'</h2><p class="num">'+
-    (rk==='c'?'No climate control in this room':'Climate set to '+roomTemp(rk)+'°')+'</p></div><div class="rd-tags">'+
+    (rk==='c'?'No climate control in this room':'Climate set to '+roomTemp(rk)+'°')+'</p></div><div class="rd-r"><div class="rd-tags">'+
     (WIN[rk]?'<span class="chip warn">'+I('window',14)+'Window open</span>':(rk!=='c'?'<span class="chip ok">'+I('window',14)+'Windows closed</span>':''))+
     (n?'<span class="chip acc">'+I(SCENE_IC[S.scene],14)+lbl(S.scene)+' controls '+n+' device'+(n>1?'s':'')+'</span>':'')+
     (priv?'<span class="chip ghost">'+I('lock',14)+'View only</span>':'')+
-    '</div></div>';
+    '</div>'+(priv?'':flBtn(rk))+'</div></div>';
   var rows;
   if(priv){
     rows='<div class="rgrid">'+roomDevices(rk).map(function(p){var par=PARAMS[p];
@@ -1652,14 +1690,14 @@ function pDash(){
   var modes=['Home','Away','Vacation'].map(function(m){var dis=m==='Vacation'&&!isAdmin()&&S.mode!=='Vacation';
     return '<button class="'+(S.mode===m?'on':'')+'" data-act="pMode" data-v="'+m+'" '+(dis?'disabled':'')+'>'+I(MODE_IC[m],18)+m+'</button>';}).join('');
   var scenes=ORDER.map(function(sc){var on=S.scene===sc;
-    return '<button class="p-chip'+(on?' on':'')+'" data-act="pScene" data-v="'+sc+'" '+(armed?'disabled':'')+'>'+I(SCENE_IC[sc],16)+lbl(sc)+'</button>';}).join('');
+    return '<button class="p-chip'+(on?' on':'')+'" data-act="pSceneQuick" data-v="'+sc+'" '+(armed?'disabled':'')+'>'+I(SCENE_IC[sc],16)+lbl(sc)+'</button>';}).join('');
   var rooms=Object.keys(ALLROOMS).map(function(rk){
     var shared=!!ROOMS[rk];
     return '<button class="p-room" data-act="pRoom" data-v="'+rk+'"><span class="tx"><b>'+RN(rk)+'</b><small>'+roomSummary(rk)+'</small></span>'+(shared?'':'<span class="p-tag">Private</span>')+'<span class="num t">'+roomTemp(rk)+'°</span><span class="chev">'+I('chev',16)+'</span></button>';
   }).join('');
-  return pApprove()+'<div class="p-card"><div class="p-ch"><span>Scene</span><span class="p-note">'+(armed?'Unavailable in '+S.mode:(S.scene?lbl(S.scene)+(diff(S.scene).length?' · Modified':''):'None'))+'</span></div><div class="p-chips">'+scenes+'</div></div>'+
+  return pApprove()+'<div class="p-card"><div class="p-ch"><span>Scene</span><span class="p-note">'+(armed?'Unavailable in '+S.mode:(S.scene?(diff(S.scene).length?'Modified':''):'No scene active'))+'</span></div><div class="p-chips">'+scenes+'</div></div>'+
     '<div class="p-stats"><div><span>'+I('temp',18)+'</span><b class="num">'+avg+'°</b><small>Average</small></div>'+
-      '<button class="'+(wn.length?'attn':'')+'" data-act="pTab" data-v="rooms"><span>'+I('window',18)+'</span><b>'+(wn.length?wn.length+' open':'Closed')+'</b><small>Windows</small></button>'+
+      '<button class="'+(wn.length?'attn':'')+'" data-act="pWin"><span>'+I('window',18)+'</span><b>'+(wn.length?wn.length+' open':'Closed')+'</b><small>Windows</small></button>'+
       '<button data-act="pEnergy"><span>'+I('bolt',18)+'</span><b class="num">18.4</b><small>kWh today</small></button></div>'+
     (wn.length?'<div class="p-warn">'+I('warn',18)+'<span>Open: '+wn.map(function(k){return WN[k];}).join(', ')+'</span></div>':'')+
     pAlerts()+
@@ -1683,10 +1721,10 @@ function pRooms(){
   var rows=roomDevices(rk).map(function(p){var par=PARAMS[p], inS=S.scene&&S.cfg[S.scene][p]!=null, ch=S.scene&&diff(S.scene).indexOf(p)>-1;
     return '<div class="p-devc"><span class="lb">'+I(par.ic,18)+'<span>'+par.label+(inS&&!ch?'<span class="smk">'+I(SCENE_IC[S.scene],12)+'</span>':'')+(ch?'<span class="p-tag warn">Changed</span>':'')+'</span></span>'+pCtl(p)+'</div>';}).join('');
   return '<button class="p-back" data-act="pRoomBack">'+I('back',18)+'All rooms</button>'+
-    '<div class="p-rh"><div><div class="p-h">'+RN(rk)+'</div><small class="num">'+roomTemp(rk)+'° · '+roomSummary(rk)+'</small></div>'+(ROOMS[rk]?'':'<span class="p-tag">Private</span>')+'</div>'+
+    '<div class="p-rh"><div><small class="num">'+roomTemp(rk)+'° · '+roomSummary(rk)+'</small></div>'+(ROOMS[rk]?'':'<span class="p-tag">Private</span>')+'</div>'+
     (WIN[rk]?'<div class="p-warn">'+I('window',18)+'<span>The window is open.</span></div>':'')+
     (n?'<p class="p-note">'+I(SCENE_IC[S.scene],14)+' Part of the active “'+lbl(S.scene)+'” scene. Changes here mark the scene as modified.</p>':'')+
-    '<div class="p-list">'+rows+'</div>';
+    '<div class="p-list">'+rows+'</div>'+flBtn(rk,true);
 }
 function pDevices(){
   if(P.add) return pAdd();
@@ -1703,7 +1741,7 @@ function pAdd(){
   var A=P.add, h='';
   var top='<div class="p-steps">'+['Find','Room','Name','Connect'].map(function(s,i){return '<span class="'+(i<=A.idx?'on':'')+'">'+s+'</span>';}).join('')+'</div>';
   if(A.step==='prep'){
-    h='<div class="p-h">Add a device</div><p class="p-note">Put the new device in pairing mode. On most devices: hold the button for 5 seconds until the light blinks.</p>'+
+    h='<p class="p-note">Put the new device in pairing mode. On most devices: hold the button for 5 seconds until the light blinks.</p>'+
       '<div class="p-illu">'+I('bolt',40)+'</div>'+
       '<button class="p-btn pri" data-act="addSearch">Search nearby</button><button class="p-btn" data-act="addSearch" data-v="qr">Scan QR code on the device</button>';
   }else if(A.step==='search'){
@@ -1756,7 +1794,7 @@ function pScenes(){
     if(d.length){
       if(isAdmin()){
         var sel=d.filter(function(p){return P.checks[p]!==false;}).length;
-        body='<button class="p-back" data-act="pBack">'+I('back',18)+'Scenes</button><div class="p-h">'+lbl(sc)+' is modified</div>'+
+        body='<button class="p-back" data-act="pBack">'+I('back',18)+'Scenes</button>'+
           '<p class="p-note">The scene is active and differs from its saved settings. Choose what to save to the scene.</p>'+
           '<div class="p-diff">'+d.map(function(p){
             var c=P.checks[p]!==false;
@@ -1766,13 +1804,13 @@ function pScenes(){
           '<button class="p-btn" data-act="pKeep">Keep as temporary</button>'+
           '<p class="p-note">Unsaved changes end when another scene is activated.</p>';
       }else{
-        body='<button class="p-back" data-act="pBack">'+I('back',18)+'Scenes</button><div class="p-h">'+lbl(sc)+' is modified</div>'+
+        body='<button class="p-back" data-act="pBack">'+I('back',18)+'Scenes</button>'+
           '<div class="p-diff">'+d.map(function(p){return '<div class="r"><span class="tx">'+RN(PARAMS[p].room)+' · '+PARAMS[p].label+'<small>Saved '+fmt(p,S.cfg[sc][p])+' → Now '+fmt(p,S.dev[p])+'</small></span></div>';}).join('')+'</div>'+
           '<button class="p-btn pri" data-act="pReset">Reset to scene</button><p class="p-note">Only Alexey can save changes to a scene. Until then they are temporary.</p>';
       }
     }else{
       var on=S.scene===sc, mo=(!on&&S.mode==='Home')?mediaOff(sc):[];
-      body='<button class="p-back" data-act="pBack">'+I('back',18)+'Scenes</button><div class="p-h">'+lbl(sc)+'</div><p class="p-note">'+(on?'Active. Current state matches the saved scene.':SCENE_DESC[sc])+'</p>'+
+      body='<button class="p-back" data-act="pBack">'+I('back',18)+'Scenes</button><p class="p-note">'+(on?'Active. Current state matches the saved scene.':SCENE_DESC[sc])+'</p>'+
         '<div class="p-diff">'+Object.keys(PARAMS).filter(function(p){return S.cfg[sc][p]!=null;}).map(function(p){
           return '<div class="r"><span class="tx">'+RN(PARAMS[p].room)+' · '+PARAMS[p].label+'</span><b>'+fmt(p,S.cfg[sc][p])+'</b></div>';
         }).join('')+'</div>'+
@@ -1791,7 +1829,7 @@ function pEdit(){
     else ctl=skip?'':'<div class="p-segs">'+par.opts.map(function(o){return '<button class="'+(v===o?'on':'')+'" data-act="eSet" data-p="'+p+'" data-v="'+o+'">'+o+'</button>';}).join('')+'</div>';
     return '<div class="p-erow'+(skip?' skip':'')+'"><div class="hd"><span>'+I(par.ic,16)+RN(par.room)+' · '+par.label+'</span><button class="p-link" data-act="eSkip" data-p="'+p+'">'+(skip?'Include':'Not in scene')+'</button></div>'+ctl+'</div>';
   }).join('');
-  return '<button class="p-back" data-act="eCancel">'+I('back',18)+'Cancel</button><div class="p-h">Edit '+lbl(E.sc)+'</div>'+
+  return '<button class="p-back" data-act="eCancel">'+I('back',18)+'Cancel</button>'+
     '<p class="p-note">Set what this scene does in the shared rooms. Devices marked “Not in scene” stay as they are when the scene starts.</p>'+
     '<div class="p-list">'+rows+'</div><button class="p-btn pri" data-act="eSave">Save scene</button>';
 }
@@ -1826,7 +1864,7 @@ function phoneHTML(role){
   if(t==='devices'&&P.add) title='Add device';
   if(t==='rooms'&&P.room) title=RN(P.room);
   if(t==='scenes'&&P.view!=='list') title=lbl(P.scene);
-  if(t==='scenes'&&P.edit) title='Edit scene';
+  if(t==='scenes'&&P.edit) title='Edit '+lbl(P.edit.sc);
   if(t==='security'&&P.cam) title=camById(P.cam).name;
   if(t==='dash'&&P.energy) title='Energy';
   var all=[['dash','Dashboard','dash'],['rooms','Rooms','rooms'],['scenes','Scenes','scenes'],['security','Security','shield'],['devices','Devices','grid'],['settings','Settings','gear']];
@@ -1834,9 +1872,12 @@ function phoneHTML(role){
     return '<button class="'+(t===x[0]?'on':'')+'" data-act="pTab" data-v="'+x[0]+'">'+I(x[2],20)+x[1]+'</button>';
   }).join('');
   var showTitle=!(t==='dash'&&!P.energy);
+  var mb=body.match(/^<button class="p-back"[^>]*>.*?<\/button>/);
+  var topBack='';
+  if(mb){topBack='<div class="p-topback">'+mb[0]+'</div>'; body=body.slice(mb[0].length);}
   var tt=S.toast?'<div class="toast" role="status">'+I('check',22)+S.toast+'</div>':'';
-  return '<div class="ph-in">'+sbar('phone')+phoneHead()+(showTitle?'<h1 class="p-title">'+title+'</h1>':'')+'<div class="p-body">'+body+'</div><nav class="p-tabs '+(isAdmin()?'six':'three')+'">'+tabs+'</nav></div>'+
-    (S.alarm&&!S.alert?'<div class="veil" aria-hidden="true"></div>':'')+(P.sheet?phoneSheet():'')+(P.dlg?phoneDlg():'')+(S.prog?progHTML():'')+(S.alert?alertHTML(true):'')+tt+'<div class="homebar"></div>';
+  return '<div class="ph-in">'+sbar('phone')+phoneHead()+topBack+(showTitle?'<h1 class="p-title'+(topBack?' hasback':'')+'">'+title+'</h1>':'')+'<div class="p-body">'+body+'</div><nav class="p-tabs '+(isAdmin()?'six':'three')+'">'+tabs+'</nav></div>'+
+    (S.alarm&&!S.alert?'<div class="veil" aria-hidden="true"></div>':'')+(P.sheet?phoneSheet():'')+(P.win?winSheet():'')+(P.dlg?phoneDlg():'')+(S.prog?progHTML():'')+(S.alert?alertHTML(true):'')+tt+'<div class="homebar"></div>';
 }
 function phoneHead(){
   var on=S.alarm;
@@ -1855,6 +1896,13 @@ function phoneSheet(){
   return '<div class="psc" data-act="pSheetClose"></div><div class="psh" role="dialog" aria-label="House mode"><div class="grab"></div><h2>House mode</h2>'+
     '<div class="lab">House mode</div><div class="p-seg">'+btns+'</div><p class="p-note">'+note+'</p>'+
     '</div>';
+}
+function winSheet(){
+  var ks=Object.keys(WN), n=ks.filter(function(k){return WIN[k];}).length;
+  return '<div class="psc" data-act="pWinClose"></div><div class="psh" role="dialog" aria-label="Windows"><div class="grab"></div><h2>Windows</h2>'+
+    '<p class="p-note">'+(n?n+' of '+ks.length+' windows are open.':'All '+ks.length+' windows are closed.')+'</p>'+
+    '<div class="p-list">'+ks.map(function(k){var o=WIN[k];return '<div class="p-dev"><span class="tx">'+WN[k]+'</span><span class="st '+(o?'off':'')+'">'+(o?'Open':'Closed')+'</span></div>';}).join('')+'</div>'+
+    '<button class="p-btn" data-act="pWinClose">Close</button></div>';
 }
 function phoneDlg(){
   return '<div class="ov"><div class="dlg"><h2>Turn off the alarm?</h2><p>Sensors stop watching the house on every device. House mode stays '+S.mode+'.</p><div class="acts"><button class="btn" data-act="pAlarmNo">Cancel</button><button class="btn pri" data-act="pAlarmOk">Turn off</button></div></div></div>';
@@ -1968,6 +2016,8 @@ function act(a,d){
     case 'pTalk': P.talk=!P.talk; if(P.talk) logEv('Two-way talk at the entrance'); break;
     case 'pRoom': P.tab='rooms'; P.room=d.v; break;
     case 'pRoomBack': P.room=null; break;
+    case 'fullLight': fullLight(d.room); break;
+    case 'fullLightBack': fullLightBack(d.room); break;
     case 'pSet': case 'pStep': (function(){var p=d.p,par=PARAMS[p],v=d.v;
         if(a==='pStep'){var L=lim(p); v=Math.max(L[0],Math.min(L[1],S.dev[p]+(+d.d)*par.step));}
         if(v===S.dev[p]) return; S.dev[p]=v; if(S.scene&&diff(S.scene).length) S.asked=true; else S.asked=false;})(); break;
@@ -2000,6 +2050,8 @@ function act(a,d){
     case 'pActivate': (function(){var sc=d.v; if(S.prog) return; P.view='list'; P.msg=lbl(sc)+' activated from this phone.'; startScene(sc);})(); break;
     case 'pSheet': if(S.prog) break; P.sheet=!P.sheet; break;
     case 'pSheetClose': P.sheet=false; break;
+    case 'pWin': P.win=true; break;
+    case 'pWinClose': P.win=false; break;
     case 'pAlarm': P.sheet=false; if(S.prog) break; if(S.alarm) P.dlg='alarmoff'; else startAlarm(true); break;
     case 'pAlarmNo': P.dlg=null; break;
     case 'pAlarmOk': P.dlg=null; startAlarm(false); break;
@@ -2061,6 +2113,7 @@ function act(a,d){
     case 'menuClose': S.menu=false; break;
     case 'progResume': if(S.prog&&S.prog.resume) S.prog.resume(); break;
     case 'progClose': var pm=S.prog&&S.prog.msg; S.prog=null; if(pm) toast(pm); break;
+    case 'pSceneQuick': if(S.prog||S.scene===d.v) break; startScene(d.v); break;
     case 'pScene': P.tab='scenes';P.view='detail';P.scene=d.v;P.checks={};P.msg=''; break;
     case 'pBack': P.view='list'; P.msg=''; break;
     case 'pChk': P.checks[d.p]=(P.checks[d.p]===false); break;
