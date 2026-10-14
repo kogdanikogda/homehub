@@ -68,7 +68,7 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
             : undefined}
           primary={dialog.holding ? { label: '▶ Resume (debug)', onClick: () => a.resumeProgress() } : undefined}
           secondary={dialog.phase === 'failed' || (dialog.phase === 'done' && a.freezeProgress) ? { label: 'Close' } : false}>
-          {dialog.items.map((i) => <ProgressRow key={i.key} status={i.status} text={progressText(i)} />)}
+          {dialog.items.map((i) => <ProgressRow key={i.key} compact={compact} status={i.status} text={progressText(i)} />)}
         </Dialog>
       )
     }

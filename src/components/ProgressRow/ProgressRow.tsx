@@ -1,13 +1,13 @@
 import { Icon } from '../Icon/Icon'
 import styles from './ProgressRow.module.css'
 
-type Props = { text: string; status: 'waiting' | 'running' | 'done' | 'failed'; failedLabel?: string }
+type Props = { text: string; status: 'waiting' | 'running' | 'done' | 'failed'; failedLabel?: string; /** Телефон: мельче шрифт, подпись состояния только при сбое, текст в одну строку */ compact?: boolean }
 
 const LABEL = { waiting: 'Waiting', running: 'In progress', done: 'Done', failed: 'No response' } as const
 
-export function ProgressRow({ text, status, failedLabel }: Props) {
+export function ProgressRow({ text, status, failedLabel, compact }: Props) {
   return (
-    <div className={`${styles.row} ${styles[status]}`}>
+    <div className={`${styles.row} ${styles[status]} ${compact ? styles.compact : ''}`}>
       <span className={styles.badge}>
         {status === 'done' && <Icon name="check" size={18} />}
         {status === 'failed' && <Icon name="x" size={20} />}

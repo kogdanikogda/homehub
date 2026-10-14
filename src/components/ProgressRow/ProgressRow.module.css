@@ -16,3 +16,8 @@
 .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent-track); border-top-color: var(--accent-default); animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+
+.compact { gap: 10px; padding: 6px; font-size: 13px; }
+.compact .text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.compact:not(.failed) .state { display: none; }
+.compact .state { font-size: 12px; }
