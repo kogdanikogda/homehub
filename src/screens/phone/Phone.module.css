@@ -52,7 +52,7 @@
 .viewImg { position: absolute; inset: 0; }
 .viewImg[data-off='true'] { filter: blur(10px); transform: scale(1.1); }
 .viewTop { position: absolute; top: 9px; left: 9px; right: 9px; display: flex; justify-content: space-between; align-items: center; }
-.viewLive { padding: 3px 7px; border-radius: 10px; background: rgb(5 8 14 / .55); font-size: 10.5px; font-weight: 700; color: #ff8a80; }
+.viewLive { padding: 3px 7px; border-radius: 10px; background: rgb(5 8 14 / .55); font-size: 11px; font-weight: 700; color: #ff8a80; }
 .viewTime { font-size: 11px; opacity: .85; font-variant-numeric: tabular-nums; }
 .viewName { position: absolute; left: 9px; bottom: 9px; font-size: 14px; font-weight: 700; }
 .viewBox { position: absolute; left: 90px; top: 60px; width: 54px; height: 99px; border: 2px solid var(--status-crit); border-radius: 4px; font-size: 11px; font-weight: 700; padding: 1px 3px; color: #fff; background: rgb(188 111 123 / .12); }

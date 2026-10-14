@@ -27,16 +27,16 @@ export function SecurityScreen({ onCamera }: { onCamera: (id: CamId) => void }) 
   const peek = useHome((s) => s.camPeek)
   const locked = useHome((s) => s.doorLocked)
   const a = useHome.getState()
-  const armed = mode !== 'home'
+  const armed = useHome((st) => st.alarm)
 
   return (
     <>
       <PhoneCard title="Alarm" aside={<AlarmPill on={armed} label={armed ? 'Armed' : 'Disarmed'} />}>
         <p className={styles.noteText}>
-          {mode === 'home' ? 'Home mode. Sensors are off.' : mode === 'away' ? 'Away mode. Sensors are on.' : 'Vacation mode. Sensors are on.'}
+          {armed ? 'Sensors are on.' : 'Sensors are off.'} The alarm does not depend on the house mode.
         </p>
-        <Button variant="secondary" size="md" className={styles.btn} onClick={() => (armed ? a.requestHome('alexey') : a.requestAway('alexey'))}>
-          {armed ? (mode === 'vacation' ? 'End Vacation · switch to Home' : 'Disarm · switch to Home') : 'Arm · switch to Away'}
+        <Button variant="secondary" size="md" className={styles.btn} onClick={() => (armed ? a.requestAlarmOff('alexey') : a.armAlarm('alexey'))}>
+          {armed ? 'Turn off alarm' : 'Turn on alarm'}
         </Button>
       </PhoneCard>
 

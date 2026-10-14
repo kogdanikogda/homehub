@@ -1,1 +1,1 @@
-.host { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 60; }
+.host { position: absolute; width: max-content; max-width: calc(100% - 32px); left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 60; }

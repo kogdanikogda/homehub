@@ -3,12 +3,12 @@
 .phone { padding: 2px; border-radius: 10px; }
 
 .item { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-weight: 600; }
-.tablet .item { height: 28px; padding: 0 11px; border-radius: 8px; font-size: 12.5px; }
-.phone .item { height: 28px; padding: 0 9px; border-radius: 8px; font-size: 12px; }
+.tablet .item { height: 44px; padding: 0 11px; border-radius: 8px; font-size: 12.5px; }
+.phone .item { height: 44px; padding: 0 9px; border-radius: 8px; font-size: 12px; }
 .item[data-state='on'] { background: var(--surface-3); color: var(--accent-text); }
 .item:disabled { color: var(--text-disabled); cursor: not-allowed; }
 .item:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
 
 /* Телефон, во всю ширину: три равные части (дом, энергия) */
 .phoneWide { display: flex; width: 100%; gap: 3px; padding: 3px; border-radius: 12px; }
-.phoneWide .item { flex: 1; height: 38px; padding: 0 8px; gap: 6px; border-radius: 9px; font-size: 13.5px; }
+.phoneWide .item { flex: 1; height: 44px; padding: 0 8px; gap: 6px; border-radius: 9px; font-size: 13.5px; }

@@ -1,8 +1,7 @@
-import { AlarmPill, PhoneCard, RoomRow, SceneChip, SectionLabel, StatTile, TechAlert, WarningRow } from '../../components/Phone/Phone'
-import { Segmented } from '../../components/Segmented/Segmented'
-import { MODE_NAMES, ROOM_NAMES, ROOM_ORDER, SCENES, SCENE_ORDER, TODAY_ENERGY_KWH } from '../../store/data'
+import { PhoneCard, RoomRow, SceneChip, SectionLabel, StatTile, TechAlert, WarningRow } from '../../components/Phone/Phone'
+import { ROOM_NAMES, ROOM_ORDER, SCENES, SCENE_ORDER, TODAY_ENERGY_KWH } from '../../store/data'
 import { averageTemperature, onCount, privateOnCount, roomTemperature } from '../../store/logic'
-import type { Mode, RoomId } from '../../store/types'
+import type { RoomId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { PRIVATE_ROOM_IDS } from '../../store/data'
 import type { PhoneUser } from './PhoneApp'
@@ -27,12 +26,6 @@ export function useRoomSub() {
   }
 }
 
-const MODE_NOTE: Record<Mode, string> = {
-  home: 'Alarm off. Normal household operation. Vacation is set by Alexey.',
-  away: 'Alarm on. Lights and media are off. Return with Home when you are back.',
-  vacation: 'Alarm on. Long absence. Only Alexey can end Vacation.',
-}
-
 export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom: (r: RoomId) => void; onEnergy: () => void }) {
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
@@ -47,28 +40,12 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
   const open = ROOM_ORDER.filter((r) => windowsOpen[r])
   const admin = user === 'alexey'
 
-  const pickMode = (m: string) => {
-    if (m === 'away' && mode === 'home') a.requestAway(user)
-    if (m === 'home' && mode !== 'home') a.requestHome(user)
-    if (m === 'vacation' && admin && mode !== 'vacation') a.enterVacation(user)
-  }
-
   const tech = admin ? offlineText(unresponsive, offlineAt) : null
 
   return (
     <>
       {admin && pairing && <PairingRequest />}
       <div className={styles.group}>
-        <PhoneCard title="House mode" aside={<AlarmPill on={mode !== 'home'} />}>
-          <Segmented platform="phoneWide" label="House mode" value={mode} onChange={pickMode}
-            items={[
-              { value: 'home', label: MODE_NAMES.home, icon: 'home' },
-              { value: 'away', label: MODE_NAMES.away, icon: 'lock', disabled: mode === 'vacation' },
-              { value: 'vacation', label: MODE_NAMES.vacation, icon: 'case', disabled: !admin },
-            ]} />
-          <p style={{ margin: 0, fontSize: 12.5, lineHeight: '17.5px', color: 'var(--text-secondary)' }}>{admin && mode === 'home' ? 'Alarm off. Normal household operation.' : MODE_NOTE[mode]}</p>
-        </PhoneCard>
-
         <PhoneCard title="Scene" aside={<b style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{activeScene ? SCENES[activeScene].name : '—'}</b>}>
           <div className={styles.two}>
             {SCENE_ORDER.map((id) => (

@@ -212,3 +212,49 @@ describe('три устройства на одном состоянии', () =>
     expect(s().doorLocked).toBe(true)
   })
 })
+
+describe('сигнализация не зависит от режима', () => {
+  it('Away включает сигнализацию, Home по PIN выключает', async () => {
+    expect(s().alarm).toBe(false)
+    s().requestAway(); s().confirmAway()
+    expect(s().alarm).toBe(true)
+    s().requestHome(); s().submitPin('1234'); await whenIdle()
+    expect(s().alarm).toBe(false)
+  })
+
+  it('на планшете сигнализация выключается по PIN, режим не меняется', () => {
+    s().requestAway(); s().confirmAway()
+    s().requestAlarmOff()
+    expect(s().dialogs.tablet).toMatchObject({ type: 'pin', purpose: 'alarm' })
+    expect(s().submitPin('0000')).toBe(false)
+    expect(s().alarm).toBe(true)
+    expect(s().submitPin('1234')).toBe(true)
+    expect(s().alarm).toBe(false)
+    expect(s().mode).toBe('away')
+  })
+
+  it('на телефоне выключение просит подтверждение без PIN', () => {
+    s().requestAway('alexey'); s().confirmAway('alexey')
+    s().requestAlarmOff('alexey')
+    expect(s().dialogs.alexey?.type).toBe('alarmOff')
+    expect(s().alarm).toBe(true)
+    s().confirmAlarmOff('alexey')
+    expect(s().alarm).toBe(false)
+    expect(s().mode).toBe('away')
+    expect(s().dialogs.alexey).toBeNull()
+  })
+
+  it('сигнализацию можно включить в режиме Home', () => {
+    s().armAlarm()
+    expect(s().alarm).toBe(true)
+    expect(s().mode).toBe('home')
+  })
+
+  it('тревога включает сигнализацию, «Turn off alarm» с телефона снимает тревогу', () => {
+    s().triggerAlert('intrusion')
+    expect(s().alarm).toBe(true)
+    s().confirmAlarmOff('marina')
+    expect(s().alert).toBeNull()
+    expect(s().alarm).toBe(false)
+  })
+})

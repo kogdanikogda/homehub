@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AlarmVeil } from '../../components/AlarmVeil/AlarmVeil'
 import { CriticalAlert } from '../../components/CriticalAlert/CriticalAlert'
 import { DimScreen } from '../../components/DimScreen/DimScreen'
 import { Header } from '../../components/Header/Header'
@@ -29,6 +30,7 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
   const clock = useClock()
 
   const mode = useHome((s) => s.mode)
+  const alarm = useHome((s) => s.alarm)
   const devices = useHome((s) => s.devices)
   const privateRooms = useHome((s) => s.privateRooms)
   const activeScene = useHome((s) => s.activeScene)
@@ -56,13 +58,19 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
     if (m === 'away' && mode === 'home') act.requestAway()
     if (m === 'home' && mode !== 'home') act.requestHome()
   }
+  // Сигнализация не зависит от режима: выключается по PIN, включается без него
+  const toggleAlarm = () => {
+    setMenuOpen(false)
+    if (alarm) act.requestAlarmOff()
+    else act.armAlarm()
+  }
   const rows: ModeRowProps[] = [
     { icon: 'home', name: 'Home', description: 'Alarm off. Everyday life at home.', current: mode === 'home', badge: mode === 'home' ? undefined : 'PIN', onClick: () => pick('home') },
     { icon: 'lock', name: 'Away', description: 'Alarm on. Lights and media off. For when everyone leaves.', current: mode === 'away', locked: mode === 'vacation', onClick: () => pick('away') },
     { icon: 'case', name: 'Vacation', description: 'Long absence. Turned on by Alexey.', current: mode === 'vacation', locked: mode !== 'vacation', badge: 'Admin only', onClick: () => setMenuOpen(false) },
   ]
 
-  const status = `${MODE_NAMES[mode]} mode · Alarm ${mode === 'home' ? 'off' : 'on'}${activeScene ? ` · Scene: ${activeScene[0].toUpperCase()}${activeScene.slice(1)}` : ''}`
+  const status = `${MODE_NAMES[mode]} mode · Alarm ${alarm ? 'on' : 'off'}${activeScene ? ` · Scene: ${activeScene[0].toUpperCase()}${activeScene.slice(1)}` : ''}`
 
   return (
     <div className={styles.root} onPointerDownCapture={() => setTouch((n) => n + 1)}>
@@ -76,15 +84,16 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
             { icon: 'window', label: 'Windows', value: windowsText(openRooms), attention: openRooms.length > 0 },
             { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh`, onClick: () => act.openEnergy() },
           ]}
-          mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: mode !== 'home', alarmOn: mode !== 'home' }}
+          mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: alarm, alarmOn: alarm }}
           menuOpen={menuOpen}
           onMenuOpenChange={setMenuOpen}
-          menu={<ModeMenu rows={rows} />}
+          menu={<ModeMenu rows={rows} alarm={{ on: alarm, badge: alarm ? 'PIN' : undefined, onClick: toggleAlarm }} />}
         />
         {page === 'dashboard' && <Dashboard onAllDevices={(r) => { setRoom(r); setPage('rooms') }} />}
         {page === 'rooms' && <RoomsPage room={room} onRoom={setRoom} />}
         {page === 'scenes' && <ScenesPage scene={sceneSel} onScene={setSceneSel} />}
       </div>
+      {alarm && !alert && <AlarmVeil radius={24} />}
       {onboarding && <Onboarding step={onboarding} />}
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />

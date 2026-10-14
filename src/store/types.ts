@@ -55,6 +55,8 @@ export type DialogState =
   | { type: 'progress'; scene: SceneId; items: ProgressItem[]; phase: 'running' | 'done' | 'failed' }
   | { type: 'confirmAway'; windows: RoomId[] }
   | { type: 'pin'; purpose: 'home' | 'alarm' }
+  /** Подтверждение выключения сигнализации на телефоне */
+  | { type: 'alarmOff' }
   | { type: 'windows' }
   | { type: 'energy' }
 

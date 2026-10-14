@@ -102,6 +102,12 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
           <PinPad onSubmit={(p) => a.submitPin(p, by)} hint={`Prototype PIN: ${PROTOTYPE_PIN}`} />
         </Dialog>
       )
+    case 'alarmOff':
+      return (
+        <Dialog compact={compact} open onOpenChange={close} title="Turn off the alarm?"
+          lead="Sensors will stop watching the house. The house mode does not change. You can turn the alarm on again at any time."
+          primary={{ label: 'Turn off alarm', onClick: () => a.confirmAlarmOff(by) }} />
+      )
     case 'energy':
       return <EnergyDialog onClose={close} />
     case 'windows':

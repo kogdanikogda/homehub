@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { PortalContainer } from '../portal'
 import styles from './TabletFrame.module.css'
 
-export const TABLET = { w: 1366, h: 1024 }
+/** Экран 1366×1024, рамка снаружи: 1386×1044 */
+export const TABLET = { w: 1386, h: 1044 }
 
 /** Планшет 1366×1024 с рамкой. Масштабируется под окно; окна и меню выводятся внутрь рамки. */
 export function TabletFrame({ children, fit = true }: { children: ReactNode; fit?: boolean }) {

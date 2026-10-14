@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { PortalContainer } from '../portal'
 import styles from './PhoneFrame.module.css'
 
-export const PHONE = { w: 390, h: 844 }
+/** Экран 390×844, рамка снаружи: 410×864 */
+export const PHONE = { w: 410, h: 864 }
 
 /** Телефон 390×844 с рамкой. Окна выводятся внутрь экрана, масштаб подгоняется под доступное место. */
 export function PhoneFrame({ children, label, fit = true }: { children: ReactNode; label?: string; fit?: boolean }) {

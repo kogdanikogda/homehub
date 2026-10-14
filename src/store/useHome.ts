@@ -11,6 +11,8 @@ type Windows = Record<RoomId, boolean>
 
 export interface HomeState {
   mode: Mode
+  /** Сигнализация не зависит от режима: её можно выключить с любого устройства */
+  alarm: boolean
   devices: DeviceValues
   activeScene: SceneId | null
   /** Предупреждение о правке сцены показывается один раз за активацию */
@@ -92,6 +94,9 @@ export interface HomeState {
   triggerAlert: (kind: AlertKind) => void
   acknowledgeSmoke: () => void
   requestAlarmOff: (by?: DeviceId) => void
+  /** Телефон: подтверждение выключения; планшет выключает по PIN */
+  confirmAlarmOff: (by?: DeviceId) => void
+  armAlarm: (by?: DeviceId) => void
   toggleWindow: (room: RoomId) => void
   setFailKeys: (keys: DeviceKey[]) => void
   reset: () => void
@@ -101,6 +106,7 @@ const closedWindows = (): Windows => Object.fromEntries(ROOM_ORDER.map((r) => [r
 
 export const initialState = () => ({
   mode: 'home' as Mode,
+  alarm: false,
   devices: { ...SCENES.general.values } as DeviceValues,
   activeScene: 'general' as SceneId | null,
   overrideAck: false,
@@ -242,13 +248,13 @@ export const useHome = create<HomeState>()((set, get) => {
     },
 
     confirmAway: (by = 'tablet') => {
-      set((s) => ({ mode: 'away', devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
+      set((s) => ({ mode: 'away', alarm: true, devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
       setDialog(by, null)
       toast(`${MODE_NAMES.away} mode is on`, by)
     },
 
     enterVacation: (by = 'alexey') => {
-      set((s) => ({ mode: 'vacation', devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
+      set((s) => ({ mode: 'vacation', alarm: true, devices: awayValues(s.devices), activeScene: null, overrideAck: false, unresponsive: [] }))
       setDialog(by, null)
       toast(`${MODE_NAMES.vacation} mode is on`, by)
     },
@@ -257,7 +263,7 @@ export const useHome = create<HomeState>()((set, get) => {
     requestHome: (by = 'tablet') => {
       if (by === 'tablet') setDialog(by, { type: 'pin', purpose: 'home' })
       else {
-        set({ mode: 'home' })
+        set({ mode: 'home', alarm: false })
         void runScene('general', by)
       }
     },
@@ -267,11 +273,11 @@ export const useHome = create<HomeState>()((set, get) => {
       if (d?.type !== 'pin' || pin !== PROTOTYPE_PIN) return false
       if (d.purpose === 'home') {
         // Возврат из Away/Vacation всегда включает сцену General
-        set({ mode: 'home' })
+        set({ mode: 'home', alarm: false })
         setDialog(by, null)
         void runScene('general', by)
       } else {
-        set({ alert: null })
+        set({ alert: null, alarm: false })
         setDialog(by, null)
         toast('Alarm turned off', by)
       }
@@ -291,9 +297,19 @@ export const useHome = create<HomeState>()((set, get) => {
     dim: () => set({ dimmed: true }),
     wake: () => set({ dimmed: false }),
 
-    triggerAlert: (kind) => set((s) => ({ alert: { kind, at: nowHHMM() }, dimmed: false, dialogs: { ...s.dialogs, tablet: null } })),
+    triggerAlert: (kind) => set((s) => ({ alert: { kind, at: nowHHMM() }, alarm: kind === 'intrusion' ? true : s.alarm, dimmed: false, dialogs: { ...s.dialogs, tablet: null } })),
     acknowledgeSmoke: () => set({ alert: null }),
-    requestAlarmOff: (by = 'tablet') => setDialog(by, { type: 'pin', purpose: 'alarm' }),
+    // На общей панели нужен PIN, на телефоне хватает подтверждения
+    requestAlarmOff: (by = 'tablet') => setDialog(by, by === 'tablet' ? { type: 'pin', purpose: 'alarm' } : { type: 'alarmOff' }),
+    confirmAlarmOff: (by = 'tablet') => {
+      set({ alarm: false, alert: null })
+      setDialog(by, null)
+      toast('Alarm turned off', by)
+    },
+    armAlarm: (by = 'tablet') => {
+      set({ alarm: true })
+      toast('Alarm turned on', by)
+    },
 
     setPairingManual: (v) => set({ pairingManual: v }),
     setTempLimit: (which, v) =>

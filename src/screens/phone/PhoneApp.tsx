@@ -1,7 +1,11 @@
 import { useState } from 'react'
-import { PhoneBody, PhoneHeader, TabBar, type CamId, type TabDef } from '../../components/Phone/Phone'
+import { AlarmVeil } from '../../components/AlarmVeil/AlarmVeil'
+import { CriticalAlert } from '../../components/CriticalAlert/CriticalAlert'
+import type { ModeRowProps } from '../../components/ModeMenu/ModeMenu'
+import { MODE_NAMES } from '../../store/data'
+import { ModeSheet, PhoneBody, PhoneHeader, TabBar, type CamId, type TabDef } from '../../components/Phone/Phone'
 import { ToastHost } from '../../components/ToastHost/ToastHost'
-import type { DeviceId, RoomId, SceneId } from '../../store/types'
+import type { DeviceId, Mode, RoomId, SceneId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { DialogHost } from '../tablet/DialogHost'
 import { AddDevice } from './AddDevice'
@@ -49,6 +53,23 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
   const toast = useHome((s) => s.toasts[user])
   const clearToast = useHome((s) => s.clearToast)
   const admin = user === 'alexey'
+  const mode = useHome((s) => s.mode)
+  const alarm = useHome((s) => s.alarm)
+  const alert = useHome((s) => s.alert)
+  const [sheet, setSheet] = useState(false)
+  const act = useHome.getState()
+
+  const pick = (m: Mode) => {
+    setSheet(false)
+    if (m === 'away' && mode === 'home') act.requestAway(user)
+    if (m === 'home' && mode !== 'home') act.requestHome(user)
+    if (m === 'vacation' && admin && mode !== 'vacation') act.enterVacation(user)
+  }
+  const rows: ModeRowProps[] = [
+    { icon: 'home', name: 'Home', description: 'Alarm off. Everyday life at home.', current: mode === 'home', onClick: () => pick('home') },
+    { icon: 'lock', name: 'Away', description: 'Alarm on. Lights and media off. For when everyone leaves.', current: mode === 'away', locked: mode === 'vacation', onClick: () => pick('away') },
+    { icon: 'case', name: 'Vacation', description: admin ? 'Long absence. Only you can turn it on.' : 'Long absence. Turned on by Alexey.', current: mode === 'vacation', locked: !admin, badge: admin ? undefined : 'Admin only', onClick: () => pick('vacation') },
+  ]
 
   const go = (t: Tab) => { setTab(t); setSub(null) }
   const title =
@@ -61,7 +82,7 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
 
   return (
     <div className={styles.root}>
-      <PhoneHeader title={title} subtitle={ROLE[user]} />
+      <PhoneHeader title={title} subtitle={ROLE[user]} mode={mode} modeName={MODE_NAMES[mode]} alarm={alarm} onMode={() => setSheet(true)} showTitle={!(tab === 'dashboard' && !sub)} />
       <PhoneBody>
         {tab === 'dashboard' && !sub && (
           <Dashboard user={user} onRoom={(id) => { setTab('rooms'); setSub({ kind: 'room', id }) }} onEnergy={() => setSub({ kind: 'energy' })} />
@@ -79,7 +100,14 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
         {admin && tab === 'settings' && !sub && <SettingsScreen />}
       </PhoneBody>
       <TabBar tabs={admin ? ADMIN_TABS : FAMILY_TABS} value={tab} onChange={go} />
+      {alarm && !alert && <AlarmVeil radius={38} />}
+      {sheet && <ModeSheet rows={rows} onClose={() => setSheet(false)} />}
       <DialogHost by={user} compact />
+      {alert && (alert.kind === 'intrusion'
+        ? <CriticalAlert icon="shield" title="Alarm triggered" subtitle={`Intrusion detected · ${alert.at}`} note="The siren is on."
+            actionLabel="Turn off alarm" actionIcon="shield" onAction={() => act.confirmAlarmOff(user)} />
+        : <CriticalAlert icon="fire" title="Smoke detected" subtitle={`Kitchen smoke sensor · ${alert.at}`} note="Alarm sound is on until you acknowledge."
+            actionLabel="Acknowledge" actionIcon="check" onAction={act.acknowledgeSmoke} />)}
       <ToastHost toast={toast} onDone={(id) => clearToast(id, user)} />
     </div>
   )

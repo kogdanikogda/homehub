@@ -28,11 +28,18 @@ function ModeRow({ icon, name, description, current, badge, locked, onClick }: M
   )
 }
 
-export function ModeMenu({ rows }: { rows: ModeRowProps[] }) {
+export function ModeMenu({ rows, alarm }: { rows: ModeRowProps[]; alarm?: { on: boolean; onClick: () => void; badge?: string } }) {
   return (
     <div className={styles.menu}>
       <p className={styles.head}>House mode</p>
       {rows.map((r) => <ModeRow key={r.name} {...r} />)}
+      {alarm && (
+        <>
+          <p className={styles.head}>Alarm</p>
+          <ModeRow icon="shield" name={alarm.on ? 'Alarm is on' : 'Alarm is off'} description={alarm.on ? 'Turn it off from here or from any phone.' : 'Turn it on without changing the mode.'}
+            badge={alarm.badge} onClick={alarm.onClick} />
+        </>
+      )}
     </div>
   )
 }
