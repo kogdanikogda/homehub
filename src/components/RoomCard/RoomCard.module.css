@@ -2,5 +2,9 @@
 .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 24px; }
 .title { margin: 0; font-size: 16px; font-weight: 600; line-height: 24px; color: var(--text-primary); }
 .devices { display: flex; flex-direction: column; gap: 10px; }
+.light { margin-top: auto; }
+.light + .more { margin-top: 12px; padding-top: 0; }
 .more { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 14px; align-self: flex-start; color: var(--accent-text); font-size: 13px; font-weight: 600; }
 .more:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; border-radius: 6px; }
+.light:empty { display: none; }
+.light:empty + .more { margin-top: auto; padding-top: 14px; }

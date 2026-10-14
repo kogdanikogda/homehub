@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Button } from '../../components/Button/Button'
-import { BackLink, CheckRow, ChangeRow, Note, SceneRow } from '../../components/Phone/Phone'
+import { ScreenHeader, CheckRow, ChangeRow, Note, SceneRow } from '../../components/Phone/Phone'
 import { DEVICES, MODE_NAMES, SCENES, SCENE_ORDER } from '../../store/data'
 import { deviceTitle, formatValue, isSceneControlled, modifiedChanges } from '../../store/logic'
 import type { DeviceValue, SceneId } from '../../store/types'
+import { useIgnoredKeys } from '../../store/selectors'
 import { useHome } from '../../store/useHome'
 import type { PhoneUser } from './PhoneApp'
 import styles from './Phone.module.css'
@@ -12,9 +13,9 @@ export function ScenesList({ onScene }: { onScene: (id: SceneId) => void }) {
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
-  const unresponsive = useHome((s) => s.unresponsive)
+  const ignored = useIgnoredKeys()
   const scenes = useHome((s) => s.scenes)
-  const changes = modifiedChanges(devices, activeScene, unresponsive, scenes).length
+  const changes = modifiedChanges(devices, activeScene, ignored, scenes).length
 
   const status = (id: SceneId) => {
     if (mode !== 'home') return `Unavailable in ${MODE_NAMES[mode]} mode`
@@ -38,14 +39,13 @@ export function ScenesList({ onScene }: { onScene: (id: SceneId) => void }) {
 function SaveToScene({ scene, onBack }: { scene: SceneId; onBack: () => void }) {
   const devices = useHome((s) => s.devices)
   const scenes = useHome((s) => s.scenes)
-  const unresponsive = useHome((s) => s.unresponsive)
-  const changes = modifiedChanges(devices, scene, unresponsive, scenes)
+  const ignored = useIgnoredKeys()
+  const changes = modifiedChanges(devices, scene, ignored, scenes)
   const [off, setOff] = useState<string[]>([])
   const picked = changes.filter((c) => !off.includes(c.key))
   return (
     <>
-      <BackLink label="Scenes" onClick={onBack} />
-      <h2 className={styles.h2}>{SCENES[scene].name} is modified</h2>
+      <ScreenHeader back={{ label: 'Scenes', onClick: onBack }} title={`${SCENES[scene].name} is modified`} />
       <Note>The scene is active and differs from its saved settings. Choose what to save to the scene.</Note>
       <div className={styles.diff}>
         {changes.map((c) => (
@@ -64,12 +64,12 @@ export function SceneScreen({ user, scene, onBack, onEdit }: { user: PhoneUser; 
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
-  const unresponsive = useHome((s) => s.unresponsive)
+  const ignored = useIgnoredKeys()
   const scenes = useHome((s) => s.scenes)
   const a = useHome.getState()
   const def = SCENES[scene]
   const isActive = activeScene === scene && mode === 'home'
-  const changes = isActive ? modifiedChanges(devices, scene, unresponsive, scenes) : []
+  const changes = isActive ? modifiedChanges(devices, scene, ignored, scenes) : []
   const admin = user === 'alexey'
 
   if (admin && changes.length) return <SaveToScene scene={scene} onBack={onBack} />
@@ -78,8 +78,7 @@ export function SceneScreen({ user, scene, onBack, onEdit }: { user: PhoneUser; 
   if (changes.length) {
     return (
       <>
-        <BackLink label="Scenes" onClick={onBack} />
-        <h2 className={styles.h2}>{def.name} is modified</h2>
+        <ScreenHeader back={{ label: 'Scenes', onClick: onBack }} title={`${def.name} is modified`} />
         <div className={styles.diff}>
           {changes.map((c) => (
             <ChangeRow key={c.key} label={deviceTitle(c.key)} small={`Saved ${formatValue(c.key, c.to)} → Now ${formatValue(c.key, c.from)}`} />
@@ -93,8 +92,7 @@ export function SceneScreen({ user, scene, onBack, onEdit }: { user: PhoneUser; 
 
   return (
     <>
-      <BackLink label="Scenes" onClick={onBack} />
-      <h2 className={styles.h2}>{def.name}</h2>
+      <ScreenHeader back={{ label: 'Scenes', onClick: onBack }} title={def.name} />
       <Note>{def.description}</Note>
       <div className={styles.diff}>
         {DEVICES.filter((d) => isSceneControlled(d.key, scene, scenes)).map((d) => (

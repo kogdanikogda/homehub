@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { SCENES } from './data'
+import { heldKeys, modifiedChanges } from './logic'
 import { initialState, useHome, whenIdle } from './useHome'
 
 const s = () => useHome.getState()
@@ -149,7 +150,7 @@ describe('личные комнаты', () => {
   beforeEach(() => useHome.getState().reset())
   it('телефон меняет личную комнату, планшет видит это', () => {
     useHome.getState().setPrivate('kids1', 'light', false, 'marina')
-    expect(useHome.getState().privateRooms.kids1.light).toBe(false)
+    expect(useHome.getState().privateRooms.kids2.light).toBe(false)
     expect(useHome.getState().toasts.marina?.text).toBe('Light turned off')
     expect(useHome.getState().toasts.tablet).toBeNull()
   })
@@ -286,5 +287,70 @@ describe('окна прогресса видны на всех устройст�
     expect(s().mode).toBe('home')
     s().resumeProgress(); await whenIdle()
     expect(s().mode).toBe('away')
+  })
+})
+
+describe('Full light', () => {
+  const lamp = () => s().devices['living.light']
+  beforeEach(() => { useHome.setState({ overrideAck: true }) })
+
+  it('одно нажатие ставит 100 %, возврат возвращает прежнее значение', () => {
+    s().setDevice('living.light', 40); const before = lamp()
+    s().fullLight('living')
+    expect(lamp()).toBe(100)
+    expect(s().lightHold.living).toBe(before)
+    s().restoreLight('living')
+    expect(lamp()).toBe(before)
+    expect(s().lightHold.living).toBeUndefined()
+  })
+
+  it('не работает вне режима Home', async () => {
+    s().setDevice('living.light', 40)
+    s().requestAway(); s().confirmAway(); await whenIdle()
+    s().fullLight('living')
+    expect(s().lightHold.living).toBeUndefined()
+  })
+
+  it('не считается изменением сцены', async () => {
+    s().tapScene('general'); await whenIdle()
+    s().fullLight('living')
+    expect(modifiedChanges(s().devices, s().activeScene, heldKeys(s().lightHold), s().scenes)).toHaveLength(0)
+  })
+
+  it('ручная правка этого света снимает удержание', () => {
+    s().setDevice('living.light', 40)
+    s().fullLight('living')
+    s().setDevice('living.light', 70)
+    expect(s().lightHold.living).toBeUndefined()
+    expect(lamp()).toBe(70)
+  })
+
+  it('смена сцены снимает удержание', async () => {
+    s().setDevice('living.light', 40)
+    s().fullLight('living')
+    s().tapScene('cinema'); await whenIdle()
+    expect(s().lightHold).toEqual({})
+  })
+
+  it('уход в Away снимает удержание', async () => {
+    s().setDevice('living.light', 40)
+    s().fullLight('living')
+    s().requestAway(); s().confirmAway(); await whenIdle()
+    expect(s().lightHold).toEqual({})
+  })
+
+  it('личная комната: включает и возвращает выключенным', () => {
+    s().fullLight('kids2')
+    expect(s().privateRooms.kids2.light).toBe(true)
+    s().restoreLight('kids2')
+    expect(s().privateRooms.kids2.light).toBe(false)
+  })
+
+  it('показывает тосты на нажатие и возврат', () => {
+    s().setDevice('living.light', 40)
+    s().fullLight('living')
+    expect(s().toasts.tablet?.text).toBe('Full light in Living Room')
+    s().restoreLight('living')
+    expect(s().toasts.tablet?.text).toBe('Light in Living Room is back as it was')
   })
 })

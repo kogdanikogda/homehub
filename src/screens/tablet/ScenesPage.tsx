@@ -5,6 +5,7 @@ import { ListRow } from '../../components/ListRow/ListRow'
 import { DEVICES, ROOM_NAMES, SCENES, SCENE_ORDER, SHARED_ROOMS } from '../../store/data'
 import { formatValue, isSceneControlled, modifiedChanges } from '../../store/logic'
 import type { DeviceValue, SceneId } from '../../store/types'
+import { useIgnoredKeys } from '../../store/selectors'
 import { useHome } from '../../store/useHome'
 import styles from './ScenesPage.module.css'
 
@@ -13,12 +14,12 @@ export function ScenesPage({ scene, onScene }: { scene: SceneId; onScene: (s: Sc
   const mode = useHome((s) => s.mode)
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
-  const unresponsive = useHome((s) => s.unresponsive)
+  const ignored = useIgnoredKeys()
   const scenes = useHome((s) => s.scenes)
   const tapScene = useHome((s) => s.tapScene)
   const resetToScene = useHome((s) => s.resetToScene)
 
-  const changes = modifiedChanges(devices, activeScene, unresponsive, scenes)
+  const changes = modifiedChanges(devices, activeScene, ignored, scenes)
   const changedKeys = new Set(changes.map((c) => c.key))
   const def = SCENES[scene]
   const isActive = mode === 'home' && scene === activeScene

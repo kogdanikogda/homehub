@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Chip } from '../../components/Chip/Chip'
 import { Icon } from '../../components/Icon/Icon'
-import { BackLink, SectionLabel } from '../../components/Phone/Phone'
+import { ScreenHeader, SectionLabel } from '../../components/Phone/Phone'
 import { Segmented } from '../../components/Segmented/Segmented'
 import { ENERGY, axisLabels, percentOf, type EnergyPeriod } from '../../store/energy'
 import styles from './Phone.module.css'
@@ -20,7 +20,7 @@ export function EnergyScreen({ onBack, now = new Date() }: { onBack: () => void;
   return (
     <>
       <div className={styles.group} style={{ gap: 12 }}>
-        <BackLink label="Home" onClick={onBack} />
+        <ScreenHeader back={{ label: 'Home', onClick: onBack }} />
         <Segmented platform="phoneWide" label="Period" value={period} onChange={(v) => setPeriod(v as EnergyPeriod)}
           items={[{ value: 'day', label: 'Day' }, { value: 'week', label: 'Week' }, { value: 'month', label: 'Month' }]} />
       </div>

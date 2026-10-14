@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '../../components/Button/Button'
 import { Icon, type IconName } from '../../components/Icon/Icon'
-import { BackLink, ChangeRow, Field, Note, SceneRow, Steps, TechAlert } from '../../components/Phone/Phone'
+import { ChangeRow, ScreenHeader, Field, Note, SceneRow, Steps, TechAlert } from '../../components/Phone/Phone'
 import { ProgressRow } from '../../components/ProgressRow/ProgressRow'
 import { ROOM_NAMES, ROOM_ORDER } from '../../store/data'
 import type { RoomId } from '../../store/types'
@@ -62,16 +62,15 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
     [0, 1, 2].map((i) => (failed && i === 1 ? 'failed' : i < progress ? 'done' : i === progress && !failed ? 'running' : 'waiting'))
   const labels = [...CONNECT_STEPS, `Adding to ${roomName}`]
 
-  const back = <BackLink label="Cancel" onClick={onClose} />
+  const head = (title: string) => <ScreenHeader back={{ label: 'Cancel', onClick: onClose }} title={title} />
   const btn = (label: string, onClick: () => void, primary = true) => (
     <Button variant={primary ? 'primary' : 'secondary'} size="md" className={styles.btn} onClick={onClick}>{label}</Button>
   )
 
   if (stage === 'prepare') return (
     <>
-      {back}
+      {head("Add a device")}
       <Steps step={1} name="Find" status="Ready to search" />
-      <h2 className={styles.h2}>Add a device</h2>
       <Note>Put the new device in pairing mode. On most devices: hold the button for 5 seconds until the light blinks.</Note>
       <div className={styles.illu}><Icon name="bolt" size={40} /></div>
       {btn('Search nearby', () => setStage('searching'))}
@@ -80,27 +79,24 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
   )
   if (stage === 'searching') return (
     <>
-      {back}
+      {head("Searching nearby…")}
       <Steps step={1} name="Find" status="Searching…" />
-      <h2 className={styles.h2}>Searching nearby…</h2>
       <div className={styles.illu}><span className={styles.spin} /></div>
       <Note>Keep the phone within a few metres of the device.</Note>
     </>
   )
   if (stage === 'none') return (
     <>
-      {back}
+      {head("No devices found")}
       <Steps step={1} name="Find" status="Nothing found" />
-      <h2 className={styles.h2}>No devices found</h2>
       <Note>Check that the device is powered and still in pairing mode. Pairing mode usually lasts 3 minutes.</Note>
       {btn('Search again', () => { a.setAddFlow({ searchEmpty: false }); setStage('searching') })}
     </>
   )
   if (stage === 'found') return (
     <>
-      {back}
+      {head("Found 3 devices")}
       <Steps step={1} name="Find" status="3 devices found" />
-      <h2 className={styles.h2}>Found 3 devices</h2>
       <Note>Choose the one you want to add.</Note>
       <div className={styles.list}>
         {FOUND.map((f) => <SceneRow key={f.name} icon={f.icon} name={f.name} status={`${f.kind} · ${f.brand}`} onClick={() => { setDev(f); setName(f.name); setStage('room') }} />)}
@@ -109,9 +105,8 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
   )
   if (stage === 'room') return (
     <>
-      {back}
+      {head(`Where is the ${dev.name.toLowerCase()}?`)}
       <Steps step={2} name="Room" status="Choose a room" />
-      <h2 className={styles.h2}>Where is the {dev.name.toLowerCase()}?</h2>
       <Note>Shared rooms can be controlled from the wall panel. Private rooms are view only there.</Note>
       <div className={styles.list}>
         {ROOM_ORDER.map((r) => (
@@ -125,9 +120,8 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
   )
   if (stage === 'name') return (
     <>
-      {back}
+      {head("Name the device")}
       <Steps step={3} name="Name" status="Name your device" />
-      <h2 className={styles.h2}>Name the device</h2>
       <Field label="Name" value={name} onChange={setName} />
       <div className={styles.diff}>
         <ChangeRow label="Room" value={roomName} />
@@ -147,9 +141,8 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
   )
   if (stage === 'error') return (
     <>
-      {back}
+      {head("Couldn’t add the device")}
       <Steps step={4} name="Connect" status="Connection failed" state="error" />
-      <h2 className={styles.h2}>Couldn’t add the device</h2>
       <div className={styles.list}>{labels.map((l, i) => <ProgressRow key={l} text={l} status={rowsOf(true)[i]} failedLabel="Failed" />)}</div>
       <TechAlert title="" tone="critical">The device stopped responding during setup. Move it closer to the hub and put it in pairing mode again.</TechAlert>
       {btn('Try again', () => { a.setAddFlow({ connectFails: false }); setStage('connecting') })}

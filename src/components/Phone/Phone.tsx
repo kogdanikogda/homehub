@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import entrance from '../../assets/cams/entrance.jpg'
 import garage from '../../assets/cams/garage.jpg'
 import living from '../../assets/cams/living.jpg'
@@ -26,11 +26,24 @@ export function PhoneStatusBar() {
   )
 }
 
+export type HeaderBack = { label: string; onClick: () => void }
+export type HeaderState = { back?: HeaderBack; title?: string } | null
+/** Экран сообщает шапке: «назад» и свой заголовок. Заголовок один, ссылка «назад» стоит над ним. */
+export const HeaderCtx = createContext<(h: HeaderState) => void>(() => {})
+export function ScreenHeader({ back, title }: { back: HeaderBack; title?: string }) {
+  const set = useContext(HeaderCtx)
+  const click = useRef(back.onClick)
+  click.current = back.onClick
+  const { label } = back
+  useEffect(() => { set({ back: { label, onClick: () => click.current() }, title }); return () => set(null) }, [set, label, title])
+  return null
+}
+
 const MODE_ICON: Record<'home' | 'away' | 'vacation', IconName> = { home: 'home', away: 'lock', vacation: 'case' }
 
 /** Шапка телефона: логотип, режим дома (открывает меню) и значок сигнализации. Заголовок экрана прячется на главном экране. */
-export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, showTitle = true }: {
-  title: string; subtitle: string
+export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, showTitle = true, back }: {
+  title: string; subtitle: string; back?: HeaderBack
   mode: 'home' | 'away' | 'vacation'; modeName: string; alarm: boolean; onMode: () => void; showTitle?: boolean
 }) {
   return (
@@ -45,6 +58,7 @@ export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, sh
       </div>
       {showTitle && (
         <div className={styles.titles}>
+          {back && <BackLink label={back.label} onClick={back.onClick} />}
           <h1 className={styles.title}>{title}</h1>
           <p className={styles.subtitle}>{subtitle}</p>
         </div>

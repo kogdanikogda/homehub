@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '../../components/Button/Button'
 import { Icon } from '../../components/Icon/Icon'
-import { AlarmPill, BackLink, CAM_STYLE, CamAction, CameraTile, ChangeRow, GroupLabel, PhoneCard, SectionLabel, StatusRow, type CamId } from '../../components/Phone/Phone'
+import { AlarmPill, ScreenHeader, CAM_STYLE, CamAction, CameraTile, ChangeRow, GroupLabel, PhoneCard, SectionLabel, StatusRow, type CamId } from '../../components/Phone/Phone'
 import { useHome } from '../../store/useHome'
 import styles from './Phone.module.css'
 
@@ -103,7 +103,7 @@ export function CameraScreen({ id, onBack, onOther }: { id: CamId; onBack: () =>
   return (
     <>
       <div className={styles.group} style={{ gap: 14 }}>
-        <BackLink label="Cameras" onClick={onBack} />
+        <ScreenHeader back={{ label: 'Cameras', onClick: onBack }} />
         <div className={`${styles.view} ${alarm ? styles.viewAlarm : ''}`}>
           <span className={styles.viewImg} style={CAM_STYLE[id]} data-off={off} />
           {off ? (

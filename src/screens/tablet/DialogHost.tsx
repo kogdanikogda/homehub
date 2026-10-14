@@ -6,6 +6,7 @@ import { ProgressRow } from '../../components/ProgressRow/ProgressRow'
 import { DEVICE_BY_KEY, PROTOTYPE_PIN, ROOM_NAMES, ROOM_ORDER, SCENES } from '../../store/data'
 import { deviceTitle, formatValue, modifiedChanges, progressText } from '../../store/logic'
 import type { Change, DeviceId, DeviceKey } from '../../store/types'
+import { useIgnoredKeys } from '../../store/selectors'
 import { useHome } from '../../store/useHome'
 import { EnergyDialog } from './EnergyDialog'
 
@@ -13,10 +14,13 @@ const arrow = (c: Change) => `${formatValue(c.key, c.from)} → ${formatValue(c.
 const joinNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0])
 
 /** Показывает окно, которое просит состояние (одновременно открыто не больше одного) */
+/** Подпись шторки Windows на телефоне */
+const windowsLead = (open: number, total: number) => (open === 0 ? `All ${total} windows are closed.` : `${open} of ${total} windows ${open === 1 ? 'is' : 'are'} open.`)
+
 export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?: boolean }) {
   const dialog = useHome((s) => s.dialogs[by])
   const devices = useHome((s) => s.devices)
-  const unresponsive = useHome((s) => s.unresponsive)
+  const ignored = useIgnoredKeys()
   const scenes = useHome((s) => s.scenes)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const a = useHome.getState()
@@ -46,7 +50,7 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
       )
     }
     case 'changes': {
-      const list = modifiedChanges(devices, dialog.scene, unresponsive, scenes)
+      const list = modifiedChanges(devices, dialog.scene, ignored, scenes)
       return (
         <Dialog compact={compact} open onOpenChange={close} title={`${SCENES[dialog.scene].name}: changes from the saved scene`}
           note="Only the administrator can save these changes to the scene. Until then they are temporary and end when another scene is activated."
@@ -112,9 +116,10 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
       return <EnergyDialog onClose={close} />
     case 'windows':
       return (
-        <Dialog compact={compact} open onOpenChange={close} title="Windows" secondary={{ label: 'Close' }}>
+        <Dialog compact={compact} open onOpenChange={close} title="Windows" secondary={{ label: 'Close' }}
+          lead={compact ? windowsLead(ROOM_ORDER.filter((r) => windowsOpen[r]).length, ROOM_ORDER.length) : undefined}>
           {ROOM_ORDER.map((r) => (
-            <ListRow key={r} icon="window" text={ROOM_NAMES[r]} value={windowsOpen[r] ? 'Open' : 'Closed'} tone={windowsOpen[r] ? 'warning' : 'default'} />
+            <ListRow key={r} text={ROOM_NAMES[r]} value={windowsOpen[r] ? 'Open' : 'Closed'} tone={windowsOpen[r] ? 'warning' : 'default'} />
           ))}
         </Dialog>
       )

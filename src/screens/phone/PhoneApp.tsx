@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { AlarmVeil } from '../../components/AlarmVeil/AlarmVeil'
 import { CriticalAlert } from '../../components/CriticalAlert/CriticalAlert'
 import type { ModeRowProps } from '../../components/ModeMenu/ModeMenu'
-import { MODE_NAMES } from '../../store/data'
-import { ModeSheet, PhoneBody, PhoneHeader, TabBar, type CamId, type TabDef } from '../../components/Phone/Phone'
+import { MODE_NAMES, ROOM_NAMES, SCENES } from '../../store/data'
+import { HeaderCtx, type HeaderState, ModeSheet, PhoneBody, PhoneHeader, TabBar, type CamId, type TabDef } from '../../components/Phone/Phone'
 import { ToastHost } from '../../components/ToastHost/ToastHost'
 import type { DeviceId, Mode, RoomId, SceneId } from '../../store/types'
 import { useHome } from '../../store/useHome'
@@ -57,6 +57,7 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
   const alarm = useHome((s) => s.alarm)
   const alert = useHome((s) => s.alert)
   const [sheet, setSheet] = useState(false)
+  const [hdr, setHdr] = useState<HeaderState>(null)
   const act = useHome.getState()
 
   const pick = (m: Mode) => {
@@ -73,16 +74,18 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
 
   const go = (t: Tab) => { setTab(t); setSub(null) }
   const title =
-    sub?.kind === 'room' ? 'Rooms'
-    : sub?.kind === 'scene' || sub?.kind === 'sceneEdit' ? 'Scenes'
+    sub?.kind === 'room' ? ROOM_NAMES[sub.id]
+    : sub?.kind === 'scene' ? SCENES[sub.id].name
+    : sub?.kind === 'sceneEdit' ? `Edit ${SCENES[sub.id].name}`
     : sub?.kind === 'camera' ? CAM_NAMES[sub.id]
-    : sub?.kind === 'addDevice' ? 'Devices'
+    : sub?.kind === 'addDevice' ? 'Add a device'
     : sub?.kind === 'energy' ? 'Energy'
     : TITLES[tab]
 
   return (
+    <HeaderCtx.Provider value={setHdr}>
     <div className={styles.root}>
-      <PhoneHeader title={title} subtitle={ROLE[user]} mode={mode} modeName={MODE_NAMES[mode]} alarm={alarm} onMode={() => setSheet(true)} showTitle={!(tab === 'dashboard' && !sub)} />
+      <PhoneHeader title={hdr?.title ?? title} back={hdr?.back} subtitle={ROLE[user]} mode={mode} modeName={MODE_NAMES[mode]} alarm={alarm} onMode={() => setSheet(true)} showTitle={!(tab === 'dashboard' && !sub) || Boolean(hdr)} />
       <PhoneBody>
         {tab === 'dashboard' && !sub && (
           <Dashboard user={user} onRoom={(id) => { setTab('rooms'); setSub({ kind: 'room', id }) }} onEnergy={() => setSub({ kind: 'energy' })} />
@@ -110,5 +113,6 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
             actionLabel="Acknowledge" actionIcon="check" onAction={act.acknowledgeSmoke} />)}
       <ToastHost toast={toast} onDone={(id) => clearToast(id, user)} />
     </div>
+    </HeaderCtx.Provider>
   )
 }

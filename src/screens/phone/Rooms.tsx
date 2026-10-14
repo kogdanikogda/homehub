@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import { DeviceRow } from '../../components/DeviceRow/DeviceRow'
 import { Chip } from '../../components/Chip/Chip'
 import { Icon } from '../../components/Icon/Icon'
-import { BackLink, Note, RoomRow, WarningRow, PrivateChip } from '../../components/Phone/Phone'
+import { Note, ScreenHeader, RoomRow, WarningRow, PrivateChip } from '../../components/Phone/Phone'
 import { Segmented } from '../../components/Segmented/Segmented'
 import { Stepper } from '../../components/Stepper/Stepper'
 import { Switch } from '../../components/Switch/Switch'
@@ -10,7 +11,9 @@ import {
 } from '../../store/data'
 import { isSceneControlled, modifiedChanges, sceneControlledCount as sceneCount } from '../../store/logic'
 import type { PrivateRoomId, RoomId } from '../../store/types'
+import { useIgnoredKeys } from '../../store/selectors'
 import { useHome } from '../../store/useHome'
+import { RoomLight } from '../../components/FullLightButton/RoomLight'
 import { DeviceControl } from '../tablet/DeviceControl'
 import type { PhoneUser } from './PhoneApp'
 import { isPrivateRoom, useRoomSub } from './Dashboard'
@@ -37,30 +40,29 @@ export function RoomScreen({ user, room, onBack }: { user: PhoneUser; room: Room
   const devices = useHome((s) => s.devices)
   const activeScene = useHome((s) => s.activeScene)
   const unresponsive = useHome((s) => s.unresponsive)
+  const ignored = useIgnoredKeys()
   const scenes = useHome((s) => s.scenes)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const extras = useHome((s) => s.extras)
   const priv = useHome((s) => s.privateRooms)
   const toggleExtra = useHome((s) => s.toggleExtra)
   const setPrivate = useHome((s) => s.setPrivate)
-  const added = useHome((s) => s.addedDevices.filter((d) => d.room === room))
+  const addedAll = useHome((s) => s.addedDevices)
+  const added = useMemo(() => addedAll.filter((d) => d.room === room), [addedAll, room])
   const toggleAdded = useHome((s) => s.toggleAdded)
   const limits = useHome((s) => s.tempLimits)
 
   const isPriv = isPrivateRoom(room)
   const s = sub(room)
   const scene = mode === 'home' && activeScene && !isPriv ? SCENES[activeScene] : null
-  const changed = new Set(modifiedChanges(devices, activeScene, unresponsive, scenes).map((c) => c.key))
+  const changed = new Set(modifiedChanges(devices, activeScene, ignored, scenes).map((c) => c.key))
   const own = DEVICES.filter((d) => d.room === room)
 
   return (
     <>
-      <BackLink label="All rooms" onClick={onBack} />
+      <ScreenHeader back={{ label: 'All rooms', onClick: onBack }} title={ROOM_NAMES[room]} />
       <div className={styles.roomHead}>
-        <div>
-          <h2>{ROOM_NAMES[room]}</h2>
-          <p>{s.temp}° · {s.text}</p>
-        </div>
+        <p>{s.temp}° · {s.text}</p>
         {isPriv && <PrivateChip />}
       </div>
       {windowsOpen[room] && <WarningRow>The window is open.</WarningRow>}
@@ -109,6 +111,7 @@ export function RoomScreen({ user, room, onBack }: { user: PhoneUser; room: Room
             control={<Switch size="sm" aria-label={d.name} checked={d.on} onCheckedChange={(v) => toggleAdded(d.id, v, user)} />} />
         ))}
       </div>
+      <RoomLight room={room} by={user} size="md" />
     </>
   )
 }

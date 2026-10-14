@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import {
-  DEFAULT_SCENES, DEVICE_BY_KEY, INITIAL_EXTRAS, INITIAL_PRIVATE, MODE_NAMES, TEMP_LIMITS, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues, type SceneMap, type SceneValues,
+  DEFAULT_SCENES, DEVICE_BY_KEY, INITIAL_EXTRAS, INITIAL_PRIVATE, MODE_NAMES, ROOM_NAMES, TEMP_LIMITS, PROTOTYPE_PIN, ROOM_ORDER, SCENES, awayValues, type DeviceValues, type SceneMap, type SceneValues,
 } from './data'
-import { conflictTurnOff, diffToScene, diffValues, modifiedChanges, sysItems } from './logic'
+import { LIGHT_KEY, conflictTurnOff, diffToScene, diffValues, fullValue, heldKeys, modifiedChanges, sysItems, type LightHold } from './logic'
 import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, AddedDevice, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
 
 type Toast = { id: number; text: string } | null
@@ -17,6 +17,8 @@ export interface HomeState {
   activeScene: SceneId | null
   /** Предупреждение о правке сцены показывается один раз за активацию */
   overrideAck: boolean
+  /** Комнаты, где включён «Full light»: помним прежний свет, чтобы вернуть его одним нажатием */
+  lightHold: LightHold
   /** Устройства, не ответившие при активации сцены */
   unresponsive: DeviceKey[]
   windowsOpen: Windows
@@ -73,6 +75,10 @@ export interface HomeState {
   saveToScene: (keys: DeviceKey[], by?: DeviceId) => void
   setPrivate: <K extends keyof PrivateState>(room: PrivateRoomId, key: K, value: PrivateState[K], by?: DeviceId) => void
   setDevice: (key: DeviceKey, value: DeviceValue, by?: DeviceId) => void
+  /** Быстрый полный свет в комнате: одно нажатие, без подтверждений, не меняет сцену */
+  fullLight: (room: RoomId, by?: DeviceId) => void
+  /** Вернуть свет комнаты таким, каким он был до «Full light» */
+  restoreLight: (room: RoomId, by?: DeviceId) => void
   confirmOverride: (by?: DeviceId) => void
   tapScene: (id: SceneId, by?: DeviceId) => void
   confirmConflict: (by?: DeviceId) => void
@@ -114,6 +120,7 @@ export const initialState = () => ({
   devices: { ...SCENES.general.values } as DeviceValues,
   activeScene: 'general' as SceneId | null,
   overrideAck: false,
+  lightHold: {} as LightHold,
   unresponsive: [] as DeviceKey[],
   windowsOpen: closedWindows(),
   pairingManual: false,
@@ -157,8 +164,13 @@ export const useHome = create<HomeState>()((set, get) => {
     set((s) => ({ dialogs: { ...s.dialogs, [by]: d } }))
   const dialogOf = (by: DeviceId) => get().dialogs[by]
 
+  const releaseHold = (room: RoomId) =>
+    set((s) => (room in s.lightHold ? { lightHold: Object.fromEntries(Object.entries(s.lightHold).filter(([r]) => r !== room)) as LightHold } : s))
+
   const apply = (key: DeviceKey, value: DeviceValue, by: DeviceId) => {
     set((s) => ({ devices: { ...s.devices, [key]: value } }))
+    // Ручная правка света отменяет «вернуть как было»
+    if (DEVICE_BY_KEY[key].room in get().lightHold && LIGHT_KEY[DEVICE_BY_KEY[key].room] === key) releaseHold(DEVICE_BY_KEY[key].room)
     const def = DEVICE_BY_KEY[key]
     if (def.kind === 'toggle') toast(`${def.short} turned ${value ? 'on' : 'off'}`, by)
   }
@@ -230,7 +242,7 @@ export const useHome = create<HomeState>()((set, get) => {
       title: `Activating “${SCENES[id].name}”`, doneTitle: `${SCENES[id].name} scene is on`, items, toast: `${SCENES[id].name} scene activated`,
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
-        set((s) => ({ devices: applyDone(s.devices, target as DeviceValues, work), activeScene: id, overrideAck: false, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+        set((s) => ({ devices: applyDone(s.devices, target as DeviceValues, work), activeScene: id, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
       },
     })
   }
@@ -243,7 +255,7 @@ export const useHome = create<HomeState>()((set, get) => {
       title: `Turning on ${MODE_NAMES[mode]} mode`, doneTitle: `${MODE_NAMES[mode]} mode is on`, items, toast: `${MODE_NAMES[mode]} mode on. Alarm is on.`,
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
-        set((s) => ({ mode, alarm: true, devices: applyDone(s.devices, target, work), activeScene: null, overrideAck: false, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+        set((s) => ({ mode, alarm: true, devices: applyDone(s.devices, target, work), activeScene: null, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
       },
     })
   }
@@ -256,7 +268,7 @@ export const useHome = create<HomeState>()((set, get) => {
       title: 'Switching to Home mode', doneTitle: 'Home mode is on', items, toast: message,
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
-        set((s) => ({ mode: 'home', alarm: false, devices: applyDone(s.devices, target as DeviceValues, work), activeScene: 'general', overrideAck: false, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+        set((s) => ({ mode: 'home', alarm: false, devices: applyDone(s.devices, target as DeviceValues, work), activeScene: 'general', overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
       },
     })
   }
@@ -289,6 +301,32 @@ export const useHome = create<HomeState>()((set, get) => {
       apply(key, value, by)
     },
 
+    fullLight: (room, by = 'tablet') => {
+      const s = get()
+      if (s.mode !== 'home' || room in s.lightHold) return
+      const key = LIGHT_KEY[room]
+      if (key) {
+        if (s.devices[key] === fullValue(key)) return
+        set({ devices: { ...s.devices, [key]: fullValue(key) }, lightHold: { ...s.lightHold, [room]: s.devices[key] } })
+      } else {
+        const r = room as PrivateRoomId
+        if (s.privateRooms[r].light) return
+        set({ privateRooms: { ...s.privateRooms, [r]: { ...s.privateRooms[r], light: true } }, lightHold: { ...s.lightHold, [room]: false } })
+      }
+      toast(`Full light in ${ROOM_NAMES[room]}`, by)
+    },
+
+    restoreLight: (room, by = 'tablet') => {
+      const s = get()
+      if (!(room in s.lightHold)) return
+      const prev = s.lightHold[room] as DeviceValue
+      const rest = Object.fromEntries(Object.entries(s.lightHold).filter(([r]) => r !== room)) as LightHold
+      const key = LIGHT_KEY[room]
+      if (key) set({ devices: { ...s.devices, [key]: prev }, lightHold: rest })
+      else set({ privateRooms: { ...s.privateRooms, [room as PrivateRoomId]: { ...s.privateRooms[room as PrivateRoomId], light: Boolean(prev) } }, lightHold: rest })
+      toast(`Light in ${ROOM_NAMES[room]} is back as it was`, by)
+    },
+
     confirmOverride: (by = 'tablet') => {
       const d = dialogOf(by)
       if (d?.type !== 'override') return
@@ -301,7 +339,7 @@ export const useHome = create<HomeState>()((set, get) => {
       const s = get()
       if (s.mode !== 'home') return
       if (id === s.activeScene) {
-        if (modifiedChanges(s.devices, s.activeScene, s.unresponsive, s.scenes).length) setDialog(by, { type: 'changes', scene: id })
+        if (modifiedChanges(s.devices, s.activeScene, [...s.unresponsive, ...heldKeys(s.lightHold)], s.scenes).length) setDialog(by, { type: 'changes', scene: id })
         return
       }
       const turnOff = conflictTurnOff(s.devices, s.activeScene, id, s.scenes)
@@ -317,7 +355,7 @@ export const useHome = create<HomeState>()((set, get) => {
     resetToScene: (by = 'tablet') => {
       const s = get()
       if (!s.activeScene) return
-      set({ devices: { ...s.devices, ...s.scenes[s.activeScene] }, unresponsive: [] })
+      set({ devices: { ...s.devices, ...s.scenes[s.activeScene] }, unresponsive: [], lightHold: {} })
       setDialog(by, null)
       toast(`${SCENES[s.activeScene].name} restored`, by)
     },
@@ -411,6 +449,7 @@ export const useHome = create<HomeState>()((set, get) => {
     },
 
     setPrivate: (room, key, value, by = 'tablet') => {
+      if (key === 'light') releaseHold(room)
       set((s) => ({ privateRooms: { ...s.privateRooms, [room]: { ...s.privateRooms[room], [key]: value } } }))
       if (key === 'light' || key === 'humidifier') toast(`${key === 'light' ? 'Light' : 'Humidifier'} turned ${value ? 'on' : 'off'}`, by)
     },

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SCENES, awayValues } from './data'
 import {
-  averageTemperature, conflictTurnOff, diffToScene, formatValue, modifiedChanges, onCount, roomSummary,
+  averageTemperature, conflictTurnOff, deviceCount, devicesOnText, privateDeviceCount, heldKeys, lightButton, fullValue, diffToScene, formatValue, modifiedChanges, onCount, roomSummary,
   sceneControlledCount, windowAlertText, windowsText,
 } from './logic'
 
@@ -71,8 +71,27 @@ describe('страница комнат', () => {
     expect(onCount('corridor', d, extras)).toBe(1)
   })
   it('подпись комнаты', () => {
-    expect(roomSummary(22, 2)).toBe('22° · 2 on')
-    expect(roomSummary(21, 0)).toBe('21° · All off')
+    expect(roomSummary(22, 2, 5)).toBe('22° · 2 of 5 devices on')
+    expect(roomSummary(21, 0, 5)).toBe('21° · All devices off')
+  })
+  it('«сколько из скольких»: одно, все, ни одного', () => {
+    expect(devicesOnText(1, 6)).toBe('1 of 6 devices on')
+    expect(devicesOnText(6, 6)).toBe('All 6 devices on')
+    expect(devicesOnText(0, 6)).toBe('All devices off')
+    expect(devicesOnText(1, 1)).toBe('1 device on')
+    expect(devicesOnText(0, 1)).toBe('Device off')
+  })
+  it('всего устройств: климат и шторы считаются, кухня с подсветкой и допустройствами', () => {
+    expect(deviceCount('living')).toBe(6)
+    expect(deviceCount('kitchen')).toBe(5)
+    expect(deviceCount('corridor')).toBe(1)
+    expect(privateDeviceCount('kids1')).toBe(3)
+    expect(privateDeviceCount('bedroom')).toBe(4)
+  })
+  it('добавленные устройства входят и в «всего», и в «включено»', () => {
+    const added = [{ id: 1, name: 'Lamp', room: 'corridor' as const, type: 'Light', on: true }]
+    expect(deviceCount('corridor', added)).toBe(2)
+    expect(onCount('corridor', general, { bar: false, floor: false } as never, added)).toBe(2)
   })
   it('сколько устройств задаёт сцена', () => {
     expect(sceneControlledCount('living', 'general')).toBe(4)
@@ -101,5 +120,29 @@ describe('энергия', () => {
   it('подписи недели: последняя — Today', () => {
     expect(axisLabels('week', new Date(2026, 9, 13)).get(6)).toBe('Today')
     expect(axisLabels('week', new Date(2026, 9, 13)).get(0)).toBe('Wed')
+  })
+})
+
+describe('кнопка «Full light»', () => {
+  const priv = { kids1: { light: true }, kids2: { light: false } } as never
+  it('значение полного света: 100 % у диммера, «вкл» у выключателя', () => {
+    expect(fullValue('living.light')).toBe(100)
+    expect(fullValue('kitchen.light')).toBe(true)
+  })
+  it('показывается только в Home, пока свет не полный и лампа отвечает', () => {
+    const dim = { ...general, 'living.light': 60 }
+    expect(lightButton('living', 'home', dim, priv, [], {})).toBe('full')
+    expect(lightButton('living', 'home', { ...general, 'living.light': 100 }, priv, [], {})).toBeNull()
+    expect(lightButton('living', 'away', dim, priv, [], {})).toBeNull()
+    expect(lightButton('living', 'home', dim, priv, ['living.light'], {})).toBeNull()
+  })
+  it('после нажатия на том же месте «Back»', () => {
+    expect(lightButton('living', 'home', general, priv, [], { living: 40 })).toBe('back')
+  })
+  it('личная комната: кнопка, пока свет выключен', () => {
+    expect(lightButton('kids2', 'home', general, priv, [], {})).toBe('full')
+  })
+  it('удерживаемый свет не считается изменением сцены', () => {
+    expect(heldKeys({ living: 40, kids2: false })).toEqual(['living.light'])
   })
 })

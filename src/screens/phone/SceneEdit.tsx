@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../../components/Button/Button'
 import { Icon } from '../../components/Icon/Icon'
-import { BackLink, Note } from '../../components/Phone/Phone'
+import { Note, ScreenHeader } from '../../components/Phone/Phone'
 import { Segmented } from '../../components/Segmented/Segmented'
 import { Stepper } from '../../components/Stepper/Stepper'
 import { DEVICES, SCENES } from '../../store/data'
@@ -34,8 +34,7 @@ export function SceneEdit({ scene, onBack }: { scene: SceneId; onBack: () => voi
 
   return (
     <>
-      <BackLink label="Cancel" onClick={onBack} />
-      <h2 className={styles.h2}>Edit {name}</h2>
+      <ScreenHeader back={{ label: 'Cancel', onClick: onBack }} title={`Edit ${name}`} />
       <Note>Set what this scene does in the shared rooms. Devices marked “Not in scene” stay as they are when the scene starts.</Note>
       <div className={styles.list} style={{ gap: 8 }}>
         {DEVICES.map((d) => {

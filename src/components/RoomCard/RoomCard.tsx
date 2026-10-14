@@ -3,9 +3,9 @@ import { Chip } from '../Chip/Chip'
 import { Icon } from '../Icon/Icon'
 import styles from './RoomCard.module.css'
 
-type Props = { title: string; windowOpen?: boolean; children: ReactNode; onAllDevices?: () => void }
+type Props = { title: string; windowOpen?: boolean; children: ReactNode; /** Быстрый свет: кнопка над «All devices» */ lightAction?: ReactNode; onAllDevices?: () => void }
 
-export function RoomCard({ title, windowOpen, children, onAllDevices }: Props) {
+export function RoomCard({ title, windowOpen, children, lightAction, onAllDevices }: Props) {
   return (
     <section className={styles.card}>
       <header className={styles.head}>
@@ -13,6 +13,7 @@ export function RoomCard({ title, windowOpen, children, onAllDevices }: Props) {
         {windowOpen && <Chip tone="warning" icon="window" size="sm">Window open</Chip>}
       </header>
       <div className={styles.devices}>{children}</div>
+      {lightAction && <div className={styles.light}>{lightAction}</div>}
       <button type="button" className={styles.more} onClick={onAllDevices}>
         All devices <Icon name="chev" size={16} />
       </button>
