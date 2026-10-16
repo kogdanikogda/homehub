@@ -3,7 +3,7 @@ import { Dialog } from '../../components/Dialog/Dialog'
 import { ListRow } from '../../components/ListRow/ListRow'
 import { PinPad } from '../../components/PinPad/PinPad'
 import { ProgressRow } from '../../components/ProgressRow/ProgressRow'
-import { DEVICE_BY_KEY, PROTOTYPE_PIN, ROOM_NAMES, ROOM_ORDER, SCENES } from '../../store/data'
+import { DEVICE_BY_KEY, PROTOTYPE_PIN, ROOM_NAMES, SCENES, WINDOW_ROOMS } from '../../store/data'
 import { deviceTitle, formatValue, modifiedChanges, progressText } from '../../store/logic'
 import type { Change, DeviceId, DeviceKey } from '../../store/types'
 import { useIgnoredKeys } from '../../store/selectors'
@@ -117,8 +117,8 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
     case 'windows':
       return (
         <Dialog compact={compact} open onOpenChange={close} title="Windows" secondary={{ label: 'Close' }}
-          lead={compact ? windowsLead(ROOM_ORDER.filter((r) => windowsOpen[r]).length, ROOM_ORDER.length) : undefined}>
-          {ROOM_ORDER.map((r) => (
+          lead={compact ? windowsLead(WINDOW_ROOMS.filter((r) => windowsOpen[r]).length, WINDOW_ROOMS.length) : undefined}>
+          {WINDOW_ROOMS.map((r) => (
             <ListRow key={r} text={ROOM_NAMES[r]} value={windowsOpen[r] ? 'Open' : 'Closed'} tone={windowsOpen[r] ? 'warning' : 'default'} />
           ))}
         </Dialog>

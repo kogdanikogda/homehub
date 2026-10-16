@@ -56,6 +56,9 @@
 .viewTime { font-size: 11px; opacity: .85; font-variant-numeric: tabular-nums; }
 .viewName { position: absolute; left: 9px; bottom: 9px; font-size: 14px; font-weight: 700; }
 .viewBox { position: absolute; left: 90px; top: 60px; width: 54px; height: 99px; border: 2px solid var(--status-crit); border-radius: 4px; font-size: 11px; font-weight: 700; padding: 1px 3px; color: #fff; background: rgb(188 111 123 / .12); }
+.viewTalk { position: absolute; right: 9px; bottom: 9px; display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: rgb(5 8 14 / .6); font-size: 12px; font-weight: 700; }
+.msg { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 14px; background: var(--surface-1); font-size: 13px; line-height: 18px; color: var(--text-primary); }
+.msg svg { color: var(--status-ok); }
 .viewOff { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 28px; text-align: center; background: rgb(5 8 14 / .5); }
 .viewOff b { font-size: 15px; }
 .viewOff small { font-size: 12px; line-height: 15px; opacity: .8; }

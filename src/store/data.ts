@@ -16,6 +16,8 @@ export const ROOM_NAMES: Record<RoomId, string> = {
   bedroom: "Parents' Bedroom",
 }
 
+/** Комнаты с окнами: в коридоре окна нет */
+export const WINDOW_ROOMS: RoomId[] = ['living', 'kitchen', 'kids1', 'kids2', 'bedroom']
 export const ROOM_ORDER: RoomId[] = ['living', 'kitchen', 'corridor', 'kids1', 'kids2', 'bedroom']
 export const SHARED_ROOMS: RoomId[] = ['living', 'kitchen', 'corridor']
 

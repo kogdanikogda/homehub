@@ -28,6 +28,7 @@ export function SecurityScreen({ onCamera }: { onCamera: (id: CamId) => void }) 
   const locked = useHome((s) => s.doorLocked)
   const a = useHome.getState()
   const armed = useHome((st) => st.alarm)
+  const liveLog = useHome((st) => st.eventLog)
 
   return (
     <>
@@ -69,7 +70,7 @@ export function SecurityScreen({ onCamera }: { onCamera: (id: CamId) => void }) 
       <div className={styles.group}>
         <SectionLabel>Event log</SectionLabel>
         <div className={styles.log}>
-          {LOG.map(([t, text]) => <div key={t + text}><span>{t}</span><span>{text}</span></div>)}
+          {[...liveLog.map((e) => [e.t, e.x]), ...LOG].map(([t, text], i) => <div key={i + t + text}><span>{t}</span><span>{text}</span></div>)}
         </div>
       </div>
     </>
@@ -89,6 +90,10 @@ export function CameraScreen({ id, onBack, onOther }: { id: CamId; onBack: () =>
   const alert = useHome((s) => s.alert)
   const a = useHome.getState()
   const now = useNow()
+  const [talk, setTalk] = useState(false)
+  const [msg, setMsg] = useState('')
+  // Смена камеры останавливает разговор и убирает сообщение; уход с экрана размонтирует компонент
+  useEffect(() => { setTalk(false); setMsg('') }, [id])
   const cam = CAMERAS.find((c) => c.id === id)!
   const off = camIsOff(id, mode, peek)
   const alarm = id === 'entrance' && alert?.kind === 'intrusion'
@@ -118,13 +123,16 @@ export function CameraScreen({ id, onBack, onOther }: { id: CamId; onBack: () =>
               <div className={styles.viewTop}><span className={styles.viewLive}>● LIVE</span><span className={styles.viewTime}>{fmtTime(now)}</span></div>
               {alarm && <span className={styles.viewBox}>Motion</span>}
               <span className={styles.viewName}>{cam.name}</span>
+              {talk && <span className={styles.viewTalk}><Icon name="mic" size={14} />Talking…</span>}
             </>
           )}
         </div>
+        {msg && <div className={styles.msg} role="status"><Icon name="check" size={20} /><span>{msg}</span></div>}
         <div className={styles.acts}>
-          {!off && <CamAction icon="camera" label="Snapshot" onClick={() => a.showToast('Snapshot saved', 'alexey')} />}
-          {!off && id !== 'living' && <CamAction icon="mic" label="Talk" onClick={() => a.showToast('Two-way audio is not part of the prototype', 'alexey')} />}
-          {off && <CamAction icon="camera" label="Snapshot" />}
+          <CamAction icon="camera" label="Snapshot" disabled={off} onClick={() => { a.logEvent(`Snapshot · ${cam.name}`); setMsg('Snapshot saved to the event log.') }} />
+          {id === 'entrance' && (
+            <CamAction icon="mic" label={talk ? 'Stop talking' : 'Talk'} active={talk} onClick={() => { if (!talk) a.logEvent('Two-way talk at the entrance'); setTalk(!talk) }} />
+          )}
           <CamAction icon="shield" label="Security" onClick={onBack} />
         </div>
         <div className={styles.diff}>

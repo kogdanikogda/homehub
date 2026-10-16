@@ -56,3 +56,11 @@ export const AdminBlocks: S = {
     </PhoneFrame>
   ),
 }
+
+export const HeaderWithBack: S = {
+  render: () => (
+    <div style={{ width: 390 }}>
+      <PhoneHeader title="Living Room" subtitle="Administrator · Alexey" mode="home" modeName="Home" alarm={false} onMode={() => {}} back={{ label: 'All rooms', onClick: () => {} }} />
+    </div>
+  ),
+}

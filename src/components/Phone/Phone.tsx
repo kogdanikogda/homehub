@@ -253,9 +253,9 @@ export function CameraTile({ id, name, off, onClick }: { id: CamId; name: string
 }
 
 /** Крупная плитка действия камеры (Snapshot, Talk, Security) */
-export function CamAction({ icon, label, onClick }: { icon: IconName; label: string; onClick?: () => void }) {
+export function CamAction({ icon, label, onClick, active, disabled }: { icon: IconName; label: string; onClick?: () => void; active?: boolean; disabled?: boolean }) {
   return (
-    <button type="button" className={styles.camAct} onClick={onClick}><Icon name={icon} size={20} />{label}</button>
+    <button type="button" className={`${styles.camAct} ${active ? styles.camActOn : ''}`} aria-pressed={active} disabled={disabled} onClick={onClick}><Icon name={icon} size={20} />{label}</button>
   )
 }
 

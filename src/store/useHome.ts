@@ -34,6 +34,8 @@ export interface HomeState {
   doorLocked: boolean
   /** Камера гостиной временно включена (по умолчанию дома выключена) */
   camPeek: boolean
+  /** Записи журнала событий, добавленные в ходе работы (новые сверху) */
+  eventLog: { t: string; x: string }[]
   addedDevices: AddedDevice[]
   /** Для прототипа: как поведёт себя добавление устройства */
   addFlow: { searchEmpty: boolean; connectFails: boolean }
@@ -95,6 +97,7 @@ export interface HomeState {
   setDeclinePairing: (v: boolean) => void
   openEnergy: (by?: DeviceId) => void
   closeDialog: (by?: DeviceId) => void
+  logEvent: (text: string) => void
   showToast: (text: string, by?: DeviceId) => void
   clearToast: (id: number, by?: DeviceId) => void
   dim: () => void
@@ -130,6 +133,7 @@ export const initialState = () => ({
   vacationOpts: { presence: true, freeze: true, cameras: true },
   doorLocked: true,
   camPeek: false,
+  eventLog: [] as { t: string; x: string }[],
   addedDevices: [] as AddedDevice[],
   addFlow: { searchEmpty: false, connectFails: false },
   scenes: structuredClone(DEFAULT_SCENES) as SceneMap,
@@ -424,6 +428,7 @@ export const useHome = create<HomeState>()((set, get) => {
     setIdleMinutes: (m) => set({ idleMinutes: m }),
     setVacationOpt: (k, v) => set((s) => ({ vacationOpts: { ...s.vacationOpts, [k]: v } })),
     setDoorLocked: (v, by = 'alexey') => { set({ doorLocked: v }); toast(v ? 'Front door locked' : 'Front door unlocked', by) },
+    logEvent: (x) => set((st) => ({ eventLog: [{ t: new Date().toTimeString().slice(0, 5), x }, ...st.eventLog] })),
     setCamPeek: (v, by = 'alexey') => { set({ camPeek: v }); toast(v ? 'Living room camera on for 10 min' : 'Living room camera off', by) },
     setAddFlow: (patch) => set((s) => ({ addFlow: { ...s.addFlow, ...patch } })),
     addDevice: (d) => set((s) => ({ addedDevices: [...s.addedDevices, { ...d, id: ++deviceId, on: false }] })),
