@@ -162,8 +162,13 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 const nowHHMM = () => new Date().toTimeString().slice(0, 5)
 
 export const useHome = create<HomeState>()((set, get) => {
-  const toast = (text: string, by: DeviceId = 'tablet') =>
+  /** Журнал событий: новые записи сверху, как в прототипе */
+  const log = (x: string) => set((st) => ({ eventLog: [{ t: nowHHMM(), x }, ...st.eventLog] }))
+  /** Всплывающее сообщение; как в прототипе, каждое попадает и в журнал событий */
+  const toast = (text: string, by: DeviceId = 'tablet', inLog = true) => {
     set((s) => ({ toasts: { ...s.toasts, [by]: { id: ++toastId, text } } }))
+    if (inLog) log(text)
+  }
   const setDialog = (by: DeviceId, d: DialogState | null) =>
     set((s) => ({ dialogs: { ...s.dialogs, [by]: d } }))
   const dialogOf = (by: DeviceId) => get().dialogs[by]
@@ -395,7 +400,7 @@ export const useHome = create<HomeState>()((set, get) => {
     },
 
     openWindows: (by = 'tablet') => setDialog(by, { type: 'windows' }),
-    setOnboarding: (step) => set({ onboarding: step }),
+    setOnboarding: (step) => { set({ onboarding: step }); if (step === 'done') log('Wall panel paired · Public panel') },
     setDeclinePairing: (v) => set({ declinePairing: v }),
     openEnergy: (by = 'tablet') => setDialog(by, { type: 'energy' }),
     closeDialog: (by = 'tablet') => {
@@ -423,15 +428,15 @@ export const useHome = create<HomeState>()((set, get) => {
         const next = { ...s.tempLimits, [which]: v }
         // Нижняя граница не выше верхней: держим хотя бы 1°
         if (next.min >= next.max) return s
-        return { tempLimits: next }
+        return { tempLimits: next, eventLog: [{ t: nowHHMM(), x: `Temperature limits set to ${next.min}–${next.max}°` }, ...s.eventLog] }
       }),
     setIdleMinutes: (m) => set({ idleMinutes: m }),
     setVacationOpt: (k, v) => set((s) => ({ vacationOpts: { ...s.vacationOpts, [k]: v } })),
     setDoorLocked: (v, by = 'alexey') => { set({ doorLocked: v }); toast(v ? 'Front door locked' : 'Front door unlocked', by) },
-    logEvent: (x) => set((st) => ({ eventLog: [{ t: new Date().toTimeString().slice(0, 5), x }, ...st.eventLog] })),
-    setCamPeek: (v, by = 'alexey') => { set({ camPeek: v }); toast(v ? 'Living room camera on for 10 min' : 'Living room camera off', by) },
+    logEvent: (x) => log(x),
+    setCamPeek: (v, by = 'alexey') => { set({ camPeek: v }); toast(v ? 'Living room camera on for 10 min' : 'Living room camera off', by, false); log(v ? 'Living room camera turned on for 10 min by Alexey' : 'Living room camera turned off') },
     setAddFlow: (patch) => set((s) => ({ addFlow: { ...s.addFlow, ...patch } })),
-    addDevice: (d) => set((s) => ({ addedDevices: [...s.addedDevices, { ...d, id: ++deviceId, on: false }] })),
+    addDevice: (d) => { set((s) => ({ addedDevices: [...s.addedDevices, { ...d, id: ++deviceId, on: false }] })); log(`${d.name} added to ${ROOM_NAMES[d.room]}`) },
     toggleAdded: (id, on, by = 'tablet') => {
       set((s) => ({ addedDevices: s.addedDevices.map((d) => (d.id === id ? { ...d, on } : d)) }))
       const d = get().addedDevices.find((x) => x.id === id)

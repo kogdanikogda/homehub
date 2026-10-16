@@ -354,3 +354,25 @@ describe('Full light', () => {
     expect(s().toasts.tablet?.text).toBe('Light in Living Room is back as it was')
   })
 })
+
+describe('журнал событий', () => {
+  it('всплывающее сообщение попадает в журнал, новые записи сверху', () => {
+    s().setDoorLocked(false)
+    s().setDoorLocked(true)
+    expect(s().eventLog.map((e) => e.x).slice(0, 2)).toEqual(['Front door locked', 'Front door unlocked'])
+  })
+  it('пределы температуры, камера гостиной, добавленное устройство, привязка панели', () => {
+    s().setTempLimit('max', 25)
+    expect(s().eventLog[0].x).toMatch(/^Temperature limits set to \d+–25°$/)
+    s().setCamPeek(true)
+    expect(s().eventLog[0].x).toBe('Living room camera turned on for 10 min by Alexey')
+    s().addDevice({ name: 'Floor lamp', room: 'corridor', type: 'Light' })
+    expect(s().eventLog[0].x).toBe('Floor lamp added to Corridor')
+    s().setOnboarding('done')
+    expect(s().eventLog[0].x).toBe('Wall panel paired · Public panel')
+  })
+  it('сигнализация: одна запись на включение', async () => {
+    s().armAlarm(); await whenIdle()
+    expect(s().eventLog.filter((e) => e.x === 'Alarm turned on')).toHaveLength(1)
+  })
+})

@@ -70,7 +70,7 @@ export function SecurityScreen({ onCamera }: { onCamera: (id: CamId) => void }) 
       <div className={styles.group}>
         <SectionLabel>Event log</SectionLabel>
         <div className={styles.log}>
-          {[...liveLog.map((e) => [e.t, e.x]), ...LOG].map(([t, text], i) => <div key={i + t + text}><span>{t}</span><span>{text}</span></div>)}
+          {[...liveLog.map((e) => [e.t, e.x]), ...LOG].slice(0, 14).map(([t, text], i) => <div key={i + t + text}><span>{t}</span><span>{text}</span></div>)}
         </div>
       </div>
     </>
