@@ -10,7 +10,6 @@ import { PhoneApp } from './screens/phone/PhoneApp'
 import { TabletApp } from './screens/tablet/TabletApp'
 import styles from './App.module.css'
 
-/** Панель, которой в прототипе вызывают события «из жизни дома» */
 /** Выбор языка: слева вверху, по умолчанию английский */
 function LanguageSwitch() {
   const lang = useLang((s) => s.lang)
@@ -28,8 +27,8 @@ function LanguageSwitch() {
 
 type View = 'all' | 'tablet' | 'marina' | 'alexey'
 
-function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void }) {
-  const [open, setOpen] = useState(false)
+/** Настройки и демо-контент: кнопка справа вверху, меню выезжает справа и сдвигает интерфейс влево */
+function PrototypePanel({ view, pick, open, onOpenChange }: { view: View; pick: (v: View) => void; open: boolean; onOpenChange: (v: boolean) => void }) {
   const windows = useHome((s) => s.windowsOpen)
   const failKeys = useHome((s) => s.failKeys)
   const mode = useHome((s) => s.mode)
@@ -44,15 +43,17 @@ function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void })
     <button
       type="button"
       className={styles.gear}
-      aria-label={t('Service panel')}
+      aria-label={open ? t('Close settings') : t('Settings & demo content')}
       aria-expanded={open}
       aria-controls="service-panel"
-      onClick={() => setOpen(!open)}
+      onClick={() => onOpenChange(!open)}
     >
-      <Icon name="cog" size={24} />
+      <Icon name={open ? 'x' : 'cog'} size={22} />
+      {!open && <span className={styles.gearLabel} aria-hidden="true">{t('Settings & demo content')}</span>}
     </button>
-    {open && (
-    <aside id="service-panel" className={styles.panel} aria-label={t('Service panel')}>
+    <aside id="service-panel" className={styles.drawer} aria-label={t('Settings & demo content')} aria-hidden={!open} inert={!open}>
+      <div className={styles.drawerInner}>
+      <h2 className={styles.drawerTitle}>{t('Settings & demo content')}</h2>
       <span className={styles.label}>{t('Device')}</span>
       <div className={styles.devices} role="group" aria-label={t('Device')}>
         {(['tablet', 'marina', 'alexey', 'all'] as const).map((v) => (
@@ -92,8 +93,8 @@ function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void })
       </Button>
       <Button size="sm" variant="secondary" onClick={a.dim}>{t('Dim screen')}</Button>
       <Button size="sm" variant="secondary" onClick={a.reset}>{t('Reset')}</Button>
+      </div>
     </aside>
-    )}
     </>
   )
 }
@@ -107,8 +108,10 @@ export function App() {
     setView(v)
     if (v === 'all') useHome.getState().setPairingManual(true)
   }
+  const [panel, setPanel] = useState(false)
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-panel={panel || undefined}>
+      <main className={styles.main}>
       {view === 'all' ? (
         <div className={styles.demo}>
           <figure className={styles.cell}><div className={styles.slot}><TabletFrame><TabletApp /></TabletFrame></div><figcaption>{t('Wall tablet')}</figcaption></figure>
@@ -117,13 +120,16 @@ export function App() {
         </div>
       ) : (
         <div className={styles.stage}>
+          <div className={styles.slot}>
           {view === 'tablet'
             ? <TabletFrame><TabletApp /></TabletFrame>
             : <PhoneFrame label={view === 'marina' ? t('Marina’s phone') : t('Alexey’s phone')}><PhoneApp key={view} user={view} /></PhoneFrame>}
+          </div>
         </div>
       )}
+      </main>
       <LanguageSwitch />
-      <PrototypePanel view={view} pick={pick} />
+      <PrototypePanel view={view} pick={pick} open={panel} onOpenChange={setPanel} />
     </div>
   )
 }

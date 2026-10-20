@@ -1,7 +1,9 @@
 /** Русские переводы. Ключ — английский текст из интерфейса; в значении можно дать три формы слова для чисел. */
 export const ru: Record<string, string | [string, string, string]> = {
   "Language": "Язык",
-  "Service panel": "Сервисная панель",
+  "Settings & demo content": "Настройки и демо-контент",
+  "Close settings": "Закрыть настройки",
+  "inside": "в доме",
   "Device": "Устройство",
   "All 3 devices": "Все 3 устройства",
   "Wall tablet": "Настенный планшет",

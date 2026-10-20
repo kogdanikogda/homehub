@@ -1,4 +1,16 @@
-.dim { position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--surface-bezel); }
-.time { font-size: 168px; font-weight: 300; line-height: 168px; letter-spacing: -0.03em; color: #d5dae0; }
-.line { font-size: 24px; line-height: 29px; color: #9a9a9a; }
-.wake { margin-top: 36px; font-size: 15px; color: #9a9a9a; opacity: .6; }
+/* Матовое стекло: размытая гостиная + затемнение, чтобы светлый текст читался */
+.dim {
+  position: absolute; inset: 0; z-index: 80;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  background:
+    radial-gradient(ellipse at center, rgba(12, 8, 6, .38), rgba(12, 8, 6, .62) 75%),
+    url('../../assets/bg/living-room-blur.jpg') center / cover no-repeat,
+    var(--surface-bezel);
+  color: #fff8f0;
+}
+.time { font-size: 168px; font-weight: 300; line-height: 168px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; text-shadow: 0 2px 24px rgba(0, 0, 0, .35); }
+.info { display: flex; align-items: center; gap: 16px; font-size: 26px; line-height: 32px; font-weight: 500; color: rgba(255, 248, 240, .9); text-shadow: 0 1px 12px rgba(0, 0, 0, .4); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; }
+.temp { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.where { color: rgba(255, 248, 240, .7); font-weight: 400; }
+.wake { margin-top: 40px; padding: 10px 20px; border-radius: 999px; background: rgba(255, 255, 255, .1); font-size: 15px; font-weight: 500; color: rgba(255, 248, 240, .8); }

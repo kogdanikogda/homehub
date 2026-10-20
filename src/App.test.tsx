@@ -15,7 +15,7 @@ afterEach(() => { cleanup(); useLang.getState().setLang('en'); useHome.setState(
 describe('главная страница', () => {
   it('открывается на настенном планшете, язык английский', () => {
     render(<App />)
-    expect(screen.getByRole('button', { name: 'Service panel' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Settings & demo content' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Scene' })).toBeTruthy()
     expect(screen.queryByRole('group', { name: 'Marina’s phone' })).toBeNull()
     expect(document.documentElement.lang).toBe('en')
@@ -28,20 +28,39 @@ describe('главная страница', () => {
     expect(group).toBeTruthy()
     await user.click(screen.getByRole('button', { name: 'RU' }))
     expect(screen.getByRole('heading', { name: 'Сцена' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Сервисная панель' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Настройки и демо-контент' })).toBeTruthy()
     expect(document.documentElement.lang).toBe('ru')
     await user.click(screen.getByRole('button', { name: 'EN' }))
     expect(screen.getByRole('heading', { name: 'Scene' })).toBeTruthy()
   })
 
-  it('выбор устройства спрятан в сервисной панели, кнопка вызова — шестерёнка', async () => {
+  it('выбор устройства спрятан в меню настроек, кнопка — шестерёнка, в открытом меню — крестик', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    const { container } = render(<App />)
     expect(screen.queryByRole('button', { name: 'Alexey’s phone' })).toBeNull()
-    const gear = screen.getByRole('button', { name: 'Service panel' })
+    const gear = screen.getByRole('button', { name: 'Settings & demo content' })
     expect(gear.querySelector('svg')).toBeTruthy()
+    expect(gear.getAttribute('aria-expanded')).toBe('false')
     await user.click(gear)
+    // меню открыто: страница помечена, интерфейс остаётся на экране рядом с меню
+    expect(container.firstElementChild?.hasAttribute('data-panel')).toBe(true)
+    expect(screen.getByRole('heading', { name: 'Scene' })).toBeTruthy()
+    const close = screen.getByRole('button', { name: 'Close settings' })
+    expect(close.getAttribute('aria-expanded')).toBe('true')
     await user.click(screen.getByRole('button', { name: 'Alexey’s phone' }))
     expect(screen.getByRole('group', { name: 'Alexey’s phone' })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Close settings' }))
+    expect(screen.queryByRole('button', { name: 'Wall tablet' })).toBeNull()
+  })
+
+  it('экран сна: время, дата и температура, без режима, сцены и сигнализации', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Settings & demo content' }))
+    await user.click(screen.getByRole('button', { name: 'Dim screen' }))
+    const dim = screen.getByRole('button', { name: 'Wake the display' })
+    expect(dim.textContent).toMatch(/\d+\.\d°C/)
+    expect(dim.textContent).toContain('inside')
+    expect(dim.textContent).not.toMatch(/mode|Alarm|Scene/)
   })
 })

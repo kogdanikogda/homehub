@@ -6,7 +6,7 @@ import { Header } from '../../components/Header/Header'
 import { ModeMenu, type ModeRowProps } from '../../components/ModeMenu/ModeMenu'
 import { Rail, type Page } from '../../components/Rail/Rail'
 import { ToastHost } from '../../components/ToastHost/ToastHost'
-import { MODE_NAMES, SCENES, TODAY_ENERGY_KWH } from '../../store/data'
+import { MODE_NAMES, TODAY_ENERGY_KWH } from '../../store/data'
 import { averageTemperature, windowsText } from '../../store/logic'
 import { ROOM_ORDER } from '../../store/data'
 import type { Mode, RoomId, SceneId } from '../../store/types'
@@ -34,7 +34,6 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
   const alarm = useHome((s) => s.alarm)
   const devices = useHome((s) => s.devices)
   const privateRooms = useHome((s) => s.privateRooms)
-  const activeScene = useHome((s) => s.activeScene)
   const windowsOpen = useHome((s) => s.windowsOpen)
   const onboarding = useHome((s) => s.onboarding)
   const dimmed = useHome((s) => s.dimmed)
@@ -71,7 +70,6 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
     { icon: 'case', name: MODE_NAMES.vacation, description: t('Long absence. Turned on by Alexey.'), current: mode === 'vacation', locked: mode !== 'vacation', badge: t('Admin only'), onClick: () => setMenuOpen(false) },
   ]
 
-  const status = `${t('{mode} mode', { mode: MODE_NAMES[mode] })} · ${alarm ? t('Alarm on') : t('Alarm off')}${activeScene ? ` · ${t('Scene')}: ${SCENES[activeScene].name}` : ''}`
 
   return (
     <div className={styles.root} onPointerDownCapture={() => setTouch((n) => n + 1)}>
@@ -103,7 +101,7 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
             note={t('The siren is on.')} actionLabel={t('Turn off alarm (PIN)')} actionIcon="lock" onAction={() => act.requestAlarmOff()} />
         : <CriticalAlert icon="fire" title={t('Smoke detected')} subtitle={t('Kitchen smoke sensor · {at}', { at: alert.at })}
             note={t('Alarm sound is on until you acknowledge.')} actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
-      {dimmed && !alert && <DimScreen time={clock.time} status={status} onWake={act.wake} />}
+      {dimmed && !alert && <DimScreen time={clock.time} date={clock.date} temperature={`${averageTemperature(devices, mode, privateRooms).toFixed(1)}°C`} onWake={act.wake} />}
     </div>
   )
 }

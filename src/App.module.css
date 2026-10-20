@@ -1,20 +1,55 @@
-.page { display: flex; flex-direction: column; height: 100%; background: var(--accent-100); }
-.stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
-.gear { position: fixed; right: 16px; top: 16px; z-index: 50; width: 48px; height: 48px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--accent-200); color: var(--accent-800); cursor: pointer; }
-.gear:hover { background: var(--accent-300, var(--accent-200)); }
-.gear:focus-visible { outline: 2px solid var(--accent-800); outline-offset: 2px; }
-.gear[aria-expanded='true'] { background: var(--accent-800); color: var(--accent-100); }
-.panel { position: fixed; right: 16px; top: 76px; z-index: 50; width: min(360px, calc(100vw - 32px)); max-height: calc(100vh - 92px); overflow-y: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 16px; background: var(--accent-200); box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+/* Фон: уютная гостиная за матовым стеклом. Поверх — тёплая дымка, чтобы стекло читалось как стекло */
+.page {
+  --glass: rgba(28, 19, 14, .52);
+  --glass-hover: rgba(28, 19, 14, .7);
+  --glass-strong: rgba(24, 16, 12, .72);
+  --glass-text: #fff8f0;
+  --glass-muted: rgba(255, 248, 240, .7);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(255, 255, 255, .1);
+  --drawer-w: 360px;
+  position: relative; display: flex; height: 100%; overflow: hidden;
+  background:
+    linear-gradient(rgba(255, 236, 214, .14), rgba(40, 24, 14, .22)),
+    url('./assets/bg/living-room-blur.jpg') center / cover no-repeat,
+    #3a2a20;
+}
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.stage { flex: 1; min-height: 0; display: flex; padding: 16px 124px; transition: padding .35s cubic-bezier(.2, .7, .2, 1); }
+.page[data-panel] .stage { padding-right: 24px; }
+.page[data-panel] .demo { padding-right: 24px; }
+
+/* Кнопка настроек: круглая шестерёнка; при наведении раскрывается в кнопку с подписью */
+.gear { position: fixed; right: 16px; top: 16px; z-index: 60; height: 48px; min-width: 48px; display: inline-flex; align-items: center; flex-direction: row-reverse; gap: 0; padding: 0 13px; border: 0; border-radius: 999px; background: var(--glass); color: var(--glass-text); box-shadow: var(--glass-shadow); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); cursor: pointer; transition: background .2s, gap .25s ease, padding .25s ease; }
+.gear > svg { flex: none; transition: transform .3s ease; }
+.gearLabel { max-width: 0; overflow: hidden; white-space: nowrap; font-size: 14px; font-weight: 600; opacity: 0; transition: max-width .3s ease, opacity .2s ease; }
+.gear:hover, .gear:focus-visible { background: var(--glass-hover); gap: 10px; padding: 0 18px 0 16px; }
+.gear:hover .gearLabel, .gear:focus-visible .gearLabel { max-width: 280px; opacity: 1; }
+.gear:hover > svg { transform: rotate(45deg); }
+.gear:focus-visible { outline: 2px solid var(--glass-text); outline-offset: 2px; }
+.gear[aria-expanded='true'] { background: rgba(255, 255, 255, .12); box-shadow: none; }
+.gear[aria-expanded='true']:hover { background: rgba(255, 255, 255, .2); padding: 0 13px; gap: 0; }
+.gear[aria-expanded='true']:hover > svg { transform: rotate(90deg); }
+
+/* Меню справа во всю высоту: выезжает и сдвигает интерфейс влево */
+.drawer { flex: none; width: 0; height: 100%; overflow: hidden; background: var(--glass-strong); color: var(--glass-text); backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2); box-shadow: -8px 0 40px rgba(0, 0, 0, .25); transition: width .35s cubic-bezier(.2, .7, .2, 1); }
+.page[data-panel] .drawer { width: var(--drawer-w); }
+.drawerInner { width: var(--drawer-w); height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 24px 20px 24px 24px; }
+.drawerInner > button { justify-content: flex-start; text-align: left; }
+.drawerTitle { margin: 0 56px 8px 0; min-height: 32px; display: flex; align-items: center; font-size: 17px; line-height: 22px; font-weight: 700; color: var(--glass-text); text-wrap: balance; }
+
+/* Язык: стеклянная капсула слева вверху */
+.lang { position: fixed; left: 16px; top: 16px; z-index: 60; display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--glass); box-shadow: var(--glass-shadow); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); }
+.langBtn { min-width: 44px; height: 42px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--glass-muted); font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .04em; cursor: pointer; transition: background .2s, color .2s; }
+.langBtn:hover { color: var(--glass-text); background: rgba(255, 255, 255, .1); }
+.langBtn[aria-pressed='true'] { background: var(--glass-text); color: #2a1a12; }
+.langBtn:focus-visible { outline: 2px solid var(--glass-text); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .drawer, .gear, .gearLabel, .gear > svg { transition: none; } }
 .label { margin-right: 4px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-800); }
 .switch { display: flex; gap: 8px; justify-content: center; padding: 12px 16px 0; }
-.demo { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 3.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 16px 20px; }
+.demo { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 3.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 76px 20px 16px; }
 .cell { margin: 0; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: stretch; gap: 8px; }
-.cell figcaption { text-align: center; font-size: 12px; font-weight: 600; color: var(--accent-700); letter-spacing: .02em; }
+.cell figcaption { justify-self: center; padding: 4px 12px; border-radius: 999px; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); text-align: center; font-size: 12px; font-weight: 600; color: var(--glass-text); letter-spacing: .02em; }
 .slot { width: 100%; height: 100%; min-height: 0; min-width: 0; contain: size; display: flex; align-items: center; justify-content: center; }
-.devices { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
-.label { width: 100%; margin: 4px 0 0; }
-
-.lang { position: fixed; left: 16px; top: 16px; z-index: 50; display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--accent-200); }
-.langBtn { min-width: 44px; height: 42px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--accent-800); font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .04em; cursor: pointer; }
-.langBtn[aria-pressed='true'] { background: var(--accent-800); color: var(--accent-100); }
-.langBtn:focus-visible { outline: 2px solid var(--accent-800); outline-offset: 2px; }
+.devices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.label { width: 100%; margin: 12px 0 0; color: rgba(255,255,255,.62); }
