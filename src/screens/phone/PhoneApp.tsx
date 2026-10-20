@@ -108,10 +108,10 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
       {sheet && <ModeSheet rows={rows} onClose={() => setSheet(false)} />}
       <DialogHost by={user} compact />
       {alert && (alert.kind === 'intrusion'
-        ? <CriticalAlert icon="shield" title={t('Alarm triggered')} subtitle={t('Intrusion detected · {at}', { at: alert.at })} note={t('The siren is on.')}
-            actionLabel={t('Turn off alarm')} actionIcon="shield" onAction={() => act.confirmAlarmOff(user)} />
-        : <CriticalAlert icon="fire" title={t('Smoke detected')} subtitle={t('Kitchen smoke sensor · {at}', { at: alert.at })} note={t('Alarm sound is on until you acknowledge.')}
-            actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
+        ? <CriticalAlert compact tone="intrusion" icon="shield" title={t('Alarm triggered')} where={t('Entrance · motion sensor')} at={alert.at} since={alert.since}
+            sound={t('Siren is on')} actionLabel={t('Turn off alarm')} actionIcon="shield" onAction={() => act.confirmAlarmOff(user)} />
+        : <CriticalAlert compact tone="smoke" icon="fire" title={t('Smoke detected')} where={t('Kitchen · smoke sensor')} at={alert.at} since={alert.since}
+            sound={t('Alarm sound is on')} actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
       <ToastHost top={68} toast={toast} onDone={(id) => clearToast(id, user)} />
     </div>
     </HeaderCtx.Provider>

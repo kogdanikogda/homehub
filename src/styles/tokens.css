@@ -49,6 +49,13 @@
   --status-on-crit: #16090b;
   --status-info: var(--info-400);
   --static-white: #ffffff;
+  /* Экран тревоги «Маяк»: проникновение — красный, дым — оранжевый */
+  --alarm-intrusion: #ff3b4e;
+  --alarm-intrusion-veil: 90 15 23;
+  --alarm-intrusion-deep: 42 7 11;
+  --alarm-smoke: #ff7a1a;
+  --alarm-smoke-veil: 92 34 8;
+  --alarm-smoke-deep: 43 15 5;
 
   /* Размеры */
   --space-4: 4px;  --space-8: 8px;  --space-12: 12px;

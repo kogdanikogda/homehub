@@ -97,10 +97,10 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />
       {alert && (alert.kind === 'intrusion'
-        ? <CriticalAlert icon="shield" title={t('Alarm triggered')} subtitle={t('Intrusion detected · Entrance motion sensor · {at}', { at: alert.at })}
-            note={t('The siren is on.')} actionLabel={t('Turn off alarm (PIN)')} actionIcon="lock" onAction={() => act.requestAlarmOff()} />
-        : <CriticalAlert icon="fire" title={t('Smoke detected')} subtitle={t('Kitchen smoke sensor · {at}', { at: alert.at })}
-            note={t('Alarm sound is on until you acknowledge.')} actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
+        ? <CriticalAlert tone="intrusion" icon="shield" title={t('Alarm triggered')} where={t('Entrance · motion sensor')} at={alert.at} since={alert.since}
+            sound={t('Siren is on')} actionLabel={t('Turn off alarm (PIN)')} actionIcon="lock" onAction={() => act.requestAlarmOff()} />
+        : <CriticalAlert tone="smoke" icon="fire" title={t('Smoke detected')} where={t('Kitchen · smoke sensor')} at={alert.at} since={alert.since}
+            sound={t('Alarm sound is on')} actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
       {dimmed && !alert && <DimScreen time={clock.time} date={clock.date} temperature={`${averageTemperature(devices, mode, privateRooms).toFixed(1)}°C`} onWake={act.wake} />}
     </div>
   )

@@ -54,7 +54,7 @@ export interface HomeState {
   declinePairing: boolean
   toasts: Record<DeviceId, Toast>
   dimmed: boolean
-  alert: { kind: AlertKind; at: string } | null
+  alert: { kind: AlertKind; at: string; since: number } | null
   /** Для прототипа: какие устройства «не ответят» при следующей сцене */
   failKeys: DeviceKey[]
   /** Пауза между шагами прогресса, мс (в тестах 0) */
@@ -413,7 +413,7 @@ export const useHome = create<HomeState>()((set, get) => {
     dim: () => set({ dimmed: true }),
     wake: () => set({ dimmed: false }),
 
-    triggerAlert: (kind) => set((s) => ({ alert: { kind, at: nowHHMM() }, alarm: kind === 'intrusion' ? true : s.alarm, dimmed: false, dialogs: { ...s.dialogs, tablet: null } })),
+    triggerAlert: (kind) => set((s) => ({ alert: { kind, at: nowHHMM(), since: Date.now() }, alarm: kind === 'intrusion' ? true : s.alarm, dimmed: false, dialogs: { ...s.dialogs, tablet: null } })),
     acknowledgeSmoke: () => set({ alert: null }),
     // На общей панели нужен PIN, на телефоне хватает подтверждения
     requestAlarmOff: (by = 'tablet') => setDialog(by, by === 'tablet' ? { type: 'pin', purpose: 'alarm' } : { type: 'alarmOff' }),

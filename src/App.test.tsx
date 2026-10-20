@@ -67,6 +67,21 @@ describe('главная страница', () => {
     expect(screen.queryByRole('button', { name: 'Close settings' })).toBeNull()
   })
 
+  it('экран тревоги: таймер, место, звук и кнопка; на русском тоже', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Settings & demo content' }))
+    await user.click(screen.getByRole('button', { name: 'Smoke in the kitchen' }))
+    const alert = screen.getByRole('alertdialog', { name: 'Smoke detected' })
+    expect(alert.textContent).toMatch(/Alarm · 0:0\d/)
+    expect(alert.textContent).toContain('Kitchen · smoke sensor')
+    expect(alert.textContent).toContain('Alarm sound is on')
+    await user.click(screen.getByRole('button', { name: 'RU' }))
+    expect(screen.getByRole('alertdialog', { name: 'Обнаружен дым' }).textContent).toContain('Кухня · датчик дыма')
+    await user.click(screen.getByRole('button', { name: 'Подтвердить' }))
+    expect(screen.queryByRole('alertdialog')).toBeNull()
+  })
+
   it('экран сна: время, дата и температура, без режима, сцены и сигнализации', async () => {
     const user = userEvent.setup()
     render(<App />)

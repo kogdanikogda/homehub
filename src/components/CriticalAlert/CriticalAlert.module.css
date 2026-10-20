@@ -1,7 +1,51 @@
-.alert { position: absolute; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; padding: 60px; background: var(--status-crit-fill); color: var(--static-white); }
-.content { display: flex; flex-direction: column; align-items: center; gap: 28px; width: 760px; }
-.big { display: flex; align-items: center; justify-content: center; width: 112px; height: 112px; border-radius: 50%; background: var(--static-white); color: var(--status-crit-fill); }
-.copy { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-.title { margin: 0; font-size: 76px; font-weight: 700; line-height: 92px; }
-.subtitle { margin: 0; font-size: 28px; line-height: 34px; }
-.note { margin: 0; font-size: 20px; line-height: 24px; }
+/* Экран тревоги «Маяк». Интерфейс под ним размыт, обесцвечен и притушен примерно на 70 % */
+.alert {
+  --c: var(--alarm-intrusion); --veil: var(--alarm-intrusion-veil); --deep: var(--alarm-intrusion-deep);
+  position: absolute; inset: 0; z-index: 90; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 72px 96px 80px; text-align: center; color: var(--static-white);
+  background: radial-gradient(circle at 50% 42%, rgb(var(--veil) / .72) 0%, rgb(var(--deep) / .7) 45%, rgb(18 3 5 / .8) 100%);
+  backdrop-filter: blur(5px) saturate(.35); -webkit-backdrop-filter: blur(5px) saturate(.35);
+}
+.smoke { --c: var(--alarm-smoke); --veil: var(--alarm-smoke-veil); --deep: var(--alarm-smoke-deep); }
+/* «дыхание» света из центра */
+.alert::before { content: ''; position: absolute; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--c) 55%, transparent), transparent 60%); animation: breathe 1.6s ease-in-out infinite; pointer-events: none; }
+
+.chip { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px 0 16px; border-radius: 999px; background: rgb(var(--deep) / .92); color: color-mix(in srgb, var(--c) 30%, white); font-size: 18px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: currentColor; animation: blink 1s steps(1) infinite; }
+.timer { font-variant-numeric: tabular-nums; }
+
+.mid { display: flex; flex-direction: column; align-items: center; gap: 40px; }
+/* Маячок: волны идут ПОД остальными элементами (z-index −1 внутри экрана тревоги) */
+.beacon { position: relative; width: 168px; height: 168px; display: grid; place-items: center; }
+.ring { position: absolute; inset: 16px; z-index: -1; border-radius: 50%; border: 3px solid var(--c); animation: ring 2.4s cubic-bezier(.2, .6, .3, 1) infinite; }
+.ring:nth-child(2) { animation-delay: .8s; }
+.ring:nth-child(3) { animation-delay: 1.6s; }
+.core { position: relative; width: 136px; height: 136px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: var(--static-white); box-shadow: 0 0 60px color-mix(in srgb, var(--c) 70%, transparent); }
+
+.copy { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.title { margin: 0; font-size: 80px; line-height: 88px; font-weight: 800; letter-spacing: -.02em; text-wrap: balance; }
+.where { margin: 0; font-size: 28px; line-height: 36px; font-weight: 500; opacity: .9; }
+.facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.fact { display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 20px; border-radius: 14px; background: rgb(var(--deep) / .92); font-size: 20px; font-weight: 600; color: rgb(255 255 255 / .92); }
+.action { min-width: 460px; box-shadow: 0 12px 40px rgb(0 0 0 / .4); }
+
+/* Телефон */
+.compact { padding: 76px 20px 44px; }
+.compact .chip { height: 34px; padding: 0 14px 0 12px; gap: 8px; font-size: 13px; }
+.compact .dot { width: 9px; height: 9px; }
+.compact .mid { gap: 28px; }
+.compact .beacon { width: 116px; height: 116px; }
+.compact .ring { inset: 12px; }
+.compact .core { width: 92px; height: 92px; }
+.compact .copy { gap: 8px; }
+.compact .title { font-size: 36px; line-height: 40px; }
+.compact .where { font-size: 17px; line-height: 22px; }
+.compact .facts { gap: 8px; }
+.compact .fact { height: 36px; padding: 0 12px; gap: 6px; border-radius: 10px; font-size: 14px; }
+.compact .action { width: 100%; min-width: 0; }
+
+@keyframes ring { from { transform: scale(1); opacity: .9; } to { transform: scale(3.2); opacity: 0; } }
+@keyframes breathe { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes blink { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .alert::before, .ring, .dot { animation: none; } .ring { opacity: 0; } }
