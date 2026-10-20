@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from './components/Button/Button'
+import { Icon } from './components/Icon/Icon'
 import { PhoneFrame } from './components/PhoneFrame/PhoneFrame'
 import { TabletFrame } from './components/TabletFrame/TabletFrame'
 import { ROOM_NAMES } from './store/data'
@@ -10,6 +11,7 @@ import styles from './App.module.css'
 
 /** Панель, которой в прототипе вызывают события «из жизни дома» */
 function PrototypePanel() {
+  const [open, setOpen] = useState(false)
   const windows = useHome((s) => s.windowsOpen)
   const failKeys = useHome((s) => s.failKeys)
   const mode = useHome((s) => s.mode)
@@ -20,8 +22,20 @@ function PrototypePanel() {
   const a = useHome.getState()
   const tvFails = failKeys.includes('living.tv')
   return (
-    <aside className={styles.panel} aria-label="Prototype controls">
-      <span className={styles.label}>Prototype</span>
+    <>
+    <button
+      type="button"
+      className={styles.gear}
+      aria-label="Service panel"
+      aria-expanded={open}
+      aria-controls="service-panel"
+      onClick={() => setOpen(!open)}
+    >
+      <Icon name="gear" size={22} />
+    </button>
+    {open && (
+    <aside id="service-panel" className={styles.panel} aria-label="Service panel">
+      <span className={styles.label}>Service panel</span>
       <Button size="sm" variant="secondary" onClick={() => a.toggleWindow('living')}>
         {windows.living ? 'Close' : 'Open'} {ROOM_NAMES.living} window
       </Button>
@@ -53,6 +67,8 @@ function PrototypePanel() {
       <Button size="sm" variant="secondary" onClick={a.dim}>Dim screen</Button>
       <Button size="sm" variant="secondary" onClick={a.reset}>Reset</Button>
     </aside>
+    )}
+    </>
   )
 }
 
