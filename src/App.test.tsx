@@ -88,7 +88,6 @@ describe('главная страница', () => {
     await user.click(screen.getByRole('button', { name: 'Dim screen' }))
     const dim = screen.getByRole('button', { name: 'Wake the display' })
     expect(dim.textContent).toMatch(/\d+\.\d°C/)
-    expect(dim.textContent).toContain('inside')
     expect(dim.textContent).not.toMatch(/mode|Alarm|Scene/)
   })
 })

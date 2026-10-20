@@ -13,7 +13,6 @@ export const ru: Record<string, string | [string, string, string]> = {
   "Reset demo": "Сбросить демо",
   "Settings & demo content": "Настройки и демо-контент",
   "Close settings": "Закрыть настройки",
-  "inside": "в доме",
   "Device": "Устройство",
   "All 3 devices": "Все 3 устройства",
   "Wall tablet": "Настенный планшет",

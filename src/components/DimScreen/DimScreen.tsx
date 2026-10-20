@@ -6,7 +6,7 @@ type Props = { time: string; date: string; temperature: string; onWake: () => vo
 
 /**
  * Ambient-режим: экран не блокируется, за «матовым стеклом» видна гостиная.
- * Остаётся минимум: время, дата и температура в доме. Касание возвращает яркость.
+ * Остаётся минимум: время, дата и температура. Касание возвращает яркость.
  */
 export function DimScreen({ time, date, temperature, onWake }: Props) {
   return (
@@ -18,7 +18,6 @@ export function DimScreen({ time, date, temperature, onWake }: Props) {
         <span className={styles.temp}>
           <Icon name="temp" size={26} />
           <span>{temperature}</span>
-          <span className={styles.where}>{t('inside')}</span>
         </span>
       </span>
       <span className={styles.wake}>{t('Tap to wake')}</span>

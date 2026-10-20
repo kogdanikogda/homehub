@@ -1522,7 +1522,7 @@ setInterval(function(){
   document.querySelectorAll('[data-al-t]').forEach(function(n){n.textContent=tm;});
 },1000);
 function dimHTML(){
-  return '<div class="dim" data-act="wake"><div class="time num">19:42</div><div class="l"><span>Thursday, 8 October</span><span class="dt"></span><span class="tp num">'+I('temp',26)+'<span>'+avgTemp()+'°C</span><span class="wh">inside</span></span></div><div class="w">Tap to wake</div></div>';
+  return '<div class="dim" data-act="wake"><div class="time num">19:42</div><div class="l"><span>Thursday, 8 October</span><span class="dt"></span><span class="tp num">'+I('temp',26)+'<span>'+avgTemp()+'°C</span></span></div><div class="w">Tap to wake</div></div>';
 }
 var MODE_SHORT={Home:'Alarm off. Everyday life at home.',Away:'Alarm on. Lights and media off. For when everyone leaves.',Vacation:'Long absence. Turned on by Alexey.'};
 function modeMenuHTML(){
@@ -2029,7 +2029,7 @@ function dsHTML(){
     ['Touch','Every control is at least 56 px high or sits in a 56 px row. Spacing follows a 4-pt grid.'],
     ['Shape','Controls 12 px, cards 20 px, dialogs 26 px, pills fully round. No borders anywhere: surfaces separate by fill. Only dialogs and toasts float.'],
     ['Type','One family (Manrope) with tabular figures for times, temperatures and counts.'],
-    ['Theme','Dark only. The dimmed screen shows the room through frosted glass (blurred photo, dark veil): time, date and indoor temperature only.']
+    ['Theme','Dark only. The dimmed screen shows the room through frosted glass (blurred photo, dark veil): time, date and temperature only.']
   ].map(function(r){return '<div><b>'+r[0]+'</b><span>'+r[1]+'</span></div>';}).join('');
   return '<section class="ds-sec"><h2>Color tokens</h2><p>Names follow Figma variables. One dark theme for now; final colors come later.</p><div class="ds-grid">'+sw+'</div></section>'+
     '<section class="ds-sec"><h2>Typography</h2><p>Manrope. Sizes are set for a tablet on the wall, read at arm’s length.</p><div class="ds-type">'+ty+'</div></section>'+
