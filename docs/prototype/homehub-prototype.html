@@ -2,7 +2,7 @@
 <title>HomeHub Wall Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: review console on top; device stage below (wall tablet 1366x1024 / admin phone 390x844 / design system sheet).
    Inside the tablet: status header, nav rail, then mode+scene row, summary row, room cards. */
@@ -21,7 +21,7 @@
   --dim-bg:#000000; --dim-ink:#9A9A9A;
   --scrim:rgba(0,0,0,.66);
   --shadow:0 18px 48px rgba(0,0,0,.6);
-  --f:"Inter",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f:"Manrope",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --t-cap:13px; --t-sm:15px; --t-body:17px; --t-lg:20px; --t-title:24px; --t-val:30px;
   --r-ctl:12px; --r-card:20px; --r-dlg:26px; --touch:56px;
   color-scheme:dark;
@@ -1981,11 +1981,11 @@ function dsHTML(){
     ['Attention levels','Info: ink toast, auto-dismiss. Warning: warn banner and chips, persistent, not blocking. Critical: full-screen crit overlay, wakes the display, needs an action.'],
     ['Touch','Every control is at least 56 px high or sits in a 56 px row. Spacing follows a 4-pt grid.'],
     ['Shape','Controls 12 px, cards 20 px, dialogs 26 px, pills fully round. No borders anywhere: surfaces separate by fill. Only dialogs and toasts float.'],
-    ['Type','One family (Inter) with tabular figures for times, temperatures and counts.'],
+    ['Type','One family (Manrope) with tabular figures for times, temperatures and counts.'],
     ['Theme','Dark only. The dimmed screen uses an even darker ground.']
   ].map(function(r){return '<div><b>'+r[0]+'</b><span>'+r[1]+'</span></div>';}).join('');
   return '<section class="ds-sec"><h2>Color tokens</h2><p>Names follow Figma variables. One dark theme for now; final colors come later.</p><div class="ds-grid">'+sw+'</div></section>'+
-    '<section class="ds-sec"><h2>Typography</h2><p>Inter. Sizes are set for a tablet on the wall, read at arm’s length.</p><div class="ds-type">'+ty+'</div></section>'+
+    '<section class="ds-sec"><h2>Typography</h2><p>Manrope. Sizes are set for a tablet on the wall, read at arm’s length.</p><div class="ds-type">'+ty+'</div></section>'+
     '<section class="ds-sec"><h2>Spacing, shape, touch</h2><p>4-pt grid. Radius: controls 10, cards 16, dialogs 24. Minimum touch target 56.</p><div class="ds-sp">'+sp+'</div></section>'+
     '<section class="ds-sec"><h2>Components</h2><p>Names use the Figma pattern Component / Property=Value, so the same names can be used as components with variants later.</p><div class="ds-comp">'+comps+'</div></section>'+
     '<section class="ds-sec"><h2>Rules</h2><div class="ds-rules">'+rules+'</div></section>';

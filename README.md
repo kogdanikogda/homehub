@@ -15,7 +15,7 @@ npm run storybook
 
 ## Стек
 
-React, TypeScript, Vite, CSS-переменные и CSS Modules, Radix UI, Zustand, Storybook, Vitest. Шрифт Inter подключён локально.
+React, TypeScript, Vite, CSS-переменные и CSS Modules, Radix UI, Zustand, Storybook, Vitest. Шрифт Manrope подключён локально.
 
 ## Демо
 

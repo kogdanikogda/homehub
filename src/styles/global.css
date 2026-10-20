@@ -8,7 +8,7 @@ body {
   margin: 0;
   background: var(--surface-0);
   color: var(--text-primary);
-  font-family: 'Inter Variable', system-ui, sans-serif;
+  font-family: 'Manrope Variable', system-ui, sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }

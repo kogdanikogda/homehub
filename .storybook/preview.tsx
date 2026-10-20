@@ -1,4 +1,4 @@
-import '@fontsource-variable/inter'
+import '@fontsource-variable/manrope'
 import '../src/styles/global.css'
 import type { Preview } from '@storybook/react-vite'
 
