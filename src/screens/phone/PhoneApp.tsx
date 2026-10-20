@@ -112,7 +112,7 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
             actionLabel={t('Turn off alarm')} actionIcon="shield" onAction={() => act.confirmAlarmOff(user)} />
         : <CriticalAlert icon="fire" title={t('Smoke detected')} subtitle={t('Kitchen smoke sensor · {at}', { at: alert.at })} note={t('Alarm sound is on until you acknowledge.')}
             actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
-      <ToastHost toast={toast} onDone={(id) => clearToast(id, user)} />
+      <ToastHost top={68} toast={toast} onDone={(id) => clearToast(id, user)} />
     </div>
     </HeaderCtx.Provider>
   )

@@ -1,1 +1,3 @@
-.host { position: absolute; width: max-content; max-width: calc(100% - 32px); left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 60; }
+.host { position: absolute; width: max-content; max-width: calc(100% - 32px); left: 50%; transform: translateX(-50%); z-index: 120; animation: drop .25s cubic-bezier(.2, .7, .2, 1); }
+@keyframes drop { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .host { animation: none; } }
