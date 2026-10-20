@@ -15,7 +15,7 @@ function LanguageSwitch() {
   const lang = useLang((s) => s.lang)
   const setLang = useLang((s) => s.setLang)
   return (
-    <div className={styles.lang} data-lang-switch role="group" aria-label={t('Language')}>
+    <div className={styles.lang} role="group" aria-label={t('Language')}>
       {LANGS.map((l) => (
         <button key={l.id} type="button" className={styles.langBtn} aria-pressed={lang === l.id} title={l.full} lang={l.id} onClick={() => setLang(l.id)}>
           {l.label}
@@ -60,18 +60,12 @@ function PrototypePanel({ view, pick, open, onOpenChange }: { view: View; pick: 
   const flow = useHome((s) => s.addFlow)
   const a = useHome.getState()
   const tvFails = failKeys.includes('living.tv')
-  // Клик вне меню (и вне кнопки) или Esc закрывают меню
+  // Esc закрывает меню; клик вне меню его не закрывает — можно работать с устройством при открытом меню
   useEffect(() => {
     if (!open) return
-    const onDown = (e: PointerEvent) => {
-      const el = e.target as Element | null
-      if (el?.closest('#service-panel, [aria-controls="service-panel"], [data-lang-switch]')) return
-      onOpenChange(false)
-    }
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onOpenChange(false) }
-    document.addEventListener('pointerdown', onDown)
     document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey) }
+    return () => document.removeEventListener('keydown', onKey)
   }, [open, onOpenChange])
   return (
     <>
