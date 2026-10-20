@@ -2,11 +2,11 @@
 .page {
   --glass: rgba(28, 19, 14, .52);
   --glass-hover: rgba(28, 19, 14, .7);
-  --glass-strong: rgba(24, 16, 12, .72);
+  --glass-strong: rgba(22, 16, 13, .94);
   --glass-text: #fff8f0;
   --glass-muted: rgba(255, 248, 240, .7);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(255, 255, 255, .1);
-  --drawer-w: 360px;
+  --drawer-w: 380px;
   position: relative; display: flex; height: 100%; overflow: hidden;
   background:
     linear-gradient(rgba(255, 236, 214, .14), rgba(40, 24, 14, .22)),
@@ -33,9 +33,8 @@
 /* Меню справа во всю высоту: выезжает и сдвигает интерфейс влево */
 .drawer { flex: none; width: 0; height: 100%; overflow: hidden; background: var(--glass-strong); color: var(--glass-text); backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2); box-shadow: -8px 0 40px rgba(0, 0, 0, .25); transition: width .35s cubic-bezier(.2, .7, .2, 1); }
 .page[data-panel] .drawer { width: var(--drawer-w); }
-.drawerInner { width: var(--drawer-w); height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 24px 20px 24px 24px; }
-.drawerInner > button { justify-content: flex-start; text-align: left; }
-.drawerTitle { margin: 0 56px 8px 0; min-height: 32px; display: flex; align-items: center; font-size: 17px; line-height: 22px; font-weight: 700; color: var(--glass-text); text-wrap: balance; }
+.drawerInner { width: var(--drawer-w); height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: stretch; gap: 28px; padding: 24px 20px 32px 24px; }
+.drawerTitle { position: sticky; top: -24px; z-index: 1; margin: -24px -20px -12px -24px; padding: 24px 76px 14px 24px; min-height: 80px; display: flex; align-items: center; background: rgb(24, 17, 14); font-size: 17px; line-height: 22px; font-weight: 700; color: var(--glass-text); text-wrap: balance; }
 
 /* Язык: стеклянная капсула слева вверху */
 .lang { position: fixed; left: 16px; top: 16px; z-index: 60; display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--glass); box-shadow: var(--glass-shadow); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); }
@@ -53,3 +52,24 @@
 .slot { width: 100%; height: 100%; min-height: 0; min-width: 0; contain: size; display: flex; align-items: center; justify-content: center; }
 .devices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
 .label { width: 100%; margin: 12px 0 0; color: rgba(255,255,255,.62); }
+
+/* Группы меню: заголовок, пояснение, список строк */
+.group { display: flex; flex-direction: column; gap: 10px; }
+.groupTitle { margin: 0; font-size: 13px; line-height: 16px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #e8d4bb; }
+.groupHint { margin: -4px 0 2px; font-size: 13px; line-height: 18px; color: rgba(255, 248, 240, .72); }
+.list { display: flex; flex-direction: column; gap: 2px; border-radius: 16px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 12px 8px 10px; border: 0; background: rgba(255, 255, 255, .07); color: #fff8f0; font: inherit; font-size: 15px; line-height: 20px; font-weight: 500; text-align: left; cursor: pointer; transition: background .15s; }
+.row:hover { background: rgba(255, 255, 255, .13); }
+.row:focus-visible { outline: 2px solid #fff8f0; outline-offset: -2px; }
+.row:disabled { cursor: not-allowed; opacity: .45; }
+.row[data-on] { background: rgba(197, 149, 125, .2); }
+.rowIcon { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: rgba(255, 255, 255, .08); color: #e8d4bb; }
+.row[data-on] .rowIcon { background: rgba(220, 186, 154, .25); color: #fff8f0; }
+.rowLabel { flex: 1; min-width: 0; }
+.rowChev { flex: none; color: rgba(255, 248, 240, .5); }
+.deviceBtn { min-height: 48px; padding: 8px 12px; border: 0; border-radius: 14px; background: rgba(255, 255, 255, .07); color: #fff8f0; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; }
+.deviceBtn:hover { background: rgba(255, 255, 255, .13); }
+.deviceBtn[aria-pressed='true'] { background: linear-gradient(135deg, var(--accent-300), var(--accent-400)); color: #1c110c; }
+.deviceBtn:focus-visible { outline: 2px solid #fff8f0; outline-offset: 2px; }
+.reset { align-self: flex-start; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: #e8d4bb; font: inherit; font-size: 15px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.reset:hover { color: #fff8f0; }

@@ -1,6 +1,16 @@
 /** Русские переводы. Ключ — английский текст из интерфейса; в значении можно дать три формы слова для чисел. */
 export const ru: Record<string, string | [string, string, string]> = {
   "Language": "Язык",
+  "Trigger an event": "Вызвать событие",
+  "Happens once, as if in the real house.": "Срабатывает один раз, как в настоящем доме.",
+  "House state": "Состояние дома",
+  "{room} window open": "Открыто окно: {room}",
+  "What goes wrong": "Что идёт не так",
+  "Turn on to show error and edge cases.": "Включите, чтобы показать ошибки и редкие случаи.",
+  "TV does not respond to scenes": "Телевизор не отвечает на сцены",
+  "Alexey decides on pairing himself": "Алексей сам решает о подключении",
+  "Progress windows stop halfway": "Окна процессов замирают на середине",
+  "Reset demo": "Сбросить демо",
   "Settings & demo content": "Настройки и демо-контент",
   "Close settings": "Закрыть настройки",
   "inside": "в доме",

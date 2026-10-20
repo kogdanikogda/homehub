@@ -53,6 +53,20 @@ describe('главная страница', () => {
     expect(screen.queryByRole('button', { name: 'Wall tablet' })).toBeNull()
   })
 
+  it('меню закрывается кликом вне меню и клавишей Esc', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Settings & demo content' }))
+    // клик внутри меню его не закрывает
+    await user.click(screen.getByRole('switch', { name: 'Device setup fails' }))
+    expect(screen.getByRole('switch', { name: 'Device setup fails' }).getAttribute('aria-checked')).toBe('true')
+    await user.click(screen.getByRole('heading', { name: 'Scene' }))
+    expect(screen.queryByRole('button', { name: 'Close settings' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'Settings & demo content' }))
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('button', { name: 'Close settings' })).toBeNull()
+  })
+
   it('экран сна: время, дата и температура, без режима, сцены и сигнализации', async () => {
     const user = userEvent.setup()
     render(<App />)
