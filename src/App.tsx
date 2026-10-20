@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from './components/Button/Button'
 import { Icon } from './components/Icon/Icon'
+import { LANGS, t, useLang } from './i18n'
 import { PhoneFrame } from './components/PhoneFrame/PhoneFrame'
 import { TabletFrame } from './components/TabletFrame/TabletFrame'
 import { ROOM_NAMES } from './store/data'
@@ -10,6 +11,21 @@ import { TabletApp } from './screens/tablet/TabletApp'
 import styles from './App.module.css'
 
 /** Панель, которой в прототипе вызывают события «из жизни дома» */
+/** Выбор языка: слева вверху, по умолчанию английский */
+function LanguageSwitch() {
+  const lang = useLang((s) => s.lang)
+  const setLang = useLang((s) => s.setLang)
+  return (
+    <div className={styles.lang} role="group" aria-label={t('Language')}>
+      {LANGS.map((l) => (
+        <button key={l.id} type="button" className={styles.langBtn} aria-pressed={lang === l.id} title={l.full} lang={l.id} onClick={() => setLang(l.id)}>
+          {l.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 type View = 'all' | 'tablet' | 'marina' | 'alexey'
 
 function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void }) {
@@ -28,7 +44,7 @@ function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void })
     <button
       type="button"
       className={styles.gear}
-      aria-label="Service panel"
+      aria-label={t('Service panel')}
       aria-expanded={open}
       aria-controls="service-panel"
       onClick={() => setOpen(!open)}
@@ -36,46 +52,46 @@ function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void })
       <Icon name="cog" size={24} />
     </button>
     {open && (
-    <aside id="service-panel" className={styles.panel} aria-label="Service panel">
-      <span className={styles.label}>Device</span>
-      <div className={styles.devices} role="group" aria-label="Device">
+    <aside id="service-panel" className={styles.panel} aria-label={t('Service panel')}>
+      <span className={styles.label}>{t('Device')}</span>
+      <div className={styles.devices} role="group" aria-label={t('Device')}>
         {(['tablet', 'marina', 'alexey', 'all'] as const).map((v) => (
           <Button key={v} size="sm" variant={view === v ? 'primary' : 'secondary'} aria-pressed={view === v} onClick={() => pick(v)}>
-            {v === 'all' ? 'All 3 devices' : v === 'tablet' ? 'Wall tablet' : v === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}
+            {v === 'all' ? t('All 3 devices') : v === 'tablet' ? t('Wall tablet') : v === 'marina' ? t('Marina’s phone') : t('Alexey’s phone')}
           </Button>
         ))}
       </div>
-      <span className={styles.label}>Events</span>
+      <span className={styles.label}>{t('Events')}</span>
       <Button size="sm" variant="secondary" onClick={() => a.toggleWindow('living')}>
-        {windows.living ? 'Close' : 'Open'} {ROOM_NAMES.living} window
+        {windows.living ? t('Close {room} window', { room: ROOM_NAMES.living }) : t('Open {room} window', { room: ROOM_NAMES.living })}
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.toggleWindow('kids1')}>
-        {windows.kids1 ? 'Close' : 'Open'} {ROOM_NAMES.kids1} window
+        {windows.kids1 ? t('Close {room} window', { room: ROOM_NAMES.kids1 }) : t('Open {room} window', { room: ROOM_NAMES.kids1 })}
       </Button>
-      <Button size="sm" variant="secondary" onClick={() => a.triggerAlert('intrusion')}>Intrusion alarm</Button>
-      <Button size="sm" variant="secondary" onClick={() => a.triggerAlert('smoke')}>Smoke in the kitchen</Button>
-      <Button size="sm" variant="secondary" disabled={mode === 'vacation'} onClick={() => a.enterVacation()}>Vacation (from Alexey’s phone)</Button>
+      <Button size="sm" variant="secondary" onClick={() => a.triggerAlert('intrusion')}>{t('Intrusion alarm')}</Button>
+      <Button size="sm" variant="secondary" onClick={() => a.triggerAlert('smoke')}>{t('Smoke in the kitchen')}</Button>
+      <Button size="sm" variant="secondary" disabled={mode === 'vacation'} onClick={() => a.enterVacation()}>{t('Vacation (from Alexey’s phone)')}</Button>
       <Button size="sm" variant="secondary" onClick={() => a.setFailKeys(tvFails ? [] : ['living.tv'])}>
-        TV {tvFails ? 'will not respond' : 'responds'} to scenes
+        {tvFails ? t('TV will not respond to scenes') : t('TV responds to scenes')}
       </Button>
-      <Button size="sm" variant="secondary" onClick={() => a.setOnboarding('welcome')}>Setup flow</Button>
+      <Button size="sm" variant="secondary" onClick={() => a.setOnboarding('welcome')}>{t('Setup flow')}</Button>
       <Button size="sm" variant="secondary" onClick={() => a.setDeclinePairing(!decline)}>
-        Owner {decline ? 'declines' : 'approves'} pairing
+        {decline ? t('Owner declines pairing') : t('Owner approves pairing')}
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.setPairingManual(!manual)}>
-        Pairing: {manual ? 'decided on Alexey’s phone' : 'decided automatically'}
+        {manual ? t('Pairing: decided on Alexey’s phone') : t('Pairing: decided automatically')}
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.setAddFlow({ searchEmpty: !flow.searchEmpty })}>
-        Device search {flow.searchEmpty ? 'finds nothing' : 'finds devices'}
+        {flow.searchEmpty ? t('Device search finds nothing') : t('Device search finds devices')}
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.setAddFlow({ connectFails: !flow.connectFails })}>
-        Device setup {flow.connectFails ? 'fails' : 'succeeds'}
+        {flow.connectFails ? t('Device setup fails') : t('Device setup succeeds')}
       </Button>
       <Button size="sm" variant="secondary" onClick={() => a.setFreezeProgress(!freeze)}>
-        Progress windows: {freeze ? 'freeze halfway (debug)' : 'run normally'}
+        {freeze ? t('Progress windows: freeze halfway (debug)') : t('Progress windows: run normally')}
       </Button>
-      <Button size="sm" variant="secondary" onClick={a.dim}>Dim screen</Button>
-      <Button size="sm" variant="secondary" onClick={a.reset}>Reset</Button>
+      <Button size="sm" variant="secondary" onClick={a.dim}>{t('Dim screen')}</Button>
+      <Button size="sm" variant="secondary" onClick={a.reset}>{t('Reset')}</Button>
     </aside>
     )}
     </>
@@ -83,6 +99,8 @@ function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void })
 }
 
 export function App() {
+  const lang = useLang((s) => s.lang) // при смене языка перерисовывается весь интерфейс
+  useEffect(() => { document.documentElement.lang = lang }, [lang])
   // Стартовая страница — настенный планшет; остальные устройства выбираются в сервисной панели
   const [view, setView] = useState<View>(() => (new URLSearchParams(location.search).get('device') as View) || 'tablet')
   const pick = (v: View) => {
@@ -93,17 +111,18 @@ export function App() {
     <div className={styles.page}>
       {view === 'all' ? (
         <div className={styles.demo}>
-          <figure className={styles.cell}><div className={styles.slot}><TabletFrame><TabletApp /></TabletFrame></div><figcaption>Wall tablet</figcaption></figure>
-          <figure className={styles.cell}><div className={styles.slot}><PhoneFrame label="Marina’s phone"><PhoneApp user="marina" /></PhoneFrame></div><figcaption>Marina · household</figcaption></figure>
-          <figure className={styles.cell}><div className={styles.slot}><PhoneFrame label="Alexey’s phone"><PhoneApp user="alexey" /></PhoneFrame></div><figcaption>Alexey · administrator</figcaption></figure>
+          <figure className={styles.cell}><div className={styles.slot}><TabletFrame><TabletApp /></TabletFrame></div><figcaption>{t('Wall tablet')}</figcaption></figure>
+          <figure className={styles.cell}><div className={styles.slot}><PhoneFrame label={t('Marina’s phone')}><PhoneApp user="marina" /></PhoneFrame></div><figcaption>{t('Marina · household')}</figcaption></figure>
+          <figure className={styles.cell}><div className={styles.slot}><PhoneFrame label={t('Alexey’s phone')}><PhoneApp user="alexey" /></PhoneFrame></div><figcaption>{t('Alexey · administrator')}</figcaption></figure>
         </div>
       ) : (
         <div className={styles.stage}>
           {view === 'tablet'
             ? <TabletFrame><TabletApp /></TabletFrame>
-            : <PhoneFrame label={view === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}><PhoneApp key={view} user={view} /></PhoneFrame>}
+            : <PhoneFrame label={view === 'marina' ? t('Marina’s phone') : t('Alexey’s phone')}><PhoneApp key={view} user={view} /></PhoneFrame>}
         </div>
       )}
+      <LanguageSwitch />
       <PrototypePanel view={view} pick={pick} />
     </div>
   )

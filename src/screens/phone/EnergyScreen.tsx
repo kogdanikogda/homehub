@@ -5,6 +5,7 @@ import { ScreenHeader, SectionLabel } from '../../components/Phone/Phone'
 import { Segmented } from '../../components/Segmented/Segmented'
 import { ENERGY, axisLabels, percentOf, type EnergyPeriod } from '../../store/energy'
 import styles from './Phone.module.css'
+import { t } from '../../i18n'
 
 const fmt = (n: number) => n.toFixed(1)
 const GRID = { day: [0, 1, 2, 3], week: [0, 10, 20, 30], month: [0, 10, 20, 30] } as const
@@ -20,18 +21,18 @@ export function EnergyScreen({ onBack, now = new Date() }: { onBack: () => void;
   return (
     <>
       <div className={styles.group} style={{ gap: 12 }}>
-        <ScreenHeader back={{ label: 'Home', onClick: onBack }} />
-        <Segmented platform="phoneWide" label="Period" value={period} onChange={(v) => setPeriod(v as EnergyPeriod)}
-          items={[{ value: 'day', label: 'Day' }, { value: 'week', label: 'Week' }, { value: 'month', label: 'Month' }]} />
+        <ScreenHeader back={{ label: t('Home'), onClick: onBack }} />
+        <Segmented platform="phoneWide" label={t('Period')} value={period} onChange={(v) => setPeriod(v as EnergyPeriod)}
+          items={[{ value: 'day', label: t('Day') }, { value: 'week', label: t('Week') }, { value: 'month', label: t('Month') }]} />
       </div>
 
       <div className={styles.hero}>
-        <div className={styles.heroNum}><b>{fmt(e.total)}</b><span>kWh</span><small>{e.caption}</small></div>
-        <Chip tone={e.compare.less ? 'success' : 'warning'} icon={e.compare.less ? 'check' : 'warn'} size="sm">{e.compare.text}</Chip>
+        <div className={styles.heroNum}><b>{fmt(e.total)}</b><span>{t('kWh')}</span><small>{t(e.caption)}</small></div>
+        <Chip tone={e.compare.less ? 'success' : 'warning'} icon={e.compare.less ? 'check' : 'warn'} size="sm">{t(e.compare.text)}</Chip>
       </div>
 
       <div className={styles.group}>
-        <div className={styles.chartCard} role="img" aria-label={`Energy use, ${period}`}>
+        <div className={styles.chartCard} role="img" aria-label={`${t('Energy use')}, ${period === 'day' ? t('Day') : period === 'week' ? t('Week') : t('Month')}`}>
           <div className={styles.plot}>
             {GRID[period].map((g) => (
               <div key={g} className={styles.grid} style={{ bottom: `${(g / e.axisMax) * 100}%` }}><span>{g}</span></div>
@@ -51,11 +52,11 @@ export function EnergyScreen({ onBack, now = new Date() }: { onBack: () => void;
           </div>
         </div>
 
-        <SectionLabel>Where it goes</SectionLabel>
+        <SectionLabel>{t('Where it goes')}</SectionLabel>
         <div className={styles.split}>
           {e.split.map((r) => (
             <div key={r.label} className={styles.erow}>
-              <span className={styles.ewhat}><Icon name={r.icon} size={18} />{r.label}</span>
+              <span className={styles.ewhat}><Icon name={r.icon} size={18} />{t(r.label)}</span>
               <span className={styles.eright}>
                 <span className={styles.trk}><i style={{ width: `${percentOf(r.value, e.total)}%` }} /></span>
                 <span className={styles.enum}>{fmt(r.value)}</span>

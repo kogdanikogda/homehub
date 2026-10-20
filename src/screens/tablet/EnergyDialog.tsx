@@ -5,6 +5,7 @@ import { Icon } from '../../components/Icon/Icon'
 import { Segmented } from '../../components/Segmented/Segmented'
 import { ENERGY, axisLabels, percentOf, type EnergyPeriod } from '../../store/energy'
 import styles from './EnergyDialog.module.css'
+import { t } from '../../i18n'
 
 const fmt = (n: number) => n.toFixed(1)
 const GRID = { day: [0, 1, 2, 3], week: [0, 10, 20, 30], month: [0, 10, 20, 30] } as const
@@ -18,25 +19,25 @@ export function EnergyDialog({ onClose, now = new Date() }: { onClose: () => voi
   const slots = period === 'day' ? 24 : e.bars.length
   const peak = e.bars.indexOf(Math.max(...e.bars))
   const caption = period === 'day'
-    ? `${e.caption} · until ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-    : e.caption
+    ? `${t(e.caption)} · ${t('until {time}', { time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}` })}`
+    : t(e.caption)
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()} title="Energy use" width={780} secondary={false}
-      primary={{ label: 'Close', onClick: onClose }}
+    <Dialog open onOpenChange={(o) => !o && onClose()} title={t('Energy use')} width={780} secondary={false}
+      primary={{ label: t('Close'), onClick: onClose }}
       headerExtra={
-        <Segmented label="Period" value={period} onChange={(v) => setPeriod(v as EnergyPeriod)}
-          items={[{ value: 'day', label: 'Day' }, { value: 'week', label: 'Week' }, { value: 'month', label: 'Month' }]} />
+        <Segmented label={t('Period')} value={period} onChange={(v) => setPeriod(v as EnergyPeriod)}
+          items={[{ value: 'day', label: t('Day') }, { value: 'week', label: t('Week') }, { value: 'month', label: t('Month') }]} />
       }>
       <div className={styles.hero}>
         <div className={styles.big}>
-          <span className={styles.num}>{fmt(e.total)}</span><span className={styles.unit}>kWh</span>
+          <span className={styles.num}>{fmt(e.total)}</span><span className={styles.unit}>{t('kWh')}</span>
           <span className={styles.cap}>{caption}</span>
         </div>
-        <Chip tone={e.compare.less ? 'success' : 'warning'} icon={e.compare.less ? 'check' : 'warn'} size="sm">{e.compare.text}</Chip>
+        <Chip tone={e.compare.less ? 'success' : 'warning'} icon={e.compare.less ? 'check' : 'warn'} size="sm">{t(e.compare.text)}</Chip>
       </div>
 
-      <div className={styles.chart} role="img" aria-label={`Energy use, ${period}`}>
+      <div className={styles.chart} role="img" aria-label={`${t('Energy use')}, ${period === 'day' ? t('Day') : period === 'week' ? t('Week') : t('Month')}`}>
         <div className={styles.plot}>
           {GRID[period].map((g) => (
             <div key={g} className={styles.grid} style={{ bottom: `${(g / e.axisMax) * 100}%` }}><span>{g}</span></div>
@@ -56,11 +57,11 @@ export function EnergyDialog({ onClose, now = new Date() }: { onClose: () => voi
         </div>
       </div>
 
-      <h3 className={styles.h3}>Where it goes</h3>
+      <h3 className={styles.h3}>{t('Where it goes')}</h3>
       <div className={styles.split}>
         {e.split.map((r) => (
           <div key={r.label} className={styles.row}>
-            <span className={styles.what}><Icon name={r.icon} size={18} />{r.label}</span>
+            <span className={styles.what}><Icon name={r.icon} size={18} />{t(r.label)}</span>
             <span className={styles.trk}><span style={{ width: `${percentOf(r.value, e.total)}%` }} /></span>
             <span className={styles.val}>{fmt(r.value)}</span>
             <span className={styles.pct}>{percentOf(r.value, e.total)}%</span>

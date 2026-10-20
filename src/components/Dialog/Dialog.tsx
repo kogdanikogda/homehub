@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Button } from '../Button/Button'
 import { usePortalContainer } from '../portal'
 import styles from './Dialog.module.css'
+import { t } from '../../i18n'
 
 type Action = { label: string; onClick: () => void; disabled?: boolean }
 
@@ -34,7 +35,7 @@ export function Dialog({
   open, onOpenChange, title, lead, counter, headerExtra, progress, children, note, width = 660, dismissible = true, compact, primary, secondary,
 }: Props) {
   const container = usePortalContainer()
-  const cancel = secondary === undefined ? { label: 'Cancel' } : secondary
+  const cancel = secondary === undefined ? { label: t('Cancel') } : secondary
   const block = dismissible ? undefined : (e: Event) => e.preventDefault()
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>

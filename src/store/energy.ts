@@ -1,3 +1,4 @@
+import { getLang, t } from '../i18n'
 export type EnergyPeriod = 'day' | 'week' | 'month'
 
 export interface EnergyData {
@@ -54,16 +55,19 @@ export const percentOf = (value: number, total: number) => Math.round((value / t
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const dayName = (d: Date) => (getLang() === 'ru' ? d.toLocaleDateString('ru-RU', { weekday: 'short' }) : DAY_NAMES[d.getDay()])
+/** По-русски «окт.», по-английски «Oct» */
+const monthName = (d: Date) => (getLang() === 'ru' ? d.toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '') : MONTH_NAMES[d.getMonth()])
 
 /** Подписи под столбиками: индекс столбика → текст */
 export function axisLabels(period: EnergyPeriod, now: Date): Map<number, string> {
   const labels = new Map<number, string>()
   const back = (n: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - n)
   if (period === 'day') for (let h = 0; h < 24; h += 3) labels.set(h, String(h).padStart(2, '0'))
-  if (period === 'week') for (let i = 0; i < 7; i++) labels.set(i, i === 6 ? 'Today' : DAY_NAMES[back(6 - i).getDay()])
+  if (period === 'week') for (let i = 0; i < 7; i++) labels.set(i, i === 6 ? t('Today') : dayName(back(6 - i)))
   if (period === 'month') {
-    for (const i of [0, 7, 14, 21]) { const d = back(29 - i); labels.set(i, `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`) }
-    labels.set(29, 'Today')
+    for (const i of [0, 7, 14, 21]) { const d = back(29 - i); labels.set(i, `${d.getDate()} ${monthName(d)}`) }
+    labels.set(29, t('Today'))
   }
   return labels
 }

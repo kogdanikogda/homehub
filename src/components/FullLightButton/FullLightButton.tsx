@@ -1,5 +1,6 @@
 import { Button } from '../Button/Button'
 import styles from './FullLightButton.module.css'
+import { t } from '../../i18n'
 
 type Props = {
   /** full — «Full light», back — «Back to previous light» */
@@ -16,6 +17,6 @@ type Props = {
 export function FullLightButton({ state, onFull, onBack, size = 'lg', block = true }: Props) {
   const cls = [block ? styles.block : '', state === 'back' ? styles.back : ''].filter(Boolean).join(' ')
   return state === 'full'
-    ? <Button size={size} icon="sun" className={cls} onClick={onFull}>Full light</Button>
-    : <Button size={size} variant="secondary" icon="back" className={cls} onClick={onBack}>Back to previous light</Button>
+    ? <Button size={size} icon="sun" className={cls} onClick={onFull}>{t('Full light')}</Button>
+    : <Button size={size} variant="secondary" icon="back" className={cls} onClick={onBack}>{t('Back to previous light')}</Button>
 }

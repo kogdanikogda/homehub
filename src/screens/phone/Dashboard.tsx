@@ -9,6 +9,7 @@ import type { PhoneUser } from './PhoneApp'
 import { offlineText } from './TechAlertRow'
 import { PairingRequest } from './PairingRequest'
 import styles from './Phone.module.css'
+import { t } from '../../i18n'
 
 export const isPrivateRoom = (r: RoomId) => (PRIVATE_ROOM_IDS as RoomId[]).includes(r)
 
@@ -24,7 +25,7 @@ export function useRoomSub() {
     const priv_ = isPrivateRoom(r)
     const on = priv_ ? privateOnCount(priv[r as keyof typeof priv], r as PrivateRoomId, added) : onCount(r, devices, extras, added)
     const total = priv_ ? privateDeviceCount(r as PrivateRoomId, added) : deviceCount(r, added)
-    const text = `${devicesOnText(on, total)}${windowsOpen[r] ? ' · Window open' : ''}`
+    const text = `${devicesOnText(on, total)}${windowsOpen[r] ? ` · ${t('Window open')}` : ''}`
     const temp = mode !== 'home' && isPrivateRoom(r) ? 18 : roomTemperature(r, devices, priv)
     return { text, temp }
   }
@@ -49,7 +50,7 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
   const modified = mode === 'home' && activeScene
     ? modifiedChanges(devices, activeScene, ignored, scenes).length > 0
     : false
-  const sceneAside = mode !== 'home' ? `Unavailable in ${MODE_NAMES[mode]}` : !activeScene ? 'No scene active' : modified ? 'Modified' : null
+  const sceneAside = mode !== 'home' ? t('Unavailable in {mode}', { mode: MODE_NAMES[mode] }) : !activeScene ? t('No scene active') : modified ? t('Modified') : null
 
   const tech = admin ? offlineText(unresponsive, offlineAt) : null
 
@@ -57,7 +58,7 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
     <>
       {admin && pairing && <PairingRequest />}
       <div className={styles.group}>
-        <PhoneCard title="Scene" aside={sceneAside && <b style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{sceneAside}</b>}>
+        <PhoneCard title={t('Scene')} aside={sceneAside && <b style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{sceneAside}</b>}>
           <div className={styles.two}>
             {SCENE_ORDER.map((id) => (
               <SceneChip key={id} icon={SCENES[id].icon} name={SCENES[id].name} selected={id === activeScene} disabled={mode !== 'home'} onClick={() => { if (id !== activeScene) a.tapScene(id, user) }} />
@@ -66,16 +67,16 @@ export function Dashboard({ user, onRoom, onEnergy }: { user: PhoneUser; onRoom:
         </PhoneCard>
 
         <div className={styles.stats}>
-          <StatTile icon="temp" value={`${averageTemperature(devices, mode, priv).toFixed(1)}°`} caption="Average" />
-          <StatTile icon="window" value={open.length ? `${open.length} open` : 'Closed'} caption="Windows" attention={open.length > 0} onClick={() => a.openWindows(user)} />
-          <StatTile icon="bolt" value={String(TODAY_ENERGY_KWH)} caption="kWh today" onClick={onEnergy} />
+          <StatTile icon="temp" value={`${averageTemperature(devices, mode, priv).toFixed(1)}°`} caption={t('Average')} />
+          <StatTile icon="window" value={open.length ? t('{n} open', { n: open.length }) : t('Closed')} caption={t('Windows')} attention={open.length > 0} onClick={() => a.openWindows(user)} />
+          <StatTile icon="bolt" value={String(TODAY_ENERGY_KWH)} caption={t('kWh today')} onClick={onEnergy} />
         </div>
-        {open.length > 0 && <WarningRow onClick={() => a.openWindows(user)}>Open: {open.map((r) => ROOM_NAMES[r]).join(', ')}</WarningRow>}
+        {open.length > 0 && <WarningRow onClick={() => a.openWindows(user)}>{t('Open: {rooms}', { rooms: open.map((r) => ROOM_NAMES[r]).join(', ') })}</WarningRow>}
         {tech && <TechAlert>{tech}</TechAlert>}
       </div>
 
       <div className={styles.group}>
-        <SectionLabel>All rooms</SectionLabel>
+        <SectionLabel>{t('All rooms')}</SectionLabel>
         <div className={styles.list}>
           {ROOM_ORDER.map((r) => {
             const s = sub(r)

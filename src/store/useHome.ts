@@ -4,6 +4,7 @@ import {
 } from './data'
 import { LIGHT_KEY, conflictTurnOff, diffToScene, diffValues, fullValue, heldKeys, modifiedChanges, sysItems, type LightHold } from './logic'
 import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, AddedDevice, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
+import { t } from '../i18n'
 
 type Toast = { id: number; text: string } | null
 
@@ -181,7 +182,7 @@ export const useHome = create<HomeState>()((set, get) => {
     // Ручная правка света отменяет «вернуть как было»
     if (DEVICE_BY_KEY[key].room in get().lightHold && LIGHT_KEY[DEVICE_BY_KEY[key].room] === key) releaseHold(DEVICE_BY_KEY[key].room)
     const def = DEVICE_BY_KEY[key]
-    if (def.kind === 'toggle') toast(`${def.short} turned ${value ? 'on' : 'off'}`, by)
+    if (def.kind === 'toggle') toast(value ? t('{name} turned on', { name: def.short }) : t('{name} turned off', { name: def.short }), by)
   }
 
   const ALL: DeviceId[] = ['tablet', 'marina', 'alexey']
@@ -248,7 +249,7 @@ export const useHome = create<HomeState>()((set, get) => {
     const target = get().scenes[id]
     const items = diffToScene(get().devices, id, get().scenes).map((c) => ({ ...c, status: 'waiting' as const }))
     return runJob(by, {
-      title: `Activating “${SCENES[id].name}”`, doneTitle: `${SCENES[id].name} scene is on`, items, toast: `${SCENES[id].name} scene activated`,
+      title: t('Activating “{name}”', { name: SCENES[id].name }), doneTitle: t('{name} scene is on', { name: SCENES[id].name }), items, toast: t('{name} scene activated', { name: SCENES[id].name }),
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
         set((s) => ({ devices: applyDone(s.devices, target as DeviceValues, work), activeScene: id, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
@@ -261,7 +262,7 @@ export const useHome = create<HomeState>()((set, get) => {
     const target = awayValues(get().devices)
     const items: ProgressItem[] = [...sysItems(true), ...diffValues(get().devices, target).map((c) => ({ ...c, status: 'waiting' as const }))]
     return runJob(by, {
-      title: `Turning on ${MODE_NAMES[mode]} mode`, doneTitle: `${MODE_NAMES[mode]} mode is on`, items, toast: `${MODE_NAMES[mode]} mode on. Alarm is on.`,
+      title: t('Turning on {mode} mode', { mode: MODE_NAMES[mode] }), doneTitle: t('{mode} mode is on', { mode: MODE_NAMES[mode] }), items, toast: t('{mode} mode on. Alarm is on.', { mode: MODE_NAMES[mode] }),
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
         set((s) => ({ mode, alarm: true, devices: applyDone(s.devices, target, work), activeScene: null, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
@@ -274,7 +275,7 @@ export const useHome = create<HomeState>()((set, get) => {
     const target = get().scenes.general
     const items = [...sysItems(false), ...diffToScene(get().devices, 'general', get().scenes).map((c) => ({ ...c, status: 'waiting' as const }))]
     return runJob(by, {
-      title: 'Switching to Home mode', doneTitle: 'Home mode is on', items, toast: message,
+      title: t('Switching to Home mode'), doneTitle: t('Home mode is on'), items, toast: message,
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
         set((s) => ({ mode: 'home', alarm: false, devices: applyDone(s.devices, target as DeviceValues, work), activeScene: 'general', overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
@@ -284,15 +285,15 @@ export const useHome = create<HomeState>()((set, get) => {
 
   const alarmJob = (on: boolean, by: DeviceId) =>
     runJob(by, {
-      title: on ? 'Turning on the alarm' : 'Turning off the alarm', doneTitle: on ? 'Alarm is on' : 'Alarm is off', items: sysItems(on),
-      toast: `Alarm turned ${on ? 'on' : 'off'}`, commit: () => set({ alarm: on }),
+      title: on ? t('Turning on the alarm') : t('Turning off the alarm'), doneTitle: on ? t('Alarm is on') : t('Alarm is off'), items: sysItems(on),
+      toast: on ? t('Alarm turned on') : t('Alarm turned off'), commit: () => set({ alarm: on }),
     })
 
   /** Выключение сигнализации: после тревоги дом возвращается в режим Home */
   const alarmOff = (by: DeviceId) => {
     if (get().alert) {
       set({ alert: null })
-      return homeJob(by, 'Alarm turned off. Home mode is on.')
+      return homeJob(by, t('Alarm turned off. Home mode is on.'))
     }
     return alarmJob(false, by)
   }
@@ -322,7 +323,7 @@ export const useHome = create<HomeState>()((set, get) => {
         if (s.privateRooms[r].light) return
         set({ privateRooms: { ...s.privateRooms, [r]: { ...s.privateRooms[r], light: true } }, lightHold: { ...s.lightHold, [room]: false } })
       }
-      toast(`Full light in ${ROOM_NAMES[room]}`, by)
+      toast(t('Full light in {room}', { room: ROOM_NAMES[room] }), by)
     },
 
     restoreLight: (room, by = 'tablet') => {
@@ -333,7 +334,7 @@ export const useHome = create<HomeState>()((set, get) => {
       const key = LIGHT_KEY[room]
       if (key) set({ devices: { ...s.devices, [key]: prev }, lightHold: rest })
       else set({ privateRooms: { ...s.privateRooms, [room as PrivateRoomId]: { ...s.privateRooms[room as PrivateRoomId], light: Boolean(prev) } }, lightHold: rest })
-      toast(`Light in ${ROOM_NAMES[room]} is back as it was`, by)
+      toast(t('Light in {room} is back as it was', { room: ROOM_NAMES[room] }), by)
     },
 
     confirmOverride: (by = 'tablet') => {
@@ -366,7 +367,7 @@ export const useHome = create<HomeState>()((set, get) => {
       if (!s.activeScene) return
       set({ devices: { ...s.devices, ...s.scenes[s.activeScene] }, unresponsive: [], lightHold: {} })
       setDialog(by, null)
-      toast(`${SCENES[s.activeScene].name} restored`, by)
+      toast(t('{name} restored', { name: SCENES[s.activeScene].name }), by)
     },
 
     requestAway: (by = 'tablet') => {
@@ -387,20 +388,20 @@ export const useHome = create<HomeState>()((set, get) => {
     // На телефоне человек уже вошёл в приложение, поэтому PIN нужен только на общей панели
     requestHome: (by = 'tablet') => {
       if (by === 'tablet') setDialog(by, { type: 'pin', purpose: 'home' })
-      else void homeJob(by, `Home mode turned on from ${by === 'alexey' ? 'Alexey' : 'Marina'}’s phone`)
+      else void homeJob(by, by === 'alexey' ? t('Home mode turned on from Alexey’s phone') : t('Home mode turned on from Marina’s phone'))
     },
 
     submitPin: (pin, by = 'tablet') => {
       const d = dialogOf(by)
       if (d?.type !== 'pin' || pin !== PROTOTYPE_PIN) return false
       setDialog(by, null)
-      if (d.purpose === 'home') void homeJob(by, 'Alarm off. Welcome home. General scene is active.')
+      if (d.purpose === 'home') void homeJob(by, t('Alarm off. Welcome home. General scene is active.'))
       else void alarmOff(by)
       return true
     },
 
     openWindows: (by = 'tablet') => setDialog(by, { type: 'windows' }),
-    setOnboarding: (step) => { set({ onboarding: step }); if (step === 'done') log('Wall panel paired · Public panel') },
+    setOnboarding: (step) => { set({ onboarding: step }); if (step === 'done') log(t('Wall panel paired · Public panel')) },
     setDeclinePairing: (v) => set({ declinePairing: v }),
     openEnergy: (by = 'tablet') => setDialog(by, { type: 'energy' }),
     closeDialog: (by = 'tablet') => {
@@ -428,24 +429,24 @@ export const useHome = create<HomeState>()((set, get) => {
         const next = { ...s.tempLimits, [which]: v }
         // Нижняя граница не выше верхней: держим хотя бы 1°
         if (next.min >= next.max) return s
-        return { tempLimits: next, eventLog: [{ t: nowHHMM(), x: `Temperature limits set to ${next.min}–${next.max}°` }, ...s.eventLog] }
+        return { tempLimits: next, eventLog: [{ t: nowHHMM(), x: t('Temperature limits set to {min}–{max}°', { min: next.min, max: next.max }) }, ...s.eventLog] }
       }),
     setIdleMinutes: (m) => set({ idleMinutes: m }),
     setVacationOpt: (k, v) => set((s) => ({ vacationOpts: { ...s.vacationOpts, [k]: v } })),
-    setDoorLocked: (v, by = 'alexey') => { set({ doorLocked: v }); toast(v ? 'Front door locked' : 'Front door unlocked', by) },
+    setDoorLocked: (v, by = 'alexey') => { set({ doorLocked: v }); toast(v ? t('Front door locked') : t('Front door unlocked'), by) },
     logEvent: (x) => log(x),
-    setCamPeek: (v, by = 'alexey') => { set({ camPeek: v }); toast(v ? 'Living room camera on for 10 min' : 'Living room camera off', by, false); log(v ? 'Living room camera turned on for 10 min by Alexey' : 'Living room camera turned off') },
+    setCamPeek: (v, by = 'alexey') => { set({ camPeek: v }); toast(v ? t('Living room camera on for 10 min') : t('Living room camera off'), by, false); log(v ? t('Living room camera turned on for 10 min by Alexey') : t('Living room camera turned off')) },
     setAddFlow: (patch) => set((s) => ({ addFlow: { ...s.addFlow, ...patch } })),
-    addDevice: (d) => { set((s) => ({ addedDevices: [...s.addedDevices, { ...d, id: ++deviceId, on: false }] })); log(`${d.name} added to ${ROOM_NAMES[d.room]}`) },
+    addDevice: (d) => { set((s) => ({ addedDevices: [...s.addedDevices, { ...d, id: ++deviceId, on: false }] })); log(t('{name} added to {room}', { name: d.name, room: ROOM_NAMES[d.room] })) },
     toggleAdded: (id, on, by = 'tablet') => {
       set((s) => ({ addedDevices: s.addedDevices.map((d) => (d.id === id ? { ...d, on } : d)) }))
       const d = get().addedDevices.find((x) => x.id === id)
-      if (d) toast(`${d.name} turned ${on ? 'on' : 'off'}`, by)
+      if (d) toast(on ? t('{name} turned on', { name: d.name }) : t('{name} turned off', { name: d.name }), by)
     },
 
     saveScene: (id, values) => {
       set((s) => ({ scenes: { ...s.scenes, [id]: values } }))
-      toast(`${SCENES[id].name} saved`, 'alexey')
+      toast(t('{name} saved', { name: SCENES[id].name }), 'alexey')
     },
 
     saveToScene: (keys, by = 'alexey') => {
@@ -455,13 +456,13 @@ export const useHome = create<HomeState>()((set, get) => {
       const next = { ...s.scenes[id] }
       for (const k of keys) next[k] = s.devices[k]
       set({ scenes: { ...s.scenes, [id]: next } })
-      toast(`${keys.length} saved to ${SCENES[id].name}`, by)
+      toast(t('{n} saved to {name}', { n: keys.length, name: SCENES[id].name }), by)
     },
 
     setPrivate: (room, key, value, by = 'tablet') => {
       if (key === 'light') releaseHold(room)
       set((s) => ({ privateRooms: { ...s.privateRooms, [room]: { ...s.privateRooms[room], [key]: value } } }))
-      if (key === 'light' || key === 'humidifier') toast(`${key === 'light' ? 'Light' : 'Humidifier'} turned ${value ? 'on' : 'off'}`, by)
+      if (key === 'light' || key === 'humidifier') toast(key === 'light' ? (value ? t('Light turned on') : t('Light turned off')) : (value ? t('Humidifier turned on') : t('Humidifier turned off')), by)
     },
     toggleExtra: (key, on) => set((s) => ({ extras: { ...s.extras, [key]: on } })),
     toggleWindow: (room) => set((s) => ({ windowsOpen: { ...s.windowsOpen, [room]: !s.windowsOpen[room] } })),

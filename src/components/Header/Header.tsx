@@ -5,6 +5,7 @@ import { AlarmIndicator } from '../AlarmIndicator/AlarmIndicator'
 import { HeaderStat } from '../Shell/NavItem'
 import { usePortalContainer } from '../portal'
 import styles from './Header.module.css'
+import { t } from '../../i18n'
 
 type Props = {
   time: string
@@ -31,10 +32,10 @@ export function Header({ time, date, stats, mode, menuOpen, onMenuOpenChange, me
       <span className={styles.grow} />
       <Popover.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <Popover.Trigger asChild>
-          <button type="button" className={styles.mode} aria-label="House mode">
+          <button type="button" className={styles.mode} aria-label={t('House mode')}>
             <span className={styles.part}>
               <Icon name={mode.icon} size={18} />
-              <span className={styles.key}>House mode:</span>
+              <span className={styles.key}>{t('House mode')}:</span>
               <span className={styles.accent}>{mode.name}</span>
             </span>
             <Icon name="chev" size={16} className={menuOpen ? styles.chevUp : styles.chevDown} />

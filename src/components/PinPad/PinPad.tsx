@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../Icon/Icon'
 import styles from './PinPad.module.css'
+import { t } from '../../i18n'
 
 type Props = {
   /** Вызывается, когда набраны 4 цифры. true — PIN верный */
@@ -31,12 +32,12 @@ export function PinPad({ onSubmit, hint }: Props) {
       <div className={styles.dots} aria-hidden="true">
         {[0, 1, 2, 3].map((i) => <span key={i} className={`${styles.dot} ${i < digits.length ? styles.on : ''}`} />)}
       </div>
-      <p className={styles.error} role="alert">{error ? 'Wrong PIN. Try again.' : ''}</p>
+      <p className={styles.error} role="alert">{error ? t('Wrong PIN. Try again.') : ''}</p>
       <div className={styles.pad}>
         {keys.map((k) => <button key={k} type="button" className={styles.key} onClick={() => press(k)}>{k}</button>)}
         <span />
         <button type="button" className={styles.key} onClick={() => press('0')}>0</button>
-        <button type="button" className={`${styles.key} ${styles.del}`} aria-label="Delete" onClick={() => { setError(false); setDigits(digits.slice(0, -1)) }}>
+        <button type="button" className={`${styles.key} ${styles.del}`} aria-label={t('Delete')} onClick={() => { setError(false); setDigits(digits.slice(0, -1)) }}>
           <Icon name="del" size={28} />
         </button>
       </div>

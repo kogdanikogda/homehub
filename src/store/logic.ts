@@ -3,16 +3,25 @@ import {
   type DeviceValues, type SceneMap,
 } from './data'
 import type { AddedDevice, Change, DeviceKey, ProgressItem, DeviceValue, ExtraKey, Mode, PrivateRoomId, PrivateRooms, PrivateState, RoomId, SceneId } from './types'
+import { t } from '../i18n'
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+const WORD: Record<string, string> = {
+  get off() { return t('Off') },
+  get on() { return t('On') },
+  get low() { return t('Low') },
+  get high() { return t('High') },
+  get open() { return t('Open') },
+  get closed() { return t('Closed') },
+}
 
 /** Как значение выглядит на экране: «Off», «80%», «22°», «Low» */
 export function formatValue(key: DeviceKey, v: DeviceValue): string {
   const kind = DEVICE_BY_KEY[key].kind
-  if (kind === 'dimmer') return v === 0 ? 'Off' : `${v}%`
+  if (kind === 'dimmer') return v === 0 ? t('Off') : `${v}%`
   if (kind === 'climate') return `${v}°`
-  if (kind === 'toggle') return v ? 'On' : 'Off'
-  return cap(String(v))
+  if (kind === 'toggle') return v ? t('On') : t('Off')
+  return WORD[String(v)] ?? cap(String(v))
 }
 
 export function deviceTitle(key: DeviceKey): string {
@@ -49,13 +58,13 @@ export function averageTemperature(devices: DeviceValues, mode: Mode, privateRoo
 }
 
 export function windowsText(open: RoomId[]): string {
-  if (open.length === 0) return 'All closed'
-  return `${open.length} open`
+  if (open.length === 0) return t('All closed')
+  return t('{n} open', { n: open.length })
 }
 
 export function windowAlertText(open: RoomId[]): string {
-  if (open.length === 1) return `${ROOM_NAMES[open[0]]} window is open`
-  return `${open.length} windows are open: ${open.map((r) => ROOM_NAMES[r]).join(', ')}`
+  if (open.length === 1) return t('{room} window is open', { room: ROOM_NAMES[open[0]] })
+  return t('{n} windows are open: {rooms}', { n: open.length, rooms: open.map((r) => ROOM_NAMES[r]).join(', ') })
 }
 
 export function clampTemp(v: number, limits: { min: number; max: number }): number {
@@ -100,10 +109,10 @@ export function privateDeviceCount(room: PrivateRoomId, added: AddedDevice[] = [
 
 /** «1 of 6 devices on», «All devices off»: понятно без пояснений, сколько из скольких включено */
 export function devicesOnText(on: number, total: number): string {
-  if (total === 1) return on ? '1 device on' : 'Device off'
-  if (on === 0) return 'All devices off'
-  if (on === total) return `All ${total} devices on`
-  return `${on} of ${total} devices on`
+  if (total === 1) return on ? t('1 device on') : t('Device off')
+  if (on === 0) return t('All devices off')
+  if (on === total) return t('All {n} devices on', { n: total })
+  return t('{on} of {n} devices on', { on, n: total })
 }
 
 /** Подпись в списке комнат: «22° · 1 of 6 devices on» или «21° · All devices off» */
@@ -129,8 +138,8 @@ export function privateOnCount(r: PrivateState, room?: PrivateRoomId, added: Add
 /** Как значение личного устройства выглядит на экране */
 export function formatPrivate(key: keyof PrivateState, r: PrivateState): string {
   if (key === 'climate') return `${r.climate}°`
-  if (key === 'curtains') return r.curtains === 'open' ? 'Open' : 'Closed'
-  return r[key] ? 'On' : 'Off'
+  if (key === 'curtains') return r.curtains === 'open' ? t('Open') : t('Closed')
+  return r[key] ? t('On') : t('Off')
 }
 
 /** Что изменится, если привести устройства к целевым значениям (для режимов Away/Vacation) */
@@ -148,8 +157,8 @@ export function sysItems(on: boolean): ProgressItem[] {
 
 /** Строка шага прогресса: «Living Room · Main light: 80% → Off» или «Alarm: Off → On» */
 export function progressText(i: Pick<ProgressItem, 'key' | 'from' | 'to'>): string {
-  if (i.key === 'sys.alarm') return `Alarm: ${i.from ? 'On' : 'Off'} → ${i.to ? 'On' : 'Off'}`
-  if (i.key === 'sys.sensors') return `Security sensors: ${i.from ? 'Active' : 'Inactive'} → ${i.to ? 'Active' : 'Inactive'}`
+  if (i.key === 'sys.alarm') return `${t('Alarm')}: ${i.from ? t('On') : t('Off')} → ${i.to ? t('On') : t('Off')}`
+  if (i.key === 'sys.sensors') return `${t('Security sensors')}: ${i.from ? t('Sensors active') : t('Sensors inactive')} → ${i.to ? t('Sensors active') : t('Sensors inactive')}`
   return `${deviceTitle(i.key)}: ${formatValue(i.key, i.from)} → ${formatValue(i.key, i.to)}`
 }
 

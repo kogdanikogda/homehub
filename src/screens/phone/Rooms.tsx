@@ -7,7 +7,7 @@ import { Segmented } from '../../components/Segmented/Segmented'
 import { Stepper } from '../../components/Stepper/Stepper'
 import { Switch } from '../../components/Switch/Switch'
 import {
-  COUNTERTOP, DEVICES, KITCHEN_EXTRAS, PRIVATE_DEVICES, ROOM_NAMES, ROOM_ORDER, SCENES,
+  COUNTERTOP, DEVICES, KITCHEN_EXTRAS, MODE_NAMES, PRIVATE_DEVICES, ROOM_NAMES, ROOM_ORDER, SCENES,
 } from '../../store/data'
 import { isSceneControlled, modifiedChanges, sceneControlledCount as sceneCount } from '../../store/logic'
 import type { PrivateRoomId, RoomId } from '../../store/types'
@@ -18,12 +18,13 @@ import { DeviceControl } from '../tablet/DeviceControl'
 import type { PhoneUser } from './PhoneApp'
 import { isPrivateRoom, useRoomSub } from './Dashboard'
 import styles from './Phone.module.css'
+import { t } from '../../i18n'
 
 export function RoomsList({ onRoom }: { onRoom: (r: RoomId) => void }) {
   const sub = useRoomSub()
   return (
     <>
-      <Note>Tap a room to control it. Private rooms are only controlled from family phones.</Note>
+      <Note>{t('Tap a room to control it. Private rooms are only controlled from family phones.')}</Note>
       <div className={styles.list}>
         {ROOM_ORDER.map((r) => {
           const s = sub(r)
@@ -60,16 +61,16 @@ export function RoomScreen({ user, room, onBack }: { user: PhoneUser; room: Room
 
   return (
     <>
-      <ScreenHeader back={{ label: 'All rooms', onClick: onBack }} title={ROOM_NAMES[room]} />
+      <ScreenHeader back={{ label: t('All rooms'), onClick: onBack }} title={ROOM_NAMES[room]} />
       <div className={styles.roomHead}>
         <p>{s.temp}° · {s.text}</p>
         {isPriv && <PrivateChip />}
       </div>
-      {windowsOpen[room] && <WarningRow>The window is open.</WarningRow>}
+      {windowsOpen[room] && <WarningRow>{t('The window is open.')}</WarningRow>}
       {user === 'alexey' && scene && sceneCount(room, scene.id, scenes) > 0 && (
-        <p className={styles.sceneNote}><Icon name="film" size={14} />Part of the active “{scene.name}” scene. Changes here mark the scene as modified.</p>
+        <p className={styles.sceneNote}><Icon name="film" size={14} />{t('Part of the active “{name}” scene. Changes here mark the scene as modified.', { name: scene.name })}</p>
       )}
-      {mode !== 'home' && !isPriv && <Note>{mode === 'away' ? 'Away' : 'Vacation'} mode is on. Media is off and climate saves energy until Home mode returns.</Note>}
+      {mode !== 'home' && !isPriv && <Note>{t('{mode} mode is on. Media is off and climate saves energy until Home mode returns.', { mode: MODE_NAMES[mode] })}</Note>}
 
       <div className={styles.devices}>
         {isPriv
@@ -78,9 +79,9 @@ export function RoomScreen({ user, room, onBack }: { user: PhoneUser; room: Room
               const set = <K extends keyof typeof st>(k: K, v: (typeof st)[K]) => setPrivate(room as PrivateRoomId, k, v, user)
               const control =
                 d.key === 'climate'
-                  ? <Stepper label="Climate" size="sm" value={st.climate} min={limits.min} max={limits.max} step={1} format={(v) => `${v}°`} onChange={(v) => set('climate', v)} />
+                  ? <Stepper label={t('Climate')} size="sm" value={st.climate} min={limits.min} max={limits.max} step={1} format={(v) => `${v}°`} onChange={(v) => set('climate', v)} />
                   : d.key === 'curtains'
-                    ? <Segmented platform="phone" label="Curtains" value={st.curtains} onChange={(v) => set('curtains', v as 'open' | 'closed')} items={[{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Closed' }]} />
+                    ? <Segmented platform="phone" label={t('Curtains')} value={st.curtains} onChange={(v) => set('curtains', v as 'open' | 'closed')} items={[{ value: 'open', label: t('Open') }, { value: 'closed', label: t('Closed') }]} />
                     : <Switch size="sm" aria-label={d.label} checked={st[d.key]} onCheckedChange={(v) => set(d.key, v)} />
               return <DeviceRow key={d.key} platform="phone" icon={d.icon} label={d.label} control={control} />
             })
@@ -92,7 +93,7 @@ export function RoomScreen({ user, room, onBack }: { user: PhoneUser; room: Room
                   <DeviceRow key={d.key} platform="phone" icon={d.icon} label={d.label}
                     inScene={Boolean(scene) && isSceneControlled(d.key, scene!.id, scenes)}
                     changed={changed.has(d.key)} unavailable={bad}
-                    control={bad ? <Chip tone="neutral" size="sm">{user === 'alexey' ? 'Offline' : 'Unavailable'}</Chip> : <DeviceControl def={d} platform="phone" by={user} />} />
+                    control={bad ? <Chip tone="neutral" size="sm">{user === 'alexey' ? t('Offline') : t('Unavailable')}</Chip> : <DeviceControl def={d} platform="phone" by={user} />} />
                 )
               })}
               {room === 'kitchen' && (

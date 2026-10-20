@@ -9,6 +9,7 @@ import { Icon, type IconName } from '../Icon/Icon'
 import { Logo } from '../Logo/Logo'
 import { ModeMenu, type ModeRowProps } from '../ModeMenu/ModeMenu'
 import styles from './Phone.module.css'
+import { t } from '../../i18n'
 
 /** Системная строка iPhone: время, остров, связь. Высота 59 */
 export function PhoneStatusBar() {
@@ -51,7 +52,7 @@ export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, sh
       <PhoneStatusBar />
       <div className={styles.brandRow}>
         <span className={styles.brand}><Logo size={38} /><span className={styles.wordmark}>HomeHub</span></span>
-        <button type="button" className={styles.capsule} onClick={onMode} aria-label={`House mode: ${modeName}. Change`} aria-haspopup="dialog">
+        <button type="button" className={styles.capsule} onClick={onMode} aria-label={t('House mode: {mode}. Change', { mode: modeName })} aria-haspopup="dialog">
           <Icon name={MODE_ICON[mode]} size={20} />{modeName}
         </button>
         <AlarmIndicator on={alarm} />
@@ -70,8 +71,8 @@ export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, sh
 /** Нижнее окно выбора режима дома. Сигнализация здесь не меняется. */
 export function ModeSheet({ rows, onClose }: { rows: ModeRowProps[]; onClose: () => void }) {
   return (
-    <div className={styles.sheetWrap} role="dialog" aria-modal="true" aria-label="House mode">
-      <button type="button" className={styles.scrim} aria-label="Close" onClick={onClose} />
+    <div className={styles.sheetWrap} role="dialog" aria-modal="true" aria-label={t('House mode')}>
+      <button type="button" className={styles.scrim} aria-label={t('Close')} onClick={onClose} />
       <div className={styles.sheet}>
         <span className={styles.grab} />
         <ModeMenu rows={rows} />
@@ -85,7 +86,7 @@ export type TabDef<T extends string> = { id: T; label: string; icon: IconName }
 /** Нижнее меню: три вкладки у семьи, шесть у администратора */
 export function TabBar<T extends string>({ tabs, value, onChange }: { tabs: TabDef<T>[]; value: T; onChange: (t: T) => void }) {
   return (
-    <nav className={styles.tabs} aria-label="Main">
+    <nav className={styles.tabs} aria-label={t('Main')}>
       {tabs.map((t) => (
         <button key={t.id} type="button" className={`${styles.tab} ${t.id === value ? styles.tabOn : ''}`} aria-current={t.id === value ? 'page' : undefined} onClick={() => onChange(t.id)}>
           <Icon name={t.icon} size={20} />
@@ -117,7 +118,7 @@ export function PhoneCard({ title, aside, children }: { title: string; aside?: R
 
 export function AlarmPill({ on, label }: { on: boolean; label?: string }) {
   return (
-    <span className={styles.pill}><Icon name="shield" size={14} />{label ?? (on ? 'Alarm on' : 'Alarm off')}</span>
+    <span className={styles.pill}><Icon name="shield" size={14} />{label ?? (on ? t('Alarm on') : t('Alarm off'))}</span>
   )
 }
 
@@ -146,7 +147,7 @@ export function WarningRow({ children, onClick }: { children: ReactNode; onClick
     <div className={styles.warn} role="status">
       <Icon name="warn" size={18} className={styles.warnIcon} />
       <span className={styles.warnText}>{children}</span>
-      {onClick && <button type="button" className={styles.warnAction} onClick={onClick}>View</button>}
+      {onClick && <button type="button" className={styles.warnAction} onClick={onClick}>{t('View')}</button>}
     </div>
   )
 }
@@ -160,7 +161,7 @@ export function RoomRow({ name, sub, temp, priv, onClick }: { name: string; sub:
   return (
     <button type="button" className={styles.room} onClick={onClick}>
       <span className={styles.roomTx}><b>{name}</b><small>{sub}</small></span>
-      {priv && <Tag>Private</Tag>}
+      {priv && <Tag>{t('Private')}</Tag>}
       <span className={styles.roomTemp}>{temp}°</span>
       <Icon name="chev" size={16} className={styles.chev} />
     </button>
@@ -201,11 +202,11 @@ export function ChangeRow({ label, value, small }: { label: string; value?: stri
 }
 
 export function PrivateChip() {
-  return <Chip tone="neutral" size="xs">Private</Chip>
+  return <Chip tone="neutral" size="xs">{t('Private')}</Chip>
 }
 
 /** Техническое оповещение: устройство не отвечает */
-export function TechAlert({ title = 'Technical alert', children, tone = 'warning' }: { title?: string; children: ReactNode; tone?: 'warning' | 'critical' }) {
+export function TechAlert({ title = t('Technical alert'), children, tone = 'warning' }: { title?: string; children: ReactNode; tone?: 'warning' | 'critical' }) {
   return (
     <div className={`${styles.alert} ${tone === 'critical' ? styles.alertCrit : ''}`} role="status">
       <Icon name="warn" size={20} className={tone === 'critical' ? styles.critIcon : styles.warnIcon} />
@@ -242,12 +243,12 @@ export const CAM_STYLE: Record<CamId, CSSProperties> = {
 
 export function CameraTile({ id, name, off, onClick }: { id: CamId; name: string; off?: boolean; onClick: () => void }) {
   return (
-    <button type="button" className={`${styles.cam} ${off ? styles.camOff : ''}`} onClick={onClick} aria-label={`${name} camera`}>
+    <button type="button" className={`${styles.cam} ${off ? styles.camOff : ''}`} onClick={onClick} aria-label={t('{name} camera', { name })}>
       <span className={styles.camImg} style={CAM_STYLE[id]} />
       <span className={styles.camShade} />
-      <span className={styles.camLive}>{off ? <><Icon name="lock" size={12} />Off</> : '● Live'}</span>
+      <span className={styles.camLive}>{off ? <><Icon name="lock" size={12} />{t('Off')}</> : `● ${t('Live')}`}</span>
       <b>{name}</b>
-      <small>{off ? 'Off · privacy at home' : 'Recording'}</small>
+      <small>{off ? t('Off · privacy at home') : t('Recording')}</small>
     </button>
   )
 }
@@ -262,7 +263,7 @@ export function CamAction({ icon, label, onClick, active, disabled }: { icon: Ic
 /** Полоска шагов добавления устройства: тонкие сегменты и подпись */
 export function Steps({ step, total = 4, name, status, state = 'active' }: { step: number; total?: number; name: string; status: string; state?: 'active' | 'error' | 'done' }) {
   return (
-    <div className={styles.steps} role="group" aria-label={state === 'done' ? 'Done' : `Step ${step} of ${total}`}>
+    <div className={styles.steps} role="group" aria-label={state === 'done' ? t('Done') : t('Step {step} of {total}', { step, total })}>
       <div className={styles.segs}>
         {Array.from({ length: total }, (_, i) => {
           const n = i + 1
@@ -271,7 +272,7 @@ export function Steps({ step, total = 4, name, status, state = 'active' }: { ste
         })}
       </div>
       <p className={styles.stepTx}>
-        <b>{state === 'done' ? 'Done' : `Step ${step} of ${total}`}</b>{name && <span className={styles.stepName}>· {name}</span>}
+        <b>{state === 'done' ? t('Done') : t('Step {step} of {total}', { step, total })}</b>{name && <span className={styles.stepName}>· {name}</span>}
         <em className={state === 'error' ? styles.stepBad : ''}>{status}</em>
       </p>
     </div>

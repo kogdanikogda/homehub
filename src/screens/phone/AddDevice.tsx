@@ -8,7 +8,9 @@ import type { RoomId } from '../../store/types'
 import { useHome } from '../../store/useHome'
 import { isPrivateRoom } from './Dashboard'
 import styles from './Phone.module.css'
+import { t } from '../../i18n'
 
+/** Названия и виды переводятся при показе: в хранилище уходит английское имя */
 type Found = { name: string; kind: string; type: string; brand: string; icon: IconName }
 const FOUND: Found[] = [
   { name: 'Floor lamp', kind: 'Light', type: 'Light', brand: 'Lumen · Zigbee', icon: 'light' },
@@ -18,7 +20,7 @@ const FOUND: Found[] = [
 
 type Stage = 'prepare' | 'searching' | 'none' | 'found' | 'room' | 'name' | 'connecting' | 'error' | 'added'
 const STEP_MS = 900
-const CONNECT_STEPS = ['Connecting to the device', 'Checking firmware']
+const connectSteps = () => [t('Connecting to the device'), t('Checking firmware')]
 
 /** Добавление устройства: поиск → комната → имя → подключение → готово */
 export function AddDevice({ onClose }: { onClose: () => void }) {
@@ -33,8 +35,8 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
   // Поиск: пара секунд, потом результат
   useEffect(() => {
     if (stage !== 'searching') return
-    const t = setTimeout(() => setStage(useHome.getState().addFlow.searchEmpty ? 'none' : 'found'), 1600)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setStage(useHome.getState().addFlow.searchEmpty ? 'none' : 'found'), 1600)
+    return () => clearTimeout(timer)
   }, [stage])
 
   // Подключение: три шага один за другим
@@ -52,7 +54,7 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
     }, STEP_MS * 3)
     const t4 = setTimeout(() => {
       if (useHome.getState().addFlow.connectFails) return
-      useHome.getState().addDevice({ name: name.trim() || dev.name, room, type: dev.type })
+      useHome.getState().addDevice({ name: name.trim() || t(dev.name), room, type: dev.type })
       setStage('added')
     }, STEP_MS * 3 + 500)
     return () => [t1, t2, t3, t4].forEach(clearTimeout)
@@ -60,58 +62,58 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
 
   const rowsOf = (failed: boolean): ('waiting' | 'running' | 'done' | 'failed')[] =>
     [0, 1, 2].map((i) => (failed && i === 1 ? 'failed' : i < progress ? 'done' : i === progress && !failed ? 'running' : 'waiting'))
-  const labels = [...CONNECT_STEPS, `Adding to ${roomName}`]
+  const labels = [...connectSteps(), t('Adding to {room}', { room: roomName })]
 
-  const head = (title: string) => <ScreenHeader back={{ label: 'Cancel', onClick: onClose }} title={title} />
+  const head = (title: string) => <ScreenHeader back={{ label: t('Cancel'), onClick: onClose }} title={title} />
   const btn = (label: string, onClick: () => void, primary = true) => (
     <Button variant={primary ? 'primary' : 'secondary'} size="md" className={styles.btn} onClick={onClick}>{label}</Button>
   )
 
   if (stage === 'prepare') return (
     <>
-      {head("Add a device")}
-      <Steps step={1} name="Find" status="Ready to search" />
-      <Note>Put the new device in pairing mode. On most devices: hold the button for 5 seconds until the light blinks.</Note>
+      {head(t('Add a device'))}
+      <Steps step={1} name={t('Find')} status={t('Ready to search')} />
+      <Note>{t('Put the new device in pairing mode. On most devices: hold the button for 5 seconds until the light blinks.')}</Note>
       <div className={styles.illu}><Icon name="bolt" size={40} /></div>
-      {btn('Search nearby', () => setStage('searching'))}
-      {btn('Scan QR code on the device', () => setStage('searching'), false)}
+      {btn(t('Search nearby'), () => setStage('searching'))}
+      {btn(t('Scan QR code on the device'), () => setStage('searching'), false)}
     </>
   )
   if (stage === 'searching') return (
     <>
-      {head("Searching nearby…")}
-      <Steps step={1} name="Find" status="Searching…" />
+      {head(t('Searching nearby…'))}
+      <Steps step={1} name={t('Find')} status={t('Searching…')} />
       <div className={styles.illu}><span className={styles.spin} /></div>
-      <Note>Keep the phone within a few metres of the device.</Note>
+      <Note>{t('Keep the phone within a few metres of the device.')}</Note>
     </>
   )
   if (stage === 'none') return (
     <>
-      {head("No devices found")}
-      <Steps step={1} name="Find" status="Nothing found" />
-      <Note>Check that the device is powered and still in pairing mode. Pairing mode usually lasts 3 minutes.</Note>
-      {btn('Search again', () => { a.setAddFlow({ searchEmpty: false }); setStage('searching') })}
+      {head(t('No devices found'))}
+      <Steps step={1} name={t('Find')} status={t('Nothing found')} />
+      <Note>{t('Check that the device is powered and still in pairing mode. Pairing mode usually lasts 3 minutes.')}</Note>
+      {btn(t('Search again'), () => { a.setAddFlow({ searchEmpty: false }); setStage('searching') })}
     </>
   )
   if (stage === 'found') return (
     <>
-      {head("Found 3 devices")}
-      <Steps step={1} name="Find" status="3 devices found" />
-      <Note>Choose the one you want to add.</Note>
+      {head(t('Found 3 devices'))}
+      <Steps step={1} name={t('Find')} status={t('3 devices found')} />
+      <Note>{t('Choose the one you want to add.')}</Note>
       <div className={styles.list}>
-        {FOUND.map((f) => <SceneRow key={f.name} icon={f.icon} name={f.name} status={`${f.kind} · ${f.brand}`} onClick={() => { setDev(f); setName(f.name); setStage('room') }} />)}
+        {FOUND.map((f) => <SceneRow key={f.name} icon={f.icon} name={t(f.name)} status={`${t(f.kind)} · ${f.brand}`} onClick={() => { setDev(f); setName(t(f.name)); setStage('room') }} />)}
       </div>
     </>
   )
   if (stage === 'room') return (
     <>
-      {head(`Where is the ${dev.name.toLowerCase()}?`)}
-      <Steps step={2} name="Room" status="Choose a room" />
-      <Note>Shared rooms can be controlled from the wall panel. Private rooms are view only there.</Note>
+      {head(t('Where is the {device}?', { device: t(dev.name).toLowerCase() }))}
+      <Steps step={2} name={t('Room')} status={t('Choose a room')} />
+      <Note>{t('Shared rooms can be controlled from the wall panel. Private rooms are view only there.')}</Note>
       <div className={styles.list}>
         {ROOM_ORDER.map((r) => (
           <button key={r} type="button" className={styles.pick} onClick={() => { setRoom(r); setStage('name') }}>
-            <span className={styles.pickTx}><b>{ROOM_NAMES[r]}</b><small>{isPrivateRoom(r) ? 'Family phones · view only on the panel' : 'Controlled from the wall panel'}</small></span>
+            <span className={styles.pickTx}><b>{ROOM_NAMES[r]}</b><small>{isPrivateRoom(r) ? t('Family phones · view only on the panel') : t('Controlled from the wall panel')}</small></span>
             <Icon name="chev" size={18} />
           </button>
         ))}
@@ -120,43 +122,43 @@ export function AddDevice({ onClose }: { onClose: () => void }) {
   )
   if (stage === 'name') return (
     <>
-      {head("Name the device")}
-      <Steps step={3} name="Name" status="Name your device" />
-      <Field label="Name" value={name} onChange={setName} />
+      {head(t('Name the device'))}
+      <Steps step={3} name={t('Name')} status={t('Name your device')} />
+      <Field label={t('Name')} value={name} onChange={setName} />
       <div className={styles.diff}>
-        <ChangeRow label="Room" value={roomName} />
-        <ChangeRow label="Type" value={dev.type} />
-        <ChangeRow label="Wall panel" value={isPrivateRoom(room) ? 'View only' : 'Everyone can use it'} />
+        <ChangeRow label={t('Room')} value={roomName} />
+        <ChangeRow label={t('Type')} value={t(dev.type)} />
+        <ChangeRow label={t('Wall panel')} value={isPrivateRoom(room) ? t('View only') : t('Everyone can use it')} />
       </div>
-      <Note>Add it to a scene later in Scenes → Edit scene.</Note>
-      {btn('Add device', () => setStage('connecting'))}
+      <Note>{t('Add it to a scene later in Scenes → Edit scene.')}</Note>
+      {btn(t('Add device'), () => setStage('connecting'))}
     </>
   )
   if (stage === 'connecting') return (
     <>
-      <Steps step={4} name="Connect" status="Pairing in progress" />
-      <h2 className={styles.h2}>Connecting…</h2>
+      <Steps step={4} name={t('Connect')} status={t('Pairing in progress')} />
+      <h2 className={styles.h2}>{t('Connecting…')}</h2>
       <div className={styles.list}>{labels.map((l, i) => <ProgressRow key={l} text={l} status={rowsOf(false)[i]} />)}</div>
     </>
   )
   if (stage === 'error') return (
     <>
-      {head("Couldn’t add the device")}
-      <Steps step={4} name="Connect" status="Connection failed" state="error" />
-      <div className={styles.list}>{labels.map((l, i) => <ProgressRow key={l} text={l} status={rowsOf(true)[i]} failedLabel="Failed" />)}</div>
-      <TechAlert title="" tone="critical">The device stopped responding during setup. Move it closer to the hub and put it in pairing mode again.</TechAlert>
-      {btn('Try again', () => { a.setAddFlow({ connectFails: false }); setStage('connecting') })}
+      {head(t('Couldn’t add the device'))}
+      <Steps step={4} name={t('Connect')} status={t('Connection failed')} state="error" />
+      <div className={styles.list}>{labels.map((l, i) => <ProgressRow key={l} text={l} status={rowsOf(true)[i]} failedLabel={t('Failed')} />)}</div>
+      <TechAlert title="" tone="critical">{t('The device stopped responding during setup. Move it closer to the hub and put it in pairing mode again.')}</TechAlert>
+      {btn(t('Try again'), () => { a.setAddFlow({ connectFails: false }); setStage('connecting') })}
     </>
   )
   return (
     <>
-      <Steps step={4} name="" status="Ready to use" state="done" />
+      <Steps step={4} name="" status={t('Ready to use')} state="done" />
       <div className={styles.done}>
         <span className={styles.ok}><Icon name="check" size={40} /></span>
-        <h2 className={styles.h2}>{name.trim() || dev.name} added</h2>
-        <Note>{roomName} · {isPrivateRoom(room) ? 'now on family phones' : 'now on the wall panel in Rooms'}</Note>
-        {btn('Done', onClose)}
-        {btn('Add another device', () => { setName(''); setStage('prepare') }, false)}
+        <h2 className={styles.h2}>{t('{name} added', { name: name.trim() || t(dev.name) })}</h2>
+        <Note>{roomName} · {isPrivateRoom(room) ? t('now on family phones') : t('now on the wall panel in Rooms')}</Note>
+        {btn(t('Done'), onClose)}
+        {btn(t('Add another device'), () => { setName(''); setStage('prepare') }, false)}
       </div>
     </>
   )

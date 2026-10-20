@@ -1,5 +1,6 @@
 import * as RadixSwitch from '@radix-ui/react-switch'
 import styles from './Switch.module.css'
+import { t } from '../../i18n'
 
 type Props = {
   checked: boolean
@@ -20,7 +21,7 @@ export function Switch({ size = 'md', showState, ...rest }: Props) {
   if (!showState) return sw
   return (
     <div className={styles.field}>
-      <span className={styles.state}>{rest.checked ? 'On' : 'Off'}</span>
+      <span className={styles.state}>{rest.checked ? t('On') : t('Off')}</span>
       {sw}
     </div>
   )

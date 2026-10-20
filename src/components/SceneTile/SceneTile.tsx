@@ -1,6 +1,7 @@
 import { Icon, type IconName } from '../Icon/Icon'
 import { Chip } from '../Chip/Chip'
 import styles from './SceneTile.module.css'
+import { t } from '../../i18n'
 
 type Props = {
   name: string
@@ -10,7 +11,7 @@ type Props = {
   onClick?: () => void
 }
 
-export function SceneTile({ name, icon, state = 'idle', modifiedLabel = 'Modified', onClick }: Props) {
+export function SceneTile({ name, icon, state = 'idle', modifiedLabel = t('Modified'), onClick }: Props) {
   const disabled = state === 'unavailable'
   const on = state === 'active' || state === 'modified'
   return (
@@ -20,8 +21,8 @@ export function SceneTile({ name, icon, state = 'idle', modifiedLabel = 'Modifie
       </span>
       <span className={styles.tx}>
         <span className={styles.nm}>{name}</span>
-        {state === 'active' && <span className={styles.stt}>Active</span>}
-        {state === 'unavailable' && <span className={styles.stt}>Unavailable</span>}
+        {state === 'active' && <span className={styles.stt}>{t('Active')}</span>}
+        {state === 'unavailable' && <span className={styles.stt}>{t('Unavailable')}</span>}
         {state === 'modified' && <Chip tone="warning" size="xs">{modifiedLabel}</Chip>}
       </span>
     </button>

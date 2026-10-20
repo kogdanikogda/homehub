@@ -6,7 +6,7 @@ import { Header } from '../../components/Header/Header'
 import { ModeMenu, type ModeRowProps } from '../../components/ModeMenu/ModeMenu'
 import { Rail, type Page } from '../../components/Rail/Rail'
 import { ToastHost } from '../../components/ToastHost/ToastHost'
-import { MODE_NAMES, TODAY_ENERGY_KWH } from '../../store/data'
+import { MODE_NAMES, SCENES, TODAY_ENERGY_KWH } from '../../store/data'
 import { averageTemperature, windowsText } from '../../store/logic'
 import { ROOM_ORDER } from '../../store/data'
 import type { Mode, RoomId, SceneId } from '../../store/types'
@@ -18,6 +18,7 @@ import { RoomsPage } from './RoomsPage'
 import { ScenesPage } from './ScenesPage'
 import { useClock } from './useClock'
 import styles from './Tablet.module.css'
+import { t } from '../../i18n'
 
 const MODE_ICON = { home: 'home', away: 'lock', vacation: 'case' } as const
 
@@ -49,8 +50,8 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
   const [touch, setTouch] = useState(0)
   useEffect(() => {
     if (dimmed || alert) return
-    const t = setTimeout(() => useHome.getState().dim(), idleMs)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => useHome.getState().dim(), idleMs)
+    return () => clearTimeout(timer)
   }, [touch, dimmed, alert, idleMs])
 
   const pick = (m: Mode) => {
@@ -65,12 +66,12 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
     else act.armAlarm()
   }
   const rows: ModeRowProps[] = [
-    { icon: 'home', name: 'Home', description: 'Alarm off. Everyday life at home.', current: mode === 'home', badge: mode === 'home' ? undefined : 'PIN', onClick: () => pick('home') },
-    { icon: 'lock', name: 'Away', description: 'Alarm on. Lights and media off. For when everyone leaves.', current: mode === 'away', locked: mode === 'vacation', onClick: () => pick('away') },
-    { icon: 'case', name: 'Vacation', description: 'Long absence. Turned on by Alexey.', current: mode === 'vacation', locked: mode !== 'vacation', badge: 'Admin only', onClick: () => setMenuOpen(false) },
+    { icon: 'home', name: MODE_NAMES.home, description: t('Alarm off. Everyday life at home.'), current: mode === 'home', badge: mode === 'home' ? undefined : t('PIN'), onClick: () => pick('home') },
+    { icon: 'lock', name: MODE_NAMES.away, description: t('Alarm on. Lights and media off. For when everyone leaves.'), current: mode === 'away', locked: mode === 'vacation', onClick: () => pick('away') },
+    { icon: 'case', name: MODE_NAMES.vacation, description: t('Long absence. Turned on by Alexey.'), current: mode === 'vacation', locked: mode !== 'vacation', badge: t('Admin only'), onClick: () => setMenuOpen(false) },
   ]
 
-  const status = `${MODE_NAMES[mode]} mode · Alarm ${alarm ? 'on' : 'off'}${activeScene ? ` · Scene: ${activeScene[0].toUpperCase()}${activeScene.slice(1)}` : ''}`
+  const status = `${t('{mode} mode', { mode: MODE_NAMES[mode] })} · ${alarm ? t('Alarm on') : t('Alarm off')}${activeScene ? ` · ${t('Scene')}: ${SCENES[activeScene].name}` : ''}`
 
   return (
     <div className={styles.root} onPointerDownCapture={() => setTouch((n) => n + 1)}>
@@ -80,14 +81,14 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
           time={clock.time}
           date={clock.date}
           stats={[
-            { icon: 'temp', label: 'Average temperature', value: `${averageTemperature(devices, mode, privateRooms).toFixed(1)}°C` },
-            { icon: 'window', label: 'Windows', value: windowsText(openRooms), attention: openRooms.length > 0 },
-            { icon: 'bolt', label: 'Today’s energy', value: `${TODAY_ENERGY_KWH} kWh`, onClick: () => act.openEnergy() },
+            { icon: 'temp', label: t('Average temperature'), value: `${averageTemperature(devices, mode, privateRooms).toFixed(1)}°C` },
+            { icon: 'window', label: t('Windows'), value: windowsText(openRooms), attention: openRooms.length > 0 },
+            { icon: 'bolt', label: t('Today’s energy'), value: `${TODAY_ENERGY_KWH} ${t('kWh')}`, onClick: () => act.openEnergy() },
           ]}
           mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: alarm, alarmOn: alarm }}
           menuOpen={menuOpen}
           onMenuOpenChange={setMenuOpen}
-          menu={<ModeMenu rows={rows} alarm={{ on: alarm, badge: alarm ? 'PIN' : undefined, onClick: toggleAlarm }} />}
+          menu={<ModeMenu rows={rows} alarm={{ on: alarm, badge: alarm ? t('PIN') : undefined, onClick: toggleAlarm }} />}
         />
         {page === 'dashboard' && <Dashboard onAllDevices={(r) => { setRoom(r); setPage('rooms') }} />}
         {page === 'rooms' && <RoomsPage room={room} onRoom={setRoom} />}
@@ -98,10 +99,10 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />
       {alert && (alert.kind === 'intrusion'
-        ? <CriticalAlert icon="shield" title="Alarm triggered" subtitle={`Intrusion detected · Entrance motion sensor · ${alert.at}`}
-            note="The siren is on." actionLabel="Turn off alarm (PIN)" actionIcon="lock" onAction={() => act.requestAlarmOff()} />
-        : <CriticalAlert icon="fire" title="Smoke detected" subtitle={`Kitchen smoke sensor · ${alert.at}`}
-            note="Alarm sound is on until you acknowledge." actionLabel="Acknowledge" actionIcon="check" onAction={act.acknowledgeSmoke} />)}
+        ? <CriticalAlert icon="shield" title={t('Alarm triggered')} subtitle={t('Intrusion detected · Entrance motion sensor · {at}', { at: alert.at })}
+            note={t('The siren is on.')} actionLabel={t('Turn off alarm (PIN)')} actionIcon="lock" onAction={() => act.requestAlarmOff()} />
+        : <CriticalAlert icon="fire" title={t('Smoke detected')} subtitle={t('Kitchen smoke sensor · {at}', { at: alert.at })}
+            note={t('Alarm sound is on until you acknowledge.')} actionLabel={t('Acknowledge')} actionIcon="check" onAction={act.acknowledgeSmoke} />)}
       {dimmed && !alert && <DimScreen time={clock.time} status={status} onWake={act.wake} />}
     </div>
   )

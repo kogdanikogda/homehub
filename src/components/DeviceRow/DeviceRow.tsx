@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Icon, type IconName } from '../Icon/Icon'
 import { Tag } from '../Chip/Chip'
 import styles from './DeviceRow.module.css'
+import { t } from '../../i18n'
 
 type Props = {
   label: string
@@ -23,9 +24,9 @@ export function DeviceRow({ label, icon, control, platform = 'tablet', inScene, 
       <div className={styles.label}>
         <Icon name={icon} size={18} className={styles.icon} />
         <span className={unavailable ? styles.dim : styles.name}>{label}</span>
-        {changed && <Tag tone="warning">Changed</Tag>}
+        {changed && <Tag tone="warning">{t('Changed')}</Tag>}
         {inScene && (
-          <span className={styles.mark} title="Входит в сцену" role="img" aria-label="Входит в сцену">
+          <span className={styles.mark} title={t('In the scene')} role="img" aria-label={t('In the scene')}>
             <Icon name="sun" size={14} />
           </span>
         )}

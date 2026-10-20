@@ -4,19 +4,21 @@ import { Icon } from '../../components/Icon/Icon'
 import { AlarmPill, ScreenHeader, CAM_STYLE, CamAction, CameraTile, ChangeRow, GroupLabel, PhoneCard, SectionLabel, StatusRow, type CamId } from '../../components/Phone/Phone'
 import { useHome } from '../../store/useHome'
 import styles from './Phone.module.css'
+import { locale, t } from '../../i18n'
 
+const camera = (id: CamId, name: string, where: string) => ({ id, get name() { return t(name) }, get where() { return t(where) } })
 export const CAMERAS: { id: CamId; name: string; where: string }[] = [
-  { id: 'yard', name: 'Yard', where: 'Backyard · outdoor' },
-  { id: 'entrance', name: 'Entrance', where: 'Front door · porch' },
-  { id: 'garage', name: 'Garage', where: 'Garage · indoor' },
-  { id: 'living', name: 'Living room', where: 'Living room · indoor' },
+  camera('yard', 'Yard', 'Backyard · outdoor'),
+  camera('entrance', 'Entrance', 'Front door · porch'),
+  camera('garage', 'Garage', 'Garage · indoor'),
+  camera('living', 'Living room', 'Living room · indoor'),
 ]
 
-const LOG = [
-  ['19:05', 'Front door locked'],
-  ['18:41', 'General scene activated'],
-  ['18:40', 'Home mode on · alarm off with PIN'],
-  ['08:12', 'Away mode on · alarm on'],
+const log = (): string[][] => [
+  ['19:05', t('Front door locked')],
+  ['18:41', t('General scene activated')],
+  ['18:40', t('Home mode on · alarm off with PIN')],
+  ['08:12', t('Away mode on · alarm on')],
 ]
 
 /** Камера гостиной дома выключена ради приватности, пока администратор не включит её на время */
@@ -32,45 +34,45 @@ export function SecurityScreen({ onCamera }: { onCamera: (id: CamId) => void }) 
 
   return (
     <>
-      <PhoneCard title="Alarm" aside={<AlarmPill on={armed} label={armed ? 'Armed' : 'Disarmed'} />}>
+      <PhoneCard title={t('Alarm')} aside={<AlarmPill on={armed} label={armed ? t('Armed') : t('Disarmed')} />}>
         <p className={styles.noteText}>
-          {armed ? 'Sensors are on.' : 'Sensors are off.'} The alarm does not depend on the house mode.
+          {armed ? t('Sensors are on.') : t('Sensors are off.')} {t('The alarm does not depend on the house mode.')}
         </p>
         <Button variant="secondary" size="md" className={styles.btn} onClick={() => (armed ? a.requestAlarmOff('alexey') : a.armAlarm('alexey'))}>
-          {armed ? 'Turn off alarm' : 'Turn on alarm'}
+          {armed ? t('Turn off alarm') : t('Turn on alarm')}
         </Button>
       </PhoneCard>
 
       <div className={styles.group}>
-        <SectionLabel>Cameras</SectionLabel>
+        <SectionLabel>{t('Cameras')}</SectionLabel>
         <div className={styles.cams}>
           {CAMERAS.map((c) => <CameraTile key={c.id} id={c.id} name={c.name} off={camIsOff(c.id, mode, peek)} onClick={() => onCamera(c.id)} />)}
         </div>
       </div>
 
       <div className={styles.group}>
-        <SectionLabel>Front door</SectionLabel>
+        <SectionLabel>{t('Front door')}</SectionLabel>
         <div className={styles.lock}>
           <Icon name="lock" size={18} />
-          <span className={styles.lockTx}><span>Smart lock</span><small>{locked ? 'Locked' : 'Unlocked'}</small></span>
-          <Button variant="secondary" size="sm" onClick={() => a.setDoorLocked(!locked)}>{locked ? 'Unlock' : 'Lock'}</Button>
+          <span className={styles.lockTx}><span>{t('Smart lock')}</span><small>{locked ? t('Locked') : t('Unlocked')}</small></span>
+          <Button variant="secondary" size="sm" onClick={() => a.setDoorLocked(!locked)}>{locked ? t('Unlock') : t('Lock')}</Button>
         </div>
       </div>
 
       <div className={styles.group}>
-        <SectionLabel>Sensors</SectionLabel>
+        <SectionLabel>{t('Sensors')}</SectionLabel>
         <div className={styles.list}>
-          <StatusRow icon="motion" name="Motion · Yard" status="Clear" />
-          <StatusRow icon="motion" name="Motion · Corridor" status="Clear" />
-          <StatusRow icon="drop" name="Water leak · Kitchen" status="Dry" />
-          <StatusRow icon="fire" name="Smoke · Kitchen" status="Clear" />
+          <StatusRow icon="motion" name={t('Motion · Yard')} status={t('Clear')} />
+          <StatusRow icon="motion" name={t('Motion · Corridor')} status={t('Clear')} />
+          <StatusRow icon="drop" name={t('Water leak · Kitchen')} status={t('Dry')} />
+          <StatusRow icon="fire" name={t('Smoke · Kitchen')} status={t('Clear')} />
         </div>
       </div>
 
       <div className={styles.group}>
-        <SectionLabel>Event log</SectionLabel>
+        <SectionLabel>{t('Event log')}</SectionLabel>
         <div className={styles.log}>
-          {[...liveLog.map((e) => [e.t, e.x]), ...LOG].slice(0, 14).map(([t, text], i) => <div key={i + t + text}><span>{t}</span><span>{text}</span></div>)}
+          {[...liveLog.map((e) => [e.t, e.x]), ...log()].slice(0, 14).map(([time, text], i) => <div key={i + time + text}><span>{time}</span><span>{text}</span></div>)}
         </div>
       </div>
     </>
@@ -79,10 +81,10 @@ export function SecurityScreen({ onCamera }: { onCamera: (id: CamId) => void }) 
 
 function useNow() {
   const [now, setNow] = useState(() => new Date())
-  useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t) }, [])
+  useEffect(() => { const timer = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(timer) }, [])
   return now
 }
-const fmtTime = (d: Date) => `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toTimeString().slice(0, 8)}`
+const fmtTime = (d: Date) => `${d.toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toTimeString().slice(0, 8)}`
 
 export function CameraScreen({ id, onBack, onOther }: { id: CamId; onBack: () => void; onOther: (id: CamId) => void }) {
   const mode = useHome((s) => s.mode)
@@ -100,61 +102,61 @@ export function CameraScreen({ id, onBack, onOther }: { id: CamId; onBack: () =>
 
   const events: [string, string][] =
     id === 'entrance'
-      ? [...(alarm ? [[alert!.at, 'Motion at the entrance · alarm'] as [string, string]] : []), ['19:05', 'Front door locked'], ['18:40', 'Alexey arrived home'], ['14:12', 'Courier at the door']]
+      ? [...(alarm ? [[alert!.at, t('Motion at the entrance · alarm')] as [string, string]] : []), ['19:05', t('Front door locked')], ['18:40', t('Alexey arrived home')], ['14:12', t('Courier at the door')]]
       : id === 'living'
-        ? [['18:40', 'Recording stopped · Home mode'], ['08:12', 'Recording started · Away mode']]
-        : [['18:40', 'Motion detected'], ['14:12', 'Motion detected']]
+        ? [['18:40', t('Recording stopped · Home mode')], ['08:12', t('Recording started · Away mode')]]
+        : [['18:40', t('Motion detected')], ['14:12', t('Motion detected')]]
 
   return (
     <>
       <div className={styles.group} style={{ gap: 14 }}>
-        <ScreenHeader back={{ label: 'Cameras', onClick: onBack }} />
+        <ScreenHeader back={{ label: t('Cameras'), onClick: onBack }} />
         <div className={`${styles.view} ${alarm ? styles.viewAlarm : ''}`}>
           <span className={styles.viewImg} style={CAM_STYLE[id]} data-off={off} />
           {off ? (
             <div className={styles.viewOff}>
               <Icon name="lock" size={28} />
-              <b>Camera is off</b>
-              <small>The living room camera stays off in Home mode for privacy.</small>
-              <Button size="sm" onClick={() => a.setCamPeek(true)}>Turn on for 10 min</Button>
+              <b>{t('Camera is off')}</b>
+              <small>{t('The living room camera stays off in Home mode for privacy.')}</small>
+              <Button size="sm" onClick={() => a.setCamPeek(true)}>{t('Turn on for 10 min')}</Button>
             </div>
           ) : (
             <>
-              <div className={styles.viewTop}><span className={styles.viewLive}>● LIVE</span><span className={styles.viewTime}>{fmtTime(now)}</span></div>
-              {alarm && <span className={styles.viewBox}>Motion</span>}
+              <div className={styles.viewTop}><span className={styles.viewLive}>● {t('LIVE')}</span><span className={styles.viewTime}>{fmtTime(now)}</span></div>
+              {alarm && <span className={styles.viewBox}>{t('Motion')}</span>}
               <span className={styles.viewName}>{cam.name}</span>
-              {talk && <span className={styles.viewTalk}><Icon name="mic" size={14} />Talking…</span>}
+              {talk && <span className={styles.viewTalk}><Icon name="mic" size={14} />{t('Talking…')}</span>}
             </>
           )}
         </div>
         {msg && <div className={styles.msg} role="status"><Icon name="check" size={20} /><span>{msg}</span></div>}
         <div className={styles.acts}>
-          <CamAction icon="camera" label="Snapshot" disabled={off} onClick={() => { a.logEvent(`Snapshot · ${cam.name}`); setMsg('Snapshot saved to the event log.') }} />
+          <CamAction icon="camera" label={t('Snapshot')} disabled={off} onClick={() => { a.logEvent(t('Snapshot · {name}', { name: cam.name })); setMsg(t('Snapshot saved to the event log.')) }} />
           {id === 'entrance' && (
-            <CamAction icon="mic" label={talk ? 'Stop talking' : 'Talk'} active={talk} onClick={() => { if (!talk) a.logEvent('Two-way talk at the entrance'); setTalk(!talk) }} />
+            <CamAction icon="mic" label={talk ? t('Stop talking') : t('Talk')} active={talk} onClick={() => { if (!talk) a.logEvent(t('Two-way talk at the entrance')); setTalk(!talk) }} />
           )}
-          <CamAction icon="shield" label="Security" onClick={onBack} />
+          <CamAction icon="shield" label={t('Security')} onClick={onBack} />
         </div>
         <div className={styles.diff}>
-          <ChangeRow label="Status" value={off ? 'Off · privacy at home' : 'Recording'} />
-          <ChangeRow label="Location" value={cam.where} />
-          <ChangeRow label="Quality" value="1080p · night vision auto" />
-          <ChangeRow label="Clips" value="Kept for 14 days" />
+          <ChangeRow label={t('Status')} value={off ? t('Off · privacy at home') : t('Recording')} />
+          <ChangeRow label={t('Location')} value={cam.where} />
+          <ChangeRow label={t('Quality')} value={t('1080p · night vision auto')} />
+          <ChangeRow label={t('Clips')} value={t('Kept for 14 days')} />
         </div>
-        {id === 'living' && peek && <Button variant="secondary" size="md" className={styles.btn} onClick={() => a.setCamPeek(false)}>Turn off camera</Button>}
+        {id === 'living' && peek && <Button variant="secondary" size="md" className={styles.btn} onClick={() => a.setCamPeek(false)}>{t('Turn off camera')}</Button>}
       </div>
 
       <div className={styles.group}>
-        <GroupLabel>Today</GroupLabel>
+        <GroupLabel>{t('Today')}</GroupLabel>
         <div className={styles.events}>
-          {events.map(([t, text]) => (
-            <div key={t + text}><i style={CAM_STYLE[id]} /><span>{t}</span><span>{text}</span></div>
+          {events.map(([time, text]) => (
+            <div key={time + text}><i style={CAM_STYLE[id]} /><span>{time}</span><span>{text}</span></div>
           ))}
         </div>
       </div>
 
       <div className={styles.group}>
-        <GroupLabel>Other cameras</GroupLabel>
+        <GroupLabel>{t('Other cameras')}</GroupLabel>
         <div className={styles.strip}>
           {CAMERAS.map((c) => (
             <button key={c.id} type="button" aria-current={c.id === id} className={c.id === id ? styles.stripOn : ''} onClick={() => onOther(c.id)}>

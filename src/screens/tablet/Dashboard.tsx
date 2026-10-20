@@ -12,6 +12,7 @@ import { useIgnoredKeys } from '../../store/selectors'
 import { useHome } from '../../store/useHome'
 import { DeviceControl } from './DeviceControl'
 import styles from './Tablet.module.css'
+import { t } from '../../i18n'
 
 export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => void }) {
   const mode = useHome((s) => s.mode)
@@ -30,10 +31,10 @@ export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => vo
 
   const hint =
     mode !== 'home'
-      ? `Scenes are unavailable in ${MODE_NAMES[mode]} mode.`
+      ? t('Scenes are unavailable in {mode} mode.', { mode: MODE_NAMES[mode] })
       : changes.length
-        ? `${SCENES[activeScene!].name} differs from its saved settings. Tap it to see what changed.`
-        : 'A scene sets lights, climate, curtains and media in Living Room, Kitchen and Corridor.'
+        ? t('{name} differs from its saved settings. Tap it to see what changed.', { name: SCENES[activeScene!].name })
+        : t('A scene sets lights, climate, curtains and media in Living Room, Kitchen and Corridor.')
 
   return (
     <main className={styles.main}>
@@ -45,7 +46,7 @@ export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => vo
             mode !== 'home' ? 'unavailable' : id !== activeScene ? 'idle' : changes.length ? 'modified' : 'active'
           return (
             <SceneTile key={id} name={scene.name} icon={scene.icon} state={state}
-              modifiedLabel={`Modified · ${changes.length} ${changes.length === 1 ? 'change' : 'changes'}`}
+              modifiedLabel={changes.length === 1 ? t('Modified · 1 change') : t('Modified · {n} changes', { n: changes.length })}
               onClick={() => tapScene(id)} />
           )
         })}
@@ -55,7 +56,7 @@ export function Dashboard({ onAllDevices }: { onAllDevices: (room: RoomId) => vo
           <RoomCard key={room} title={ROOM_NAMES[room]} windowOpen={windowsOpen[room]} lightAction={<RoomLight room={room} />} onAllDevices={() => onAllDevices(room)}>
             {DEVICES.filter((d) => d.room === room).map((d) => (
               <DeviceRow key={d.key} icon={d.icon} label={d.label} changed={changedKeys.has(d.key)}
-                unavailable={unresponsive.includes(d.key)} status={unresponsive.includes(d.key) ? 'No response' : undefined}
+                unavailable={unresponsive.includes(d.key)} status={unresponsive.includes(d.key) ? t('No response') : undefined}
                 control={<DeviceControl def={d} />} />
             ))}
           </RoomCard>

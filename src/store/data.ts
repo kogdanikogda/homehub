@@ -1,5 +1,22 @@
 import type { DeviceDef, DeviceKey, DeviceValue, ExtraKey, Mode, PrivateKey, PrivateRoomId, PrivateRooms, RoomId, SceneId } from './types'
 import type { IconName } from '../components/Icon/Icon'
+import { t } from '../i18n'
+
+/** Делает текстовые поля объекта переводимыми: значение берётся из словаря при каждом чтении. */
+function loc<T extends object>(o: T, ...keys: (keyof T & string)[]): T {
+  for (const k of keys) {
+    const raw = o[k] as string
+    Object.defineProperty(o, k, { get: () => t(raw), enumerable: true })
+  }
+  return o
+}
+function locAll<K extends string>(rec: Record<K, string>): Record<K, string> {
+  for (const k of Object.keys(rec) as K[]) {
+    const raw = rec[k]
+    Object.defineProperty(rec, k, { get: () => t(raw), enumerable: true })
+  }
+  return rec
+}
 
 export const HOUSE_NAME = 'Home on Birch Street 12'
 /** Прототипный PIN (показывается подсказкой на экране) */
@@ -7,21 +24,21 @@ export const PROTOTYPE_PIN = '1234'
 /** Глобальный диапазон температур — настраивается только в админке */
 export const TEMP_LIMITS = { min: 18, max: 26 }
 
-export const ROOM_NAMES: Record<RoomId, string> = {
+export const ROOM_NAMES: Record<RoomId, string> = locAll<RoomId>({
   living: 'Living Room',
   kitchen: 'Kitchen',
   corridor: 'Corridor',
   kids1: 'Kids Room 1',
   kids2: 'Kids Room 2',
   bedroom: "Parents' Bedroom",
-}
+})
 
 /** Комнаты с окнами: в коридоре окна нет */
 export const WINDOW_ROOMS: RoomId[] = ['living', 'kitchen', 'kids1', 'kids2', 'bedroom']
 export const ROOM_ORDER: RoomId[] = ['living', 'kitchen', 'corridor', 'kids1', 'kids2', 'bedroom']
 export const SHARED_ROOMS: RoomId[] = ['living', 'kitchen', 'corridor']
 
-export const DEVICES: DeviceDef[] = [
+export const DEVICES: DeviceDef[] = ([
   { key: 'living.light', room: 'living', label: 'Main light', short: 'Living Room light', icon: 'light', kind: 'dimmer' },
   { key: 'living.rgb', room: 'living', label: 'RGB lighting', short: 'RGB lighting', icon: 'rgb', kind: 'rgb' },
   { key: 'living.climate', room: 'living', label: 'Climate', short: 'Living Room climate', icon: 'temp', kind: 'climate' },
@@ -31,7 +48,7 @@ export const DEVICES: DeviceDef[] = [
   { key: 'kitchen.light', room: 'kitchen', label: 'Main ceiling light', short: 'Kitchen light', icon: 'light', kind: 'toggle' },
   { key: 'kitchen.climate', room: 'kitchen', label: 'Climate', short: 'Kitchen climate', icon: 'temp', kind: 'climate' },
   { key: 'corridor.light', room: 'corridor', label: 'Entrance light', short: 'Entrance light', icon: 'light', kind: 'dimmer' },
-]
+] as DeviceDef[]).map((d) => loc(d, 'label', 'short'))
 
 export const DEVICE_BY_KEY = Object.fromEntries(DEVICES.map((d) => [d.key, d])) as Record<DeviceKey, DeviceDef>
 
@@ -47,7 +64,7 @@ export interface SceneDef {
 }
 
 // Значения всех четырёх сцен взяты из макета.
-export const SCENES: Record<SceneId, SceneDef> = {
+const RAW_SCENES: Record<SceneId, SceneDef> = {
   general: {
     id: 'general', name: 'General', description: 'Everyday light and comfort in the shared rooms.', icon: 'sun',
     values: {
@@ -77,6 +94,10 @@ export const SCENES: Record<SceneId, SceneDef> = {
     },
   },
 }
+
+export const SCENES: Record<SceneId, SceneDef> = Object.fromEntries(
+  Object.entries(RAW_SCENES).map(([id, sc]) => [id, loc(sc, 'name', 'description')]),
+) as Record<SceneId, SceneDef>
 
 export const SCENE_ORDER: SceneId[] = ['general', 'cinema', 'night', 'guests']
 
@@ -120,33 +141,35 @@ export const INITIAL_PRIVATE: PrivateRooms = {
 export const CORRIDOR_TEMP = 21
 
 /** Устройства, которых нет на главном экране, но есть на странице комнаты (кухня) */
-export const KITCHEN_EXTRAS: { key: ExtraKey; label: string; icon: IconName }[] = [
+export const KITCHEN_EXTRAS: { key: ExtraKey; label: string; icon: IconName }[] = ([
   { key: 'kitchen.bar', label: 'Bar lighting', icon: 'light' },
   { key: 'kitchen.floor', label: 'Floor heating', icon: 'temp' },
-]
-export const COUNTERTOP = { label: 'Countertop lighting', icon: 'light' as IconName, status: 'Off · wall switch only' }
+] as { key: ExtraKey; label: string; icon: IconName }[]).map((e) => loc(e, 'label'))
+export const COUNTERTOP = loc({ label: 'Countertop lighting', icon: 'light' as IconName, status: 'Off · wall switch only' }, 'label', 'status')
 export const INITIAL_EXTRAS: Record<ExtraKey, boolean> = { 'kitchen.bar': false, 'kitchen.floor': true }
 
 /** Личные комнаты: панель только показывает их состояние, управляют телефоны семьи */
-export const PRIVATE_DEVICES: Record<PrivateRoomId, { key: PrivateKey; label: string; icon: IconName }[]> = {
-  kids1: [
+type PrivDev = { key: PrivateKey; label: string; icon: IconName }
+const privList = (list: PrivDev[]) => list.map((d) => loc(d, 'label'))
+export const PRIVATE_DEVICES: Record<PrivateRoomId, PrivDev[]> = {
+  kids1: privList([
     { key: 'light', label: 'Light', icon: 'light' },
     { key: 'climate', label: 'Climate', icon: 'temp' },
     { key: 'humidifier', label: 'Humidifier', icon: 'drop' },
-  ],
-  kids2: [
+  ]),
+  kids2: privList([
     { key: 'light', label: 'Light', icon: 'light' },
     { key: 'climate', label: 'Climate', icon: 'temp' },
     { key: 'humidifier', label: 'Humidifier', icon: 'drop' },
-  ],
-  bedroom: [
+  ]),
+  bedroom: privList([
     { key: 'light', label: 'Light', icon: 'light' },
     { key: 'climate', label: 'Climate', icon: 'temp' },
     { key: 'humidifier', label: 'Humidifier', icon: 'drop' },
     { key: 'curtains', label: 'Curtains', icon: 'curtains' },
-  ],
+  ]),
 }
 export const PRIVATE_ROOM_IDS: PrivateRoomId[] = ['kids1', 'kids2', 'bedroom']
 
-export const MODE_NAMES: Record<Mode, string> = { home: 'Home', away: 'Away', vacation: 'Vacation' }
+export const MODE_NAMES: Record<Mode, string> = locAll<Mode>({ home: 'Home', away: 'Away', vacation: 'Vacation' })
 export const TODAY_ENERGY_KWH = 18.4

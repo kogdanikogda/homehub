@@ -6,6 +6,7 @@ import { useHome } from '../../store/useHome'
 import { isPrivateRoom } from './Dashboard'
 import { offlineText } from './TechAlertRow'
 import styles from './Phone.module.css'
+import { t } from '../../i18n'
 
 /** Все устройства дома со статусом. Недоступное устройство подсвечивается, а наверху — техническое оповещение. */
 export function DevicesScreen({ onAdd }: { onAdd: () => void }) {
@@ -31,15 +32,15 @@ export function DevicesScreen({ onAdd }: { onAdd: () => void }) {
   return (
     <>
       <div className={styles.group}>
-        <Button size="md" icon="plus" className={styles.btn} onClick={onAdd}>Add device</Button>
+        <Button size="md" icon="plus" className={styles.btn} onClick={onAdd}>{t('Add device')}</Button>
         {text && <TechAlert>{text}</TechAlert>}
       </div>
       {ROOM_ORDER.map((room) => (
         <div key={room} className={styles.group}>
-          <GroupLabel tag={isPrivateRoom(room) ? 'Private' : undefined}>{ROOM_NAMES[room]}</GroupLabel>
+          <GroupLabel tag={isPrivateRoom(room) ? t('Private') : undefined}>{ROOM_NAMES[room]}</GroupLabel>
           <div className={styles.list}>
-            {rows(room).map((d) => <StatusRow key={d.key} icon={d.icon} name={d.name} status={d.off ? 'Offline' : 'Online'} tone={d.off ? 'bad' : 'ok'} />)}
-            {added.filter((d) => d.room === room).map((d) => <StatusRow key={`add-${d.id}`} icon="light" name={d.name} status="Online" />)}
+            {rows(room).map((d) => <StatusRow key={d.key} icon={d.icon} name={d.name} status={d.off ? t('Offline') : t('Online')} tone={d.off ? 'bad' : 'ok'} />)}
+            {added.filter((d) => d.room === room).map((d) => <StatusRow key={`add-${d.id}`} icon="light" name={d.name} status={t('Online')} />)}
           </div>
         </div>
       ))}

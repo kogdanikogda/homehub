@@ -14,6 +14,7 @@ import { useIgnoredKeys } from '../../store/selectors'
 import { useHome } from '../../store/useHome'
 import { DeviceControl } from './DeviceControl'
 import styles from './RoomsPage.module.css'
+import { t } from '../../i18n'
 
 const isPrivate = (r: RoomId): r is PrivateRoomId => PRIVATE_ROOM_IDS.includes(r as PrivateRoomId)
 
@@ -39,7 +40,7 @@ export function RoomsPage({ room, onRoom }: { room: RoomId; onRoom: (r: RoomId) 
             {ROOM_NAMES[r]}
           </span>
           <span className={styles.itemSub}>{roomSummary(awayTemp(r), on, total)}</span>
-          {windowsOpen[r] && <span className={styles.itemChip}><Chip tone="warning" icon="window" size="sm">Window open</Chip></span>}
+          {windowsOpen[r] && <span className={styles.itemChip}><Chip tone="warning" icon="window" size="sm">{t('Window open')}</Chip></span>}
         </button>
       </li>
     )
@@ -47,10 +48,10 @@ export function RoomsPage({ room, onRoom }: { room: RoomId; onRoom: (r: RoomId) 
 
   return (
     <main className={styles.split}>
-      <nav className={styles.list} aria-label="Rooms">
-        <h2 className={styles.colh}>Shared rooms</h2>
+      <nav className={styles.list} aria-label={t('Rooms')}>
+        <h2 className={styles.colh}>{t('Shared rooms')}</h2>
         <ul className={styles.ul}>{SHARED_ROOMS.map(item)}</ul>
-        <h2 className={styles.colh}>Private rooms · view only</h2>
+        <h2 className={styles.colh}>{t('Private rooms · view only')}</h2>
         <ul className={styles.ul}>{PRIVATE_ROOM_IDS.map(item)}</ul>
       </nav>
       <RoomDetail room={room} />
@@ -78,8 +79,8 @@ function RoomDetail({ room }: { room: RoomId }) {
   const changedKeys = new Set(modifiedChanges(devices, activeScene, ignored, scenes).map((c) => c.key))
   const climateKey = room === 'living' || room === 'kitchen' ? (`${room}.climate` as const) : null
   const subtitle = priv
-    ? `Climate set to ${mode === 'home' ? privateRooms[room].climate : AWAY_CLIMATE}°`
-    : climateKey ? `Climate set to ${devices[climateKey]}°` : 'No climate control in this room'
+    ? t('Climate set to {v}°', { v: mode === 'home' ? privateRooms[room].climate : AWAY_CLIMATE })
+    : climateKey ? t('Climate set to {v}°', { v: String(devices[climateKey]) }) : t('No climate control in this room')
 
   const scene = mode === 'home' && activeScene && !priv ? SCENES[activeScene] : null
   const count = scene ? sceneControlledCount(room, scene.id, scenes) : 0
@@ -94,8 +95,8 @@ function RoomDetail({ room }: { room: RoomId }) {
         </div>
         <div className={styles.headRight}>
           <div className={styles.tags}>
-            {open ? <Chip tone="warning" icon="window" size="sm">Window open</Chip> : <Chip tone="success" icon="check" size="sm">Windows closed</Chip>}
-            {priv && <Chip tone="neutral" icon="lock" size="sm">View only</Chip>}
+            {open ? <Chip tone="warning" icon="window" size="sm">{t('Window open')}</Chip> : <Chip tone="success" icon="check" size="sm">{t('Windows closed')}</Chip>}
+            {priv && <Chip tone="neutral" icon="lock" size="sm">{t('View only')}</Chip>}
           </div>
           {!priv && <RoomLight room={room} block={false} />}
         </div>
@@ -105,13 +106,13 @@ function RoomDetail({ room }: { room: RoomId }) {
         <div className={styles.legend}>
           <Icon name={scene.icon} size={16} className={styles.legendIcon} />
           <span>
-            {scene.name} controls {count} {count === 1 ? 'device' : 'devices'}. Marked devices belong to the active “{scene.name}” scene.
-            Changing them modifies the scene until another scene is activated.
+            {count === 1 ? t('{name} controls 1 device.', { name: scene.name }) : t('{name} controls {n} devices.', { name: scene.name, n: count })}{' '}
+            {t('Marked devices belong to the active “{name}” scene. Changing them modifies the scene until another scene is activated.', { name: scene.name })}
           </span>
         </div>
       )}
       {mode !== 'home' && !priv && (
-        <p className={styles.desc}>{MODE_NAMES[mode]} mode is on. Media is off and climate saves energy until Home mode returns.</p>
+        <p className={styles.desc}>{t('{mode} mode is on. Media is off and climate saves energy until Home mode returns.', { mode: MODE_NAMES[mode] })}</p>
       )}
 
       <div className={styles.grid}>
@@ -127,7 +128,7 @@ function RoomDetail({ room }: { room: RoomId }) {
                   <DeviceRow key={d.key} icon={d.icon} label={d.label}
                     inScene={Boolean(scene) && isSceneControlled(d.key, scene!.id, scenes)}
                     changed={changedKeys.has(d.key)} unavailable={bad}
-                    control={bad ? <Chip tone="neutral" size="lg">Unavailable</Chip> : <DeviceControl def={d} />} />
+                    control={bad ? <Chip tone="neutral" size="lg">{t('Unavailable')}</Chip> : <DeviceControl def={d} />} />
                 )
               })}
               {room === 'kitchen' && (
@@ -143,14 +144,14 @@ function RoomDetail({ room }: { room: RoomId }) {
           )}
         {added.map((d) => (
           <DeviceRow key={`add-${d.id}`} icon="light" label={d.name}
-            control={priv ? <span className={styles.readonly}>{d.on ? 'On' : 'Off'}</span> : <Switch showState aria-label={d.name} checked={d.on} onCheckedChange={(v) => toggleAdded(d.id, v)} />} />
+            control={priv ? <span className={styles.readonly}>{d.on ? t('On') : t('Off')}</span> : <Switch showState aria-label={d.name} checked={d.on} onCheckedChange={(v) => toggleAdded(d.id, v)} />} />
         ))}
       </div>
 
       {priv && (
         <div className={styles.infobox}>
           <Icon name="lock" size={20} className={styles.legendIcon} />
-          <span>This is a private room. You can see its state here. Family phones control it.</span>
+          <span>{t('This is a private room. You can see its state here. Family phones control it.')}</span>
         </div>
       )}
     </section>
