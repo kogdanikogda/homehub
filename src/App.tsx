@@ -10,7 +10,9 @@ import { TabletApp } from './screens/tablet/TabletApp'
 import styles from './App.module.css'
 
 /** Панель, которой в прототипе вызывают события «из жизни дома» */
-function PrototypePanel() {
+type View = 'all' | 'tablet' | 'marina' | 'alexey'
+
+function PrototypePanel({ view, pick }: { view: View; pick: (v: View) => void }) {
   const [open, setOpen] = useState(false)
   const windows = useHome((s) => s.windowsOpen)
   const failKeys = useHome((s) => s.failKeys)
@@ -31,11 +33,19 @@ function PrototypePanel() {
       aria-controls="service-panel"
       onClick={() => setOpen(!open)}
     >
-      <Icon name="gear" size={22} />
+      <Icon name="cog" size={24} />
     </button>
     {open && (
     <aside id="service-panel" className={styles.panel} aria-label="Service panel">
-      <span className={styles.label}>Service panel</span>
+      <span className={styles.label}>Device</span>
+      <div className={styles.devices} role="group" aria-label="Device">
+        {(['tablet', 'marina', 'alexey', 'all'] as const).map((v) => (
+          <Button key={v} size="sm" variant={view === v ? 'primary' : 'secondary'} aria-pressed={view === v} onClick={() => pick(v)}>
+            {v === 'all' ? 'All 3 devices' : v === 'tablet' ? 'Wall tablet' : v === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}
+          </Button>
+        ))}
+      </div>
+      <span className={styles.label}>Events</span>
       <Button size="sm" variant="secondary" onClick={() => a.toggleWindow('living')}>
         {windows.living ? 'Close' : 'Open'} {ROOM_NAMES.living} window
       </Button>
@@ -72,26 +82,15 @@ function PrototypePanel() {
   )
 }
 
-type View = 'all' | 'tablet' | 'marina' | 'alexey'
-
 export function App() {
-  // Стартовая страница — все три устройства на одном состоянии дома
-  const [view, setView] = useState<View>(() => (new URLSearchParams(location.search).get('device') as View) || 'all')
+  // Стартовая страница — настенный планшет; остальные устройства выбираются в сервисной панели
+  const [view, setView] = useState<View>(() => (new URLSearchParams(location.search).get('device') as View) || 'tablet')
   const pick = (v: View) => {
     setView(v)
     if (v === 'all') useHome.getState().setPairingManual(true)
   }
-  const tab = (v: View, text: string) => (
-    <Button size="sm" variant={view === v ? 'primary' : 'secondary'} onClick={() => pick(v)}>{text}</Button>
-  )
   return (
     <div className={styles.page}>
-      <div className={styles.switch} role="group" aria-label="Device">
-        {tab('all', 'All 3 devices')}
-        {tab('tablet', 'Wall tablet')}
-        {tab('marina', 'Marina’s phone')}
-        {tab('alexey', 'Alexey’s phone')}
-      </div>
       {view === 'all' ? (
         <div className={styles.demo}>
           <figure className={styles.cell}><div className={styles.slot}><TabletFrame><TabletApp /></TabletFrame></div><figcaption>Wall tablet</figcaption></figure>
@@ -105,7 +104,7 @@ export function App() {
             : <PhoneFrame label={view === 'marina' ? 'Marina’s phone' : 'Alexey’s phone'}><PhoneApp key={view} user={view} /></PhoneFrame>}
         </div>
       )}
-      <PrototypePanel />
+      <PrototypePanel view={view} pick={pick} />
     </div>
   )
 }
