@@ -101,7 +101,7 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
     }
     case 'pin':
       return (
-        <Dialog compact={compact} open onOpenChange={close} width={460}
+        <Dialog compact={compact} centered open onOpenChange={close} width={460}
           title={dialog.purpose === 'home' ? t('Enter PIN to switch to Home') : t('Enter PIN to turn off the alarm')}
           lead={dialog.purpose === 'home' ? t('This turns the alarm off.') : t('This stops the siren.')}>
           <PinPad onSubmit={(p) => a.submitPin(p, by)} hint={t('Prototype PIN: {pin}', { pin: PROTOTYPE_PIN })} />

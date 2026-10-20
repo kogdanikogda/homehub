@@ -16,3 +16,9 @@
 .compact .note { font-size: 13px; line-height: 18px; }
 .compact .actions { flex-direction: column-reverse; gap: 8px; }
 .compact .actions > * { width: 100%; }
+
+/* Окно по центру: заголовок, пояснение и кнопки выровнены по оси окна */
+.centered { text-align: center; }
+.centered .header { justify-content: center; }
+.centered .title { min-width: 0; text-wrap: balance; }
+.centered .actions { justify-content: center; }

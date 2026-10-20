@@ -27,12 +27,14 @@ type Props = {
   primary?: Action
   /** Телефон: меньше отступы, кнопки на всю ширину */
   compact?: boolean
+  /** Всё содержимое по центру (например, окно ввода PIN) */
+  centered?: boolean
   /** Кнопка-отмена; false — не показывать. По умолчанию «Cancel» */
   secondary?: { label: string; onClick?: () => void } | false
 }
 
 export function Dialog({
-  open, onOpenChange, title, lead, counter, headerExtra, progress, children, note, width = 660, dismissible = true, compact, primary, secondary,
+  open, onOpenChange, title, lead, counter, headerExtra, progress, children, note, width = 660, dismissible = true, compact, centered, primary, secondary,
 }: Props) {
   const container = usePortalContainer()
   const cancel = secondary === undefined ? { label: t('Cancel') } : secondary
@@ -42,7 +44,7 @@ export function Dialog({
       <RadixDialog.Portal container={container}>
         <RadixDialog.Overlay className={styles.overlay} />
         <RadixDialog.Content
-          className={`${styles.content} ${compact ? styles.compact : ''}`}
+          className={[styles.content, compact && styles.compact, centered && styles.centered].filter(Boolean).join(' ')}
           style={{ width: `min(${width}px, calc(100% - 32px))` }}
           aria-describedby={undefined}
           onEscapeKeyDown={block}
