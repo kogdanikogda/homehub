@@ -1535,8 +1535,7 @@ function guardHTML(ph){
   return '<div class="alert armed" role="alertdialog" aria-modal="true" aria-label="'+(v?'Vacation mode':'Away mode')+'">'+
     '<span class="al-chip"><span class="al-dot"></span><span>Home is armed</span></span>'+
     '<div class="al-mid"><span class="beacon" aria-hidden="true"><span class="ring"></span><span class="core">'+I(v?'case':'lock',64)+'</span></span>'+
-    '<div class="al-copy"><div class="t">'+(v?'Vacation mode':'Away mode')+'</div><div class="s">'+(v?'Long absence · Turned on by Alexey':'Alarm is on · Lights and media are off')+'</div></div>'+
-    '<div class="al-facts"><span class="al-fact">'+I('clock',22)+'Since 19:42</span><span class="al-fact">'+I('motion',22)+'All sensors are watching</span></div></div>'+
+    '<div class="al-copy"><div class="t">'+(v?'Vacation mode':'Away mode')+'</div></div></div>'+
     '<div class="al-act"><button class="btn" data-act="'+(ph?'pGuardHome':'guardHome')+'">'+I('home',26)+'Switch to Home'+(ph?'':' (PIN)')+'</button></div></div>';
 }
 function dimHTML(){
