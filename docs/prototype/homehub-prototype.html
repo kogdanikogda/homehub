@@ -244,6 +244,12 @@ button.tile{cursor:pointer}
 .alert .n{font-size:14px;opacity:.75}
 .alert .btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;background:#FFFFFF;color:#14181D;border-color:#FFFFFF;font-size:26px;font-weight:700;height:88px;min-width:460px;padding:0 44px;border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.4)}
 /* Дом под охраной (Away, Vacation): то же окно, спокойнее — приглушённый розовый, один медленный круг, точка не мигает */
+.nopt{display:flex;align-items:center;gap:14px;width:100%;margin-top:14px;padding:12px 0 4px;border:none;background:none;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.nopt-ic{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:var(--s2);color:var(--ink2)}
+.nopt-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.nopt-tx b{font-size:16px;font-weight:600}
+.nopt-tx small{font-size:13px;line-height:18px;color:var(--ink2)}
+.nopt .sw{pointer-events:none}
 .alert.armed{z-index:28;--c:#DC8995;--veil:62,26,33;--deep:32,13,17}
 .alert.armed::before{animation:alBreatheSoft 4s ease-in-out infinite}
 .alert.armed .ring{animation-duration:3.2s}
@@ -1258,11 +1264,15 @@ function runProgress(o){
     S.prog.resume=function(){S.prog.holding=false; held.splice(0).forEach(function(g){g();}); render();};
   }
 }
-function startScene(sc){
-  var items=paramItems(S.cfg[sc]);
+function startScene(sc,arm){
+  var items=(arm?sysItems(true):[]).concat(paramItems(S.cfg[sc]));
   if(!items.length){applyScene(sc);toast(lbl(sc)+' scene activated');return;}
   runProgress({title:'Activating “'+lbl(sc)+'” scene',doneTitle:lbl(sc)+' scene is on',items:items,
-    commit:function(){applyScene(sc);},msg:lbl(sc)+' scene activated'});
+    commit:function(){applyScene(sc);if(arm){S.alarm=true;logEv('Alarm turned on with the Night scene');}},msg:arm?lbl(sc)+' scene on. Alarm is on.':lbl(sc)+' scene activated'});
+}
+// Сцена Night: окно с опцией «включить сигнализацию» (по умолчанию выключена)
+function nightOpt(on,act){
+  return '<button class="nopt" data-act="'+act+'" role="switch" aria-checked="'+on+'"><span class="nopt-ic">'+I('shield',22)+'</span><span class="nopt-tx"><b>Turn on the alarm</b><small>The screen will show that the home is armed until the alarm is turned off.</small></span><span class="sw" aria-hidden="true" aria-checked="'+on+'"></span></button>';
 }
 function startAway(){
   runProgress({title:'Turning on Away mode',doneTitle:'Away mode is on',items:sysItems(true).concat(paramItems(AWAY_T)),
@@ -1360,7 +1370,7 @@ function baseHTML(){
     '</div><div class="sp"></div>'+
     '<button class="modebtn'+(armed?' armed':'')+(S.menu?' open':'')+'" data-act="modeMenu" aria-haspopup="true" aria-expanded="'+(!!S.menu)+'">'+
       '<span class="mb-m">'+I(MODE_IC[S.mode],18)+'<span class="pk">House mode:</span> <b>'+S.mode+'</b></span>'+I('chev',16)+'</button>'+
-    '<div class="talarm'+(armed?' on':'')+'" role="status" aria-label="Alarm '+(armed?'on':'off')+'">'+I('shield',24)+'</div></header>';
+    '</header>';
   var nav='<nav class="nav"><div class="logo" role="img" aria-label="HomeHub">'+LOGO+'</div>'+[['dashboard','Dashboard','dash'],['rooms','Rooms','rooms'],['scenes','Scenes','scenes']].map(function(x){
     return '<button data-act="nav" data-v="'+x[0]+'" class="'+(S.view===x[0]?'on':'')+'"><span class="ib">'+I(x[2],22)+'</span>'+x[1]+'</button>';
   }).join('')+'<span class="grow"></span><button data-act="dimNow"><span class="ib">'+I('moon',22)+'</span>Dim</button></nav>';
@@ -1443,6 +1453,11 @@ function dialogHTML(){
       '<div class="chg">'+I(par.ic,24)+'<span class="tx"><small>'+RN(par.room)+'</small>'+par.label+'</span><b class="num">'+fmt(d.p,S.dev[d.p])+' → '+fmt(d.p,d.v)+'</b></div>'+
       '<p>This change will remain active until you change it manually again, or another scene is activated.</p>'+
       '<div class="acts"><button class="btn" data-act="dlgCancel">Cancel</button><button class="btn pri" data-act="ok">Continue</button></div>';
+  }else if(d.type==='night'){
+    inner='<h2>Switch to Night?</h2>'+
+      (d.items.length?'<p class="lead">Switching to Night will turn off '+d.items.join(' and ')+'.</p><div class="lst">'+d.items.map(function(x){return lstRow(x==='the TV'?'tv':'sound','Living Room · '+(x==='the TV'?'TV':'Sound system'),'Off');}).join('')+'</div>':'')+
+      nightOpt(!!d.arm,'nightArm')+
+      '<div class="acts"><button class="btn" data-act="dlgCancel">Cancel</button><button class="btn pri" data-act="ok">Confirm</button></div>';
   }else if(d.type==='conflict'){
     inner='<h2>Switch to '+lbl(d.sc)+'?</h2>'+
       '<p class="lead">Switching to '+lbl(d.sc)+' will turn off '+d.items.join(' and ')+'.</p>'+
@@ -1529,9 +1544,16 @@ setInterval(function(){
   document.querySelectorAll('[data-al-t]').forEach(function(n){n.textContent=tm;});
 },1000);
 // Дом под охраной: окно поверх интерфейса, нажать можно только его кнопку
-function guarded(){return S.mode!=='Home'&&!S.alert;}
+function guarded(){return (S.mode!=='Home'||S.alarm)&&!S.alert;}
 function guardHTML(ph){
   var v=S.mode==='Vacation';
+  if(S.mode==='Home'){
+    return '<div class="alert armed" role="alertdialog" aria-modal="true" aria-label="Alarm is on">'+
+      '<span class="al-chip"><span class="al-dot"></span><span>Home is armed</span></span>'+
+      '<div class="al-mid"><span class="beacon" aria-hidden="true"><span class="ring"></span><span class="core">'+I('shield',64)+'</span></span>'+
+      '<div class="al-copy"><div class="t">Alarm is on</div></div></div>'+
+      '<div class="al-act"><button class="btn" data-act="'+(ph?'pGuardAlarmOff':'guardAlarmOff')+'">'+I('lock',26)+'Turn off alarm'+(ph?'':' (PIN)')+'</button></div></div>';
+  }
   return '<div class="alert armed" role="alertdialog" aria-modal="true" aria-label="'+(v?'Vacation mode':'Away mode')+'">'+
     '<span class="al-chip"><span class="al-dot"></span><span>Home is armed</span></span>'+
     '<div class="al-mid"><span class="beacon" aria-hidden="true"><span class="ring"></span><span class="core">'+I(v?'case':'lock',64)+'</span></span>'+
@@ -1552,7 +1574,7 @@ function modeMenuHTML(){
   return '<div class="mm-scrim" data-act="menuClose"></div><div class="mm" role="menu"><div class="mm-h">House mode</div>'+rows+al+'</div>';
 }
 function tabletHTML(){
-  var h=(guarded()?'<div inert style="display:contents">'+baseHTML()+'</div>'+guardHTML():baseHTML())+(S.alarm&&S.mode==='Home'&&!S.alert?'<div class="veil" aria-hidden="true"></div>':'');
+  var h=(guarded()?'<div inert style="display:contents">'+baseHTML()+'</div>'+guardHTML():baseHTML())+'';
   if(S.dim) h+=dimHTML();
   if(S.alert) h+=alertHTML();
   if(S.prog) h+=progHTML();
@@ -1941,14 +1963,13 @@ function phoneHTML(role){
   if(mb){topBack='<div class="p-topback">'+mb[0]+'</div>'; body=body.slice(mb[0].length);}
   var tt=S.toast?'<div class="toast" role="status">'+I('check',22)+S.toast+'</div>':'';
   return '<div class="ph-in"'+(guarded()?' inert':'')+'>'+sbar('phone')+phoneHead()+topBack+(showTitle?'<h1 class="p-title'+(topBack?' hasback':'')+'">'+title+'</h1>':'')+'<div class="p-body">'+body+'</div><nav class="p-tabs '+(isAdmin()?'six':'three')+'">'+tabs+'</nav></div>'+
-    (S.alarm&&S.mode==='Home'&&!S.alert?'<div class="veil" aria-hidden="true"></div>':'')+(guarded()?guardHTML(true):'')+(P.sheet?phoneSheet():'')+(P.win?winSheet():'')+(P.dlg?phoneDlg():'')+(S.prog?progHTML():'')+(S.alert?alertHTML(true):'')+tt+'<div class="homebar"></div>';
+    (guarded()?guardHTML(true):'')+(P.sheet?phoneSheet():'')+(P.win?winSheet():'')+(P.dlg?phoneDlg():'')+(S.prog?progHTML():'')+(S.alert?alertHTML(true):'')+tt+'<div class="homebar"></div>';
 }
 function phoneHead(){
   var on=S.alarm;
   return '<header class="p-hd"><div class="p-brand">'+LOGO.replace('width="34" height="34"','width="38" height="38"')+'<span>HomeHub</span></div>'+
     '<div class="p-st"><button class="pcap'+(S.mode!=='Home'?' armed':'')+(P.sheet?' open':'')+'" data-act="pSheet" aria-haspopup="dialog" aria-expanded="'+(!!P.sheet)+'" aria-label="House mode: '+S.mode+'">'+
-    '<span class="pc-m">'+I(MODE_IC[S.mode],20)+S.mode+'</span></button>'+
-    '<div class="palarm'+(on?' on':'')+'" role="status" aria-label="Alarm '+(on?'on':'off')+'">'+I('shield',24)+'</div></div></header>';
+    '<span class="pc-m">'+I(MODE_IC[S.mode],20)+S.mode+'</span></button></div></header>';
 }
 function phoneSheet(){
   var admin=isAdmin(), vac=S.mode==='Vacation';
@@ -1969,6 +1990,7 @@ function winSheet(){
     '<button class="p-btn" data-act="pWinClose">Close</button></div>';
 }
 function phoneDlg(){
+  if(P.dlg==='night') return '<div class="ov"><div class="dlg"><h2>Switch to Night?</h2>'+nightOpt(!!P.nightArm,'pNightArm')+'<div class="acts"><button class="btn" data-act="pAlarmNo">Cancel</button><button class="btn pri" data-act="pNightOk">Confirm</button></div></div></div>';
   return '<div class="ov"><div class="dlg"><h2>Turn off the alarm?</h2><p>Sensors stop watching the house on every device. House mode stays '+S.mode+'.</p><div class="acts"><button class="btn" data-act="pAlarmNo">Cancel</button><button class="btn pri" data-act="pAlarmOk">Turn off</button></div></div></div>';
 }
 function sbar(kind){
@@ -2111,7 +2133,7 @@ function act(a,d){
       else if(d.v==='Away') startAway();
       else startVacation();
       break;
-    case 'pActivate': (function(){var sc=d.v; if(S.prog) return; P.view='list'; P.msg=lbl(sc)+' activated from this phone.'; startScene(sc);})(); break;
+    case 'pActivate': (function(){var sc=d.v; if(S.prog) return; if(sc==='Night'){P.dlg='night';P.nightArm=false;return;} P.view='list'; P.msg=lbl(sc)+' activated from this phone.'; startScene(sc);})(); break;
     case 'pSheet': if(S.prog) break; P.sheet=!P.sheet; break;
     case 'pSheetClose': P.sheet=false; break;
     case 'pWin': P.win=true; break;
@@ -2121,6 +2143,8 @@ function act(a,d){
     case 'pAlarmOk': P.dlg=null; startAlarm(false); break;
     case 'pAlertOff': S.alert=null; startHome('Alarm turned off. Home mode is on.'); break;
     case 'pGuardHome': startHome('Home mode turned on from '+WHO()+'’s phone'); break;
+    case 'guardAlarmOff': S.pin='';S.pinErr=false;S.dialog={type:'pin',ctx:'alarmoff'}; break;
+    case 'pGuardAlarmOff': P.dlg='alarmoff'; break;
     case 'guardHome': S.pin='';S.pinErr=false;S.dialog={type:'pin',ctx:'home'}; break;
     case 'addStart': P.add={step:'prep',idx:0,run:0}; P.dmsg=''; break;
     case 'addCancel': P.add=null; break;
@@ -2139,17 +2163,22 @@ function act(a,d){
       if(S.mode!=='Home') break;
       if(S.scene===d.v){ if(diff(d.v).length) S.dialog={type:'changes'}; break; }
       var m=mediaOff(d.v);
+      if(d.v==='Night'){S.dialog={type:'night',items:m,arm:false};break;}
       if(m.length){S.dialog={type:'conflict',sc:d.v,items:m};break;}
       startScene(d.v);
       break;
     case 'step': setParam(d.p,S.dev[d.p]+(+d.d)*PARAMS[d.p].step); break;
     case 'seg': setParam(d.p,d.v); break;
     case 'tileWin': S.dialog={type:'windows'}; break;
+    case 'nightArm': if(S.dialog&&S.dialog.type==='night') S.dialog.arm=!S.dialog.arm; break;
+    case 'pNightArm': P.nightArm=!P.nightArm; break;
+    case 'pNightOk': P.dlg=null; if(!S.prog) startScene('Night',!!P.nightArm); break;
     case 'dlgCancel': S.dialog=null;S.pin='';S.pinErr=false; break;
     case 'ok':
       var dl=S.dialog; if(!dl) break;
       if(dl.type==='override'){S.asked=true;S.dev[dl.p]=dl.v;S.dialog=null;toast(lbl(S.scene)+' scene modified');}
       else if(dl.type==='conflict'){S.dialog=null;startScene(dl.sc);}
+      else if(dl.type==='night'){S.dialog=null;startScene('Night',dl.arm);}
       else if(dl.type==='away'){S.dialog=null;startAway();}
       else if(dl.type==='changes'){
         var sc=S.scene;
@@ -2179,7 +2208,7 @@ function act(a,d){
     case 'menuClose': S.menu=false; break;
     case 'progResume': if(S.prog&&S.prog.resume) S.prog.resume(); break;
     case 'progClose': var pm=S.prog&&S.prog.msg; S.prog=null; if(pm) toast(pm); break;
-    case 'pSceneQuick': if(S.prog||S.scene===d.v) break; startScene(d.v); break;
+    case 'pSceneQuick': if(S.prog||S.scene===d.v) break; if(d.v==='Night'){P.dlg='night';P.nightArm=false;break;} startScene(d.v); break;
     case 'pScene': P.tab='scenes';P.view='detail';P.scene=d.v;P.checks={};P.msg=''; break;
     case 'pBack': P.view='list'; P.msg=''; break;
     case 'pChk': P.checks[d.p]=(P.checks[d.p]===false); break;
