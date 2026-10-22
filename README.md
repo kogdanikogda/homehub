@@ -22,6 +22,7 @@ React, TypeScript, Vite, CSS-переменные и CSS Modules, Radix UI, Zust
 - Прототип: https://kogdanikogda.github.io/homehub/ — на стартовой странице планшет и оба телефона работают одновременно с одним состоянием дома. Сцена, выбранная на телефоне, сразу меняется на планшете, окна и подтверждения показываются только на том устройстве, где нажали.
 - Переключатель сверху — одно устройство на весь экран; `?device=tablet|marina|alexey` в адресе открывает его сразу.
 - Storybook: https://kogdanikogda.github.io/homehub/storybook/
+- Презентация кейса: https://kogdanikogda.github.io/homehub/presentation/ — 16 слайдов на английском и русском. Язык общий с прототипом (переключатель EN / RU слева вверху, `?lang=ru`), скриншоты интерфейса — на том же языке. Листать стрелками, пробелом, кликом или свайпом; номер слайда в адресе (`#5`). Открывается и из меню «Настройки и демо-контент» → «Презентация». Печать из браузера даёт PDF.
 
 ## Структура
 
@@ -30,6 +31,7 @@ React, TypeScript, Vite, CSS-переменные и CSS Modules, Radix UI, Zust
 - `src/screens` — экраны планшета и телефонов
 - `src/store` — состояние дома (комнаты, устройства, режимы, сцены)
 - `src/lib` — вспомогательный код
+- `scripts/presentation` — презентация: тексты `content.json`, шаблон `page.html`, сборка `build.py` (пишет `public/presentation/index.html`), скриншоты `capture.py` (снимает прототип на обоих языках)
 - `scripts/contrast.mjs` — проверка контраста WCAG для пар токенов (`node scripts/contrast.mjs`)
 
 

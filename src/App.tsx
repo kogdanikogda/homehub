@@ -38,6 +38,17 @@ function ActionRow({ icon, label, onClick, disabled }: { icon: IconName; label: 
   )
 }
 
+/** Строка-ссылка: открывает другую страницу сайта */
+function LinkRow({ icon, label, href }: { icon: IconName; label: string; href: string }) {
+  return (
+    <a className={styles.row} href={href}>
+      <span className={styles.rowIcon}><Icon name={icon} size={20} /></span>
+      <span className={styles.rowLabel}>{label}</span>
+      <Icon name="chev" size={18} className={styles.rowChev} />
+    </a>
+  )
+}
+
 /** Строка-переключатель: условие действует, пока включено */
 function SwitchRow({ icon, label, checked, onChange }: { icon: IconName; label: string; checked: boolean; onChange: () => void }) {
   return (
@@ -60,6 +71,7 @@ function PrototypePanel({ view, pick, open, onOpenChange }: { view: View; pick: 
   const flow = useHome((s) => s.addFlow)
   const a = useHome.getState()
   const tvFails = failKeys.includes('living.tv')
+  const lang = useLang((l) => l.lang)
   // Esc закрывает меню; клик вне меню его не закрывает — можно работать с устройством при открытом меню
   useEffect(() => {
     if (!open) return
@@ -125,6 +137,14 @@ function PrototypePanel({ view, pick, open, onOpenChange }: { view: View; pick: 
           <SwitchRow icon="grid" label={t('Device search finds nothing')} checked={flow.searchEmpty} onChange={() => a.setAddFlow({ searchEmpty: !flow.searchEmpty })} />
           <SwitchRow icon="warn" label={t('Device setup fails')} checked={flow.connectFails} onChange={() => a.setAddFlow({ connectFails: !flow.connectFails })} />
           <SwitchRow icon="dash" label={t('Progress windows stop halfway')} checked={freeze} onChange={() => a.setFreezeProgress(!freeze)} />
+        </div>
+      </section>
+
+      <section className={styles.group} aria-labelledby="sp-case">
+        <h3 id="sp-case" className={styles.groupTitle}>{t('Case study')}</h3>
+        <p className={styles.groupHint}>{t('Slides about the project, in the current language.')}</p>
+        <div className={styles.list}>
+          <LinkRow icon="film" label={t('Presentation')} href={`presentation/?lang=${lang}`} />
         </div>
       </section>
 
