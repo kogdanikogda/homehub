@@ -4,7 +4,8 @@ import {
 } from './data'
 import { LIGHT_KEY, conflictTurnOff, diffToScene, diffValues, fullValue, heldKeys, modifiedChanges, sysItems, type LightHold } from './logic'
 import type { AlertKind, DeviceId, OnboardingStep, ExtraKey, DeviceKey, DeviceValue, DialogState, AddedDevice, Mode, PrivateRoomId, PrivateRooms, PrivateState, ProgressItem, RoomId, SceneId } from './types'
-import { t } from '../i18n'
+import { t, useLang } from '../i18n'
+import { retranslate } from '../i18n/retranslate'
 
 type Toast = { id: number; text: string } | null
 
@@ -164,9 +165,11 @@ const nowHHMM = () => new Date().toTimeString().slice(0, 5)
 
 export const useHome = create<HomeState>()((set, get) => {
   /** Журнал событий: новые записи сверху, как в прототипе */
-  const log = (x: string) => set((st) => ({ eventLog: [{ t: nowHHMM(), x }, ...st.eventLog] }))
+  // Текст приводится к текущему языку: сообщение могло быть подготовлено до переключения языка
+  const log = (x: string) => set((st) => ({ eventLog: [{ t: nowHHMM(), x: retranslate(x, useLang.getState().lang) }, ...st.eventLog] }))
   /** Всплывающее сообщение; как в прототипе, каждое попадает и в журнал событий */
   const toast = (text: string, by: DeviceId = 'tablet', inLog = true) => {
+    text = retranslate(text, useLang.getState().lang)
     set((s) => ({ toasts: { ...s.toasts, [by]: { id: ++toastId, text } } }))
     if (inLog) log(text)
   }
@@ -474,4 +477,21 @@ export const useHome = create<HomeState>()((set, get) => {
     },
     reset: () => { runToken++; gate?.(); gate = null; set({ ...initialState() }) },
   }
+})
+
+/**
+ * Смена языка: тексты, которые хранятся готовой строкой (журнал событий, всплывающие сообщения,
+ * заголовки окон прогресса, названия добавленных устройств), переводятся на новый язык,
+ * чтобы после переключения на экране не осталось строк на старом языке.
+ */
+useLang.subscribe((now, before) => {
+  if (now.lang === before.lang) return
+  const to = now.lang
+  const tr = (x: string) => retranslate(x, to)
+  useHome.setState((s) => ({
+    eventLog: s.eventLog.map((e) => ({ ...e, x: tr(e.x) })),
+    toasts: Object.fromEntries(Object.entries(s.toasts).map(([k, v]) => [k, v && { ...v, text: tr(v.text) }])) as HomeState['toasts'],
+    dialogs: Object.fromEntries(Object.entries(s.dialogs).map(([k, d]) => [k, d && d.type === 'progress' ? { ...d, title: tr(d.title), doneTitle: tr(d.doneTitle) } : d])) as HomeState['dialogs'],
+    addedDevices: s.addedDevices.map((d) => ({ ...d, name: tr(d.name) })),
+  }))
 })

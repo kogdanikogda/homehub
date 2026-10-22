@@ -4,6 +4,7 @@ import { t, useLang } from './index'
 import { ru } from './ru'
 import { COUNTERTOP, DEVICES, KITCHEN_EXTRAS, MODE_NAMES, PRIVATE_DEVICES, ROOM_NAMES, SCENES } from '../store/data'
 import { ENERGY } from '../store/energy'
+import { CAMERAS } from '../screens/phone/Security'
 
 /** Исходные тексты всех файлов приложения (без тестов, историй и самого словаря) */
 const sources = Object.entries(import.meta.glob('/src/**/*.{ts,tsx}', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)
@@ -68,6 +69,7 @@ describe('словарь полный', () => {
       ...KITCHEN_EXTRAS.map((e) => e.label), COUNTERTOP.label, COUNTERTOP.status,
       ...Object.values(PRIVATE_DEVICES).flat().map((d) => d.label),
       ...Object.values(ENERGY).flatMap((e) => [e.caption, e.compare.text, ...e.split.map((s) => s.label)]),
+      ...CAMERAS.flatMap((c) => [c.name, c.where]),
       'Floor lamp', 'Humidifier', 'Water leak sensor', 'Light', 'Climate', 'Sensor',
     ]
     expect(data.filter((k) => !(k in ru))).toEqual([])
