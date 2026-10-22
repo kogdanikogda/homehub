@@ -1,8 +1,0 @@
-.veil {
-  position: absolute; inset: 0; z-index: 30; pointer-events: none;
-  background: rgb(220 137 149 / 0.05);
-  box-shadow: inset 0 0 0 2px rgb(220 137 149 / 0.65), inset 0 0 90px rgb(220 137 149 / 0.25);
-  animation: veilPulse 3.2s ease-in-out infinite;
-}
-@keyframes veilPulse { 50% { box-shadow: inset 0 0 0 2px rgb(220 137 149 / 0.4), inset 0 0 130px rgb(220 137 149 / 0.34); } }
-@media (prefers-reduced-motion: reduce) { .veil { animation: none; } }

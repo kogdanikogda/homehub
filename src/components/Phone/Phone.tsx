@@ -4,7 +4,6 @@ import garage from '../../assets/cams/garage.jpg'
 import living from '../../assets/cams/living.jpg'
 import yard from '../../assets/cams/yard.jpg'
 import { Chip, Tag } from '../Chip/Chip'
-import { AlarmIndicator } from '../AlarmIndicator/AlarmIndicator'
 import { Icon, type IconName } from '../Icon/Icon'
 import { Logo } from '../Logo/Logo'
 import { ModeMenu, type ModeRowProps } from '../ModeMenu/ModeMenu'
@@ -42,10 +41,10 @@ export function ScreenHeader({ back, title }: { back: HeaderBack; title?: string
 
 const MODE_ICON: Record<'home' | 'away' | 'vacation', IconName> = { home: 'home', away: 'lock', vacation: 'case' }
 
-/** Шапка телефона: логотип, режим дома (открывает меню) и значок сигнализации. Заголовок экрана прячется на главном экране. */
-export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, showTitle = true, back }: {
+/** Шапка телефона: логотип и режим дома (открывает меню). Сигнализацию показывает окно «Дом под охраной». Заголовок экрана прячется на главном экране. */
+export function PhoneHeader({ title, subtitle, mode, modeName, onMode, showTitle = true, back }: {
   title: string; subtitle: string; back?: HeaderBack
-  mode: 'home' | 'away' | 'vacation'; modeName: string; alarm: boolean; onMode: () => void; showTitle?: boolean
+  mode: 'home' | 'away' | 'vacation'; modeName: string; alarm?: boolean; onMode: () => void; showTitle?: boolean
 }) {
   return (
     <header className={styles.header}>
@@ -55,7 +54,6 @@ export function PhoneHeader({ title, subtitle, mode, modeName, alarm, onMode, sh
         <button type="button" className={styles.capsule} onClick={onMode} aria-label={t('House mode: {mode}. Change', { mode: modeName })} aria-haspopup="dialog">
           <Icon name={MODE_ICON[mode]} size={20} />{modeName}
         </button>
-        <AlarmIndicator on={alarm} />
       </div>
       {showTitle && (
         <div className={styles.titles}>

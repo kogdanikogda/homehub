@@ -21,12 +21,31 @@ describe('смена сцены', () => {
   it('Cinema → Night сначала спрашивает про ТВ и звук', async () => {
     s().tapScene('cinema'); await whenIdle()
     s().tapScene('night')
-    expect(s().dialogs.tablet?.type).toBe('conflict')
+    const d = s().dialogs.tablet
+    expect(d?.type).toBe('night')
+    expect(d?.type === 'night' && d.turnOff.length).toBe(2)
     expect(s().activeScene).toBe('cinema') // пока ничего не изменилось
-    s().confirmConflict(); await whenIdle()
+    s().confirmNight(); await whenIdle()
     expect(s().activeScene).toBe('night')
     expect(s().devices['living.tv']).toBe(false)
     expect(s().devices['living.sound']).toBe(false)
+  })
+
+  it('Night: сигнализация по умолчанию не включается', async () => {
+    s().tapScene('night')
+    expect(s().dialogs.tablet).toMatchObject({ type: 'night', alarm: false })
+    s().confirmNight(); await whenIdle()
+    expect(s().activeScene).toBe('night')
+    expect(s().alarm).toBe(false)
+  })
+
+  it('Night с опцией «включить сигнализацию» ставит дом на охрану', async () => {
+    s().tapScene('night')
+    s().setNightAlarm(true)
+    s().confirmNight(); await whenIdle()
+    expect(s().activeScene).toBe('night')
+    expect(s().alarm).toBe(true)
+    expect(s().mode).toBe('home')
   })
 
   it('Cancel в конфликте оставляет Cinema', async () => {
@@ -195,7 +214,7 @@ describe('настройки и сцены администратора', () => 
 
 describe('три устройства на одном состоянии', () => {
   it('сцена, выбранная с телефона Марины, видна везде', async () => {
-    s().tapScene('night', 'marina'); await whenIdle()
+    s().tapScene('night', 'marina'); s().confirmNight('marina'); await whenIdle()
     expect(s().activeScene).toBe('night')
     expect(s().devices).toMatchObject(SCENES.night.values)
   })
@@ -203,7 +222,7 @@ describe('три устройства на одном состоянии', () =>
   it('окно конфликта появляется только на том устройстве, где нажали', async () => {
     s().tapScene('cinema'); await whenIdle()
     s().tapScene('night', 'marina')
-    expect(s().dialogs.marina?.type).toBe('conflict')
+    expect(s().dialogs.marina?.type).toBe('night')
     expect(s().dialogs.tablet).toBeNull()
     expect(s().dialogs.alexey).toBeNull()
   })

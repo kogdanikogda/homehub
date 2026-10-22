@@ -1,7 +1,6 @@
 import * as Popover from '@radix-ui/react-popover'
 import type { ReactNode } from 'react'
 import { Icon, type IconName } from '../Icon/Icon'
-import { AlarmIndicator } from '../AlarmIndicator/AlarmIndicator'
 import { HeaderStat } from '../Shell/NavItem'
 import { usePortalContainer } from '../portal'
 import styles from './Header.module.css'
@@ -11,7 +10,7 @@ type Props = {
   time: string
   date: string
   stats: { icon: IconName; label: string; value: string; attention?: boolean; onClick?: () => void }[]
-  mode: { icon: IconName; name: string; armed: boolean; alarmOn: boolean }
+  mode: { icon: IconName; name: string; armed: boolean }
   menuOpen: boolean
   onMenuOpenChange: (open: boolean) => void
   /** Содержимое меню режимов */
@@ -45,7 +44,6 @@ export function Header({ time, date, stats, mode, menuOpen, onMenuOpenChange, me
           <Popover.Content className={styles.popover} align="end" sideOffset={8}>{menu}</Popover.Content>
         </Popover.Portal>
       </Popover.Root>
-      <AlarmIndicator on={mode.alarmOn} />
     </header>
   )
 }

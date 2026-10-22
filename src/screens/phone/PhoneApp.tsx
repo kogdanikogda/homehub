@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { AlarmVeil } from '../../components/AlarmVeil/AlarmVeil'
 import { CriticalAlert } from '../../components/CriticalAlert/CriticalAlert'
 import type { ModeRowProps } from '../../components/ModeMenu/ModeMenu'
 import { MODE_NAMES, ROOM_NAMES, SCENES } from '../../store/data'
@@ -73,8 +72,8 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
     { icon: 'case', name: MODE_NAMES.vacation, description: admin ? t('Long absence. Only you can turn it on.') : t('Long absence. Turned on by Alexey.'), current: mode === 'vacation', locked: !admin, badge: admin ? undefined : t('Admin only'), onClick: () => pick('vacation') },
   ]
 
-  // Дом под охраной (Away, Vacation): интерфейс перекрыт окном, нажимать можно только его кнопку
-  const guarded = mode !== 'home'
+  // Дом под охраной (Away, Vacation или сигнализация в режиме Home): интерфейс перекрыт окном, нажимать можно только его кнопку
+  const guarded = mode !== 'home' || alarm
 
   const go = (next: Tab) => { setTab(next); setSub(null) }
   const title =
@@ -109,12 +108,12 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
       </PhoneBody>
       <TabBar tabs={admin ? adminTabs() : familyTabs()} value={tab} onChange={go} />
       </div>
-      {alarm && !guarded && !alert && <AlarmVeil radius={38} />}
-      {guarded && !alert && (
-        <CriticalAlert tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
-          title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
-          actionLabel={t('Switch to Home')} actionIcon="home" onAction={() => act.requestHome(user)} compact />
-      )}
+      {guarded && !alert && (mode === 'home'
+        ? <CriticalAlert compact tone="armed" icon="shield" chip={t('Home is armed')} title={t('Alarm is on')}
+            actionLabel={t('Turn off alarm')} actionIcon="lock" onAction={() => act.requestAlarmOff(user)} />
+        : <CriticalAlert compact tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
+            title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
+            actionLabel={t('Switch to Home')} actionIcon="home" onAction={() => act.requestHome(user)} />)}
       {sheet && <ModeSheet rows={rows} onClose={() => setSheet(false)} />}
       <DialogHost by={user} compact />
       {alert && (alert.kind === 'intrusion'

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { AlarmVeil } from '../../components/AlarmVeil/AlarmVeil'
 import { CriticalAlert } from '../../components/CriticalAlert/CriticalAlert'
 import { DimScreen } from '../../components/DimScreen/DimScreen'
 import { Header } from '../../components/Header/Header'
@@ -71,8 +70,8 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
   ]
 
 
-  // Дом под охраной (Away, Vacation): интерфейс перекрыт окном, нажимать можно только его кнопку
-  const guarded = mode !== 'home'
+  // Дом под охраной (Away, Vacation или сигнализация в режиме Home): интерфейс перекрыт окном, нажимать можно только его кнопку
+  const guarded = mode !== 'home' || alarm
 
   return (
     <div className={styles.root} onPointerDownCapture={() => setTouch((n) => n + 1)}>
@@ -87,7 +86,7 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
             { icon: 'window', label: t('Windows'), value: windowsText(openRooms), attention: openRooms.length > 0 },
             { icon: 'bolt', label: t('Today’s energy'), value: `${TODAY_ENERGY_KWH} ${t('kWh')}`, onClick: () => act.openEnergy() },
           ]}
-          mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: alarm, alarmOn: alarm }}
+          mode={{ icon: MODE_ICON[mode], name: MODE_NAMES[mode], armed: alarm }}
           menuOpen={menuOpen}
           onMenuOpenChange={setMenuOpen}
           menu={<ModeMenu rows={rows} alarm={{ on: alarm, badge: alarm ? t('PIN') : undefined, onClick: toggleAlarm }} />}
@@ -97,12 +96,12 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
         {page === 'scenes' && <ScenesPage scene={sceneSel} onScene={setSceneSel} />}
       </div>
       </div>
-      {alarm && !guarded && !alert && <AlarmVeil radius={24} />}
-      {guarded && !alert && (
-        <CriticalAlert tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
-          title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
-          actionLabel={t('Switch to Home (PIN)')} actionIcon="home" onAction={() => act.requestHome()}/>
-      )}
+      {guarded && !alert && (mode === 'home'
+        ? <CriticalAlert tone="armed" icon="shield" chip={t('Home is armed')} title={t('Alarm is on')}
+            actionLabel={t('Turn off alarm (PIN)')} actionIcon="lock" onAction={() => act.requestAlarmOff()} />
+        : <CriticalAlert tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
+            title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
+            actionLabel={t('Switch to Home (PIN)')} actionIcon="home" onAction={() => act.requestHome()} />)}
       {onboarding && <Onboarding step={onboarding} />}
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />

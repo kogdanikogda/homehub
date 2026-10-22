@@ -88,6 +88,9 @@ export interface HomeState {
   confirmOverride: (by?: DeviceId) => void
   tapScene: (id: SceneId, by?: DeviceId) => void
   confirmConflict: (by?: DeviceId) => void
+  /** Окно сцены Night: переключатель «включить сигнализацию» и запуск */
+  setNightAlarm: (on: boolean, by?: DeviceId) => void
+  confirmNight: (by?: DeviceId) => void
   resetToScene: (by?: DeviceId) => void
   requestAway: (by?: DeviceId) => void
   confirmAway: (by?: DeviceId) => void
@@ -251,14 +254,16 @@ export const useHome = create<HomeState>()((set, get) => {
     return run
   }
 
-  const sceneJob = (id: SceneId, by: DeviceId) => {
+  /** arm — вместе со сценой включить сигнализацию (вариант для сцены Night) */
+  const sceneJob = (id: SceneId, by: DeviceId, arm = false) => {
     const target = get().scenes[id]
-    const items = diffToScene(get().devices, id, get().scenes).map((c) => ({ ...c, status: 'waiting' as const }))
+    const items: ProgressItem[] = [...(arm ? sysItems(true) : []), ...diffToScene(get().devices, id, get().scenes).map((c) => ({ ...c, status: 'waiting' as const }))]
     return runJob(by, {
-      title: t('Activating “{name}”', { name: SCENES[id].name }), doneTitle: t('{name} scene is on', { name: SCENES[id].name }), items, toast: t('{name} scene activated', { name: SCENES[id].name }),
+      title: t('Activating “{name}”', { name: SCENES[id].name }), doneTitle: t('{name} scene is on', { name: SCENES[id].name }), items,
+      toast: arm ? t('{name} scene on. Alarm is on.', { name: SCENES[id].name }) : t('{name} scene activated', { name: SCENES[id].name }),
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
-        set((s) => ({ devices: applyDone(s.devices, target as DeviceValues, work), activeScene: id, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+        set((s) => ({ devices: applyDone(s.devices, target as DeviceValues, work), activeScene: id, alarm: arm || s.alarm, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
       },
     })
   }
@@ -359,8 +364,19 @@ export const useHome = create<HomeState>()((set, get) => {
         return
       }
       const turnOff = conflictTurnOff(s.devices, s.activeScene, id, s.scenes)
-      if (turnOff.length) setDialog(by, { type: 'conflict', target: id, turnOff })
+      if (id === 'night') setDialog(by, { type: 'night', turnOff, alarm: false })
+      else if (turnOff.length) setDialog(by, { type: 'conflict', target: id, turnOff })
       else void sceneJob(id, by)
+    },
+
+    setNightAlarm: (on, by = 'tablet') => {
+      const d = dialogOf(by)
+      if (d?.type === 'night') setDialog(by, { ...d, alarm: on })
+    },
+
+    confirmNight: (by = 'tablet') => {
+      const d = dialogOf(by)
+      if (d?.type === 'night') void sceneJob('night', by, d.alarm)
     },
 
     confirmConflict: (by = 'tablet') => {

@@ -3,6 +3,9 @@ import { Dialog } from '../../components/Dialog/Dialog'
 import { ListRow } from '../../components/ListRow/ListRow'
 import { PinPad } from '../../components/PinPad/PinPad'
 import { ProgressRow } from '../../components/ProgressRow/ProgressRow'
+import { Switch } from '../../components/Switch/Switch'
+import { Icon } from '../../components/Icon/Icon'
+import styles from './DialogHost.module.css'
 import { DEVICE_BY_KEY, PROTOTYPE_PIN, ROOM_NAMES, SCENES, WINDOW_ROOMS } from '../../store/data'
 import { deviceTitle, formatValue, modifiedChanges, progressText } from '../../store/logic'
 import type { Change, DeviceId, DeviceKey } from '../../store/types'
@@ -47,6 +50,25 @@ export function DialogHost({ by = 'tablet', compact }: { by?: DeviceId; compact?
         <Dialog compact={compact} open onOpenChange={close} title={t('Switch to {name}?', { name })} lead={t('Switching to {name} will turn off {what}.', { name, what })}
           primary={{ label: t('Confirm'), onClick: () => a.confirmConflict(by) }}>
           {dialog.turnOff.map((c) => <ListRow key={c.key} icon={DEVICE_BY_KEY[c.key].icon} text={deviceTitle(c.key)} value={t('Off')} />)}
+        </Dialog>
+      )
+    }
+    case 'night': {
+      const name = SCENES.night.name
+      const what = dialog.turnOff.length ? joinNames(dialog.turnOff.map((c) => (c.key === 'living.tv' ? t('the TV') : t('the sound system')))) : ''
+      return (
+        <Dialog compact={compact} open onOpenChange={close} title={t('Switch to {name}?', { name })}
+          lead={what ? t('Switching to {name} will turn off {what}.', { name, what }) : undefined}
+          primary={{ label: t('Confirm'), onClick: () => a.confirmNight(by) }}>
+          {dialog.turnOff.map((c) => <ListRow key={c.key} icon={DEVICE_BY_KEY[c.key].icon} text={deviceTitle(c.key)} value={t('Off')} />)}
+          <label className={styles.option}>
+            <span className={styles.optionIcon}><Icon name="shield" size={22} /></span>
+            <span className={styles.optionText}>
+              <b>{t('Turn on the alarm')}</b>
+              <small>{t('The screen will show that the home is armed until the alarm is turned off.')}</small>
+            </span>
+            <Switch checked={dialog.alarm} onCheckedChange={(v) => a.setNightAlarm(v, by)} aria-label={t('Turn on the alarm')} />
+          </label>
         </Dialog>
       )
     }

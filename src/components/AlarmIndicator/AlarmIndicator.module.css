@@ -1,2 +1,0 @@
-.root { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--surface-3); color: var(--text-tertiary); box-sizing: border-box; }
-.on { border-color: transparent; background: var(--status-crit); color: var(--status-on-crit); box-shadow: 0 0 0 4px rgb(220 137 149 / 0.25); }

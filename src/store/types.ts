@@ -57,6 +57,8 @@ export type DialogState =
   | { type: 'override'; key: DeviceKey; from: DeviceValue; to: DeviceValue; scene: SceneId }
   | { type: 'conflict'; target: SceneId; turnOff: Change[] }
   | { type: 'changes'; scene: SceneId }
+  /** Сцена Night: можно сразу включить сигнализацию (по умолчанию выключено) */
+  | { type: 'night'; turnOff: Change[]; alarm: boolean }
   /** Окно прогресса видно на всех трёх устройствах сразу */
   | { type: 'progress'; title: string; doneTitle: string; items: ProgressItem[]; phase: 'running' | 'done' | 'failed'; holding?: boolean }
   | { type: 'confirmAway'; windows: RoomId[] }
