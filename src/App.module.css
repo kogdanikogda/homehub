@@ -58,7 +58,7 @@
 .groupTitle { margin: 0; font-size: 13px; line-height: 16px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #e8d4bb; }
 .groupHint { margin: -4px 0 2px; font-size: 13px; line-height: 18px; color: rgba(255, 248, 240, .72); }
 .list { display: flex; flex-direction: column; gap: 2px; border-radius: 16px; overflow: hidden; }
-.row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 12px 8px 10px; border: 0; background: rgba(255, 255, 255, .07); color: #fff8f0; font: inherit; font-size: 15px; line-height: 20px; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer; transition: background .15s; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 12px 8px 10px; border: 0; background: rgba(255, 255, 255, .07); color: #fff8f0; font: inherit; font-size: 15px; line-height: 20px; font-weight: 500; text-align: left; cursor: pointer; transition: background .15s; }
 .row:hover { background: rgba(255, 255, 255, .13); }
 .row:focus-visible { outline: 2px solid #fff8f0; outline-offset: -2px; }
 .row:disabled { cursor: not-allowed; opacity: .45; }
