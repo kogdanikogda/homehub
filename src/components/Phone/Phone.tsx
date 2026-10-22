@@ -52,7 +52,10 @@ export function PhoneHeader({ title, subtitle, mode, modeName, onMode, showTitle
       <div className={styles.brandRow}>
         <span className={styles.brand}><Logo size={38} /><span className={styles.wordmark}>HomeHub</span></span>
         <button type="button" className={styles.capsule} onClick={onMode} aria-label={t('House mode: {mode}. Change', { mode: modeName })} aria-haspopup="dialog">
-          <Icon name={MODE_ICON[mode]} size={20} />{modeName}
+          <Icon name={MODE_ICON[mode]} size={20} />
+          <span className={styles.capsuleKey}>{t('House mode')}:</span>
+          <span className={styles.capsuleValue}>{modeName}</span>
+          <Icon name="chev" size={16} className={styles.capsuleChev} />
         </button>
       </div>
       {showTitle && (

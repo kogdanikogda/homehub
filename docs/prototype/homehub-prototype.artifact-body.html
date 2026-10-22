@@ -898,6 +898,9 @@ button.hst{background:none;border:none;color:inherit;font:inherit;text-align:lef
 .pcap{display:flex;align-items:center;gap:4px;height:48px;padding:0 16px 0 14px;border:none;border-radius:24px;background:var(--s2);color:var(--ink);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
 .pcap .pc-m,.pcap .pc-a{display:flex;align-items:center;gap:6px}
 .pcap .pc-m .i{color:var(--acc-ink)}
+.pcap{gap:8px;padding:0 12px 0 14px}
+.pcap .pk{color:var(--ink2);font-weight:500;margin-right:-2px}
+.pcap b{font-weight:600;color:var(--acc-ink)}
 .pcap .pc-a .i{color:var(--ink2)}
 .pcap .pc-d{width:1px;height:20px;background:#444}
 .pcap>.i{color:var(--ink3);transform:rotate(90deg);transition:transform .15s}
@@ -1969,7 +1972,7 @@ function phoneHead(){
   var on=S.alarm;
   return '<header class="p-hd"><div class="p-brand">'+LOGO.replace('width="34" height="34"','width="38" height="38"')+'<span>HomeHub</span></div>'+
     '<div class="p-st"><button class="pcap'+(S.mode!=='Home'?' armed':'')+(P.sheet?' open':'')+'" data-act="pSheet" aria-haspopup="dialog" aria-expanded="'+(!!P.sheet)+'" aria-label="House mode: '+S.mode+'">'+
-    '<span class="pc-m">'+I(MODE_IC[S.mode],20)+S.mode+'</span></button></div></header>';
+    '<span class="pc-m">'+I(MODE_IC[S.mode],20)+'<span class="pk">House mode:</span> <b>'+S.mode+'</b></span>'+I('chev',16)+'</button></div></header>';
 }
 function phoneSheet(){
   var admin=isAdmin(), vac=S.mode==='Vacation';
