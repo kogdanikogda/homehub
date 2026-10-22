@@ -56,6 +56,10 @@
   --alarm-smoke: #ff7a1a;
   --alarm-smoke-veil: 92 34 8;
   --alarm-smoke-deep: 43 15 5;
+  /* Дом под охраной (Away, Vacation) — приглушённый розовый, как пелена сигнализации */
+  --alarm-armed: #dc8995;
+  --alarm-armed-veil: 62 26 33;
+  --alarm-armed-deep: 32 13 17;
 
   /* Размеры */
   --space-4: 4px;  --space-8: 8px;  --space-12: 12px;

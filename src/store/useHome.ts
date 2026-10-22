@@ -56,6 +56,8 @@ export interface HomeState {
   toasts: Record<DeviceId, Toast>
   dimmed: boolean
   alert: { kind: AlertKind; at: string; since: number } | null
+  /** Когда включили текущий режим охраны (Away / Vacation), ЧЧ:ММ */
+  modeAt: string | null
   /** Для прототипа: какие устройства «не ответят» при следующей сцене */
   failKeys: DeviceKey[]
   /** Пауза между шагами прогресса, мс (в тестах 0) */
@@ -147,6 +149,7 @@ export const initialState = () => ({
   toasts: { tablet: null, marina: null, alexey: null } as Record<DeviceId, Toast>,
   dimmed: false,
   alert: null as HomeState['alert'],
+  modeAt: null as string | null,
   failKeys: [] as DeviceKey[],
   stepDelay: 450,
   freezeProgress: false,
@@ -268,7 +271,7 @@ export const useHome = create<HomeState>()((set, get) => {
       title: t('Turning on {mode} mode', { mode: MODE_NAMES[mode] }), doneTitle: t('{mode} mode is on', { mode: MODE_NAMES[mode] }), items, toast: t('{mode} mode on. Alarm is on.', { mode: MODE_NAMES[mode] }),
       commit: (work) => {
         const failed = work.filter((w) => w.status === 'failed').map((w) => w.key as DeviceKey)
-        set((s) => ({ mode, alarm: true, devices: applyDone(s.devices, target, work), activeScene: null, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
+        set((s) => ({ mode, modeAt: nowHHMM(), alarm: true, devices: applyDone(s.devices, target, work), activeScene: null, overrideAck: false, lightHold: {}, unresponsive: failed, offlineAt: failed.length ? nowHHMM() : null }))
       },
     })
   }

@@ -8,6 +8,12 @@
   backdrop-filter: blur(5px) saturate(.35); -webkit-backdrop-filter: blur(5px) saturate(.35);
 }
 .smoke { --c: var(--alarm-smoke); --veil: var(--alarm-smoke-veil); --deep: var(--alarm-smoke-deep); }
+/* Дом под охраной: спокойнее — один медленный круг, мягкое дыхание, точка не мигает */
+.armed { z-index: 75; --c: var(--alarm-armed); --veil: var(--alarm-armed-veil); --deep: var(--alarm-armed-deep); }
+.armed::before { animation: breatheSoft 4s ease-in-out infinite; }
+.armed .ring { animation-duration: 3.2s; }
+.armed .dot { animation: none; }
+.armed .core { box-shadow: 0 0 40px color-mix(in srgb, var(--c) 45%, transparent); }
 /* «дыхание» света из центра */
 .alert::before { content: ''; position: absolute; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--c) 55%, transparent), transparent 60%); animation: breathe 1.6s ease-in-out infinite; pointer-events: none; }
 
@@ -47,5 +53,6 @@
 
 @keyframes ring { from { transform: scale(1); opacity: .9; } to { transform: scale(3.2); opacity: 0; } }
 @keyframes breathe { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes breatheSoft { 0%, 100% { opacity: .15; } 50% { opacity: .55; } }
 @keyframes blink { 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { .alert::before, .ring, .dot { animation: none; } .ring { opacity: 0; } }

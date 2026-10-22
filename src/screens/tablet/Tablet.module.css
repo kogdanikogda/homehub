@@ -3,3 +3,6 @@
 .main { display: flex; flex-direction: column; gap: 20px; flex: 1; padding: 8px 32px 28px; min-height: 0; }
 .rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; flex: 1; min-height: 0; }
 .placeholder { display: flex; align-items: center; justify-content: center; flex: 1; margin: 8px 32px 28px; border-radius: var(--radius-card); background: var(--surface-1); color: var(--text-secondary); font-size: 15px; }
+
+/* Обёртка интерфейса: при режиме охраны получает inert — нажать ничего нельзя, раскладку не меняет */
+.guardWrap { display: contents; }

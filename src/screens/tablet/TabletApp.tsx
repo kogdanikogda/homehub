@@ -71,8 +71,13 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
   ]
 
 
+  // Дом под охраной (Away, Vacation): интерфейс перекрыт окном, нажимать можно только его кнопку
+  const guarded = mode !== 'home'
+  const modeAt = useHome((s) => s.modeAt)
+
   return (
     <div className={styles.root} onPointerDownCapture={() => setTouch((n) => n + 1)}>
+      <div className={styles.guardWrap} inert={guarded || undefined}>
       <Rail page={page} onPage={setPage} onDim={act.dim} />
       <div className={styles.col}>
         <Header
@@ -92,7 +97,15 @@ export function TabletApp({ idleMs: idleOverride }: { idleMs?: number }) {
         {page === 'rooms' && <RoomsPage room={room} onRoom={setRoom} />}
         {page === 'scenes' && <ScenesPage scene={sceneSel} onScene={setSceneSel} />}
       </div>
-      {alarm && !alert && <AlarmVeil radius={24} />}
+      </div>
+      {alarm && !guarded && !alert && <AlarmVeil radius={24} />}
+      {guarded && !alert && (
+        <CriticalAlert tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
+          title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
+          where={mode === 'vacation' ? t('Long absence · Turned on by Alexey') : t('Alarm is on · Lights and media are off')}
+          at={modeAt} sound={t('All sensors are watching')} soundIcon="motion"
+          actionLabel={t('Switch to Home (PIN)')} actionIcon="home" onAction={() => act.requestHome()}/>
+      )}
       {onboarding && <Onboarding step={onboarding} />}
       <DialogHost />
       <ToastHost toast={toast} onDone={act.clearToast} />

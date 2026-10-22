@@ -81,6 +81,19 @@ describe('главная страница', () => {
     expect(screen.queryByRole('alertdialog')).toBeNull()
   })
 
+  it('дом под охраной: окно поверх интерфейса, нажать можно только его кнопку', async () => {
+    const user = userEvent.setup()
+    useHome.setState({ mode: 'vacation', alarm: true, modeAt: '12:40' })
+    render(<App />)
+    const guard = screen.getByRole('alertdialog', { name: 'Vacation mode' })
+    expect(guard.textContent).toContain('Home is armed')
+    expect(guard.textContent).toContain('Since 12:40')
+    // интерфейс под окном недоступен
+    expect(document.querySelector('[inert]')?.contains(screen.getByRole('heading', { name: 'Scene', hidden: true }))).toBe(true)
+    await user.click(screen.getByRole('button', { name: 'Switch to Home (PIN)' }))
+    expect(screen.getByRole('dialog', { name: 'Enter PIN to switch to Home' })).toBeTruthy()
+  })
+
   it('экран сна: время, дата и температура, без режима, сцены и сигнализации', async () => {
     const user = userEvent.setup()
     render(<App />)

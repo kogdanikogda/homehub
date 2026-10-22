@@ -73,6 +73,10 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
     { icon: 'case', name: MODE_NAMES.vacation, description: admin ? t('Long absence. Only you can turn it on.') : t('Long absence. Turned on by Alexey.'), current: mode === 'vacation', locked: !admin, badge: admin ? undefined : t('Admin only'), onClick: () => pick('vacation') },
   ]
 
+  // Дом под охраной (Away, Vacation): интерфейс перекрыт окном, нажимать можно только его кнопку
+  const guarded = mode !== 'home'
+  const modeAt = useHome((s) => s.modeAt)
+
   const go = (next: Tab) => { setTab(next); setSub(null) }
   const title =
     sub?.kind === 'room' ? ROOM_NAMES[sub.id]
@@ -86,6 +90,7 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
   return (
     <HeaderCtx.Provider value={setHdr}>
     <div className={styles.root}>
+      <div className={styles.guardWrap} inert={guarded || undefined}>
       <PhoneHeader title={hdr?.title ?? title} back={hdr?.back} subtitle={role(user)} mode={mode} modeName={MODE_NAMES[mode]} alarm={alarm} onMode={() => setSheet(true)} showTitle={!(tab === 'dashboard' && !sub) || Boolean(hdr)} />
       <PhoneBody>
         {tab === 'dashboard' && !sub && (
@@ -104,7 +109,15 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
         {admin && tab === 'settings' && !sub && <SettingsScreen />}
       </PhoneBody>
       <TabBar tabs={admin ? adminTabs() : familyTabs()} value={tab} onChange={go} />
-      {alarm && !alert && <AlarmVeil radius={38} />}
+      </div>
+      {alarm && !guarded && !alert && <AlarmVeil radius={38} />}
+      {guarded && !alert && (
+        <CriticalAlert tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
+          title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
+          where={mode === 'vacation' ? t('Long absence · Turned on by Alexey') : t('Alarm is on · Lights and media are off')}
+          at={modeAt} sound={t('All sensors are watching')} soundIcon="motion"
+          actionLabel={t('Switch to Home')} actionIcon="home" onAction={() => act.requestHome(user)} compact />
+      )}
       {sheet && <ModeSheet rows={rows} onClose={() => setSheet(false)} />}
       <DialogHost by={user} compact />
       {alert && (alert.kind === 'intrusion'
