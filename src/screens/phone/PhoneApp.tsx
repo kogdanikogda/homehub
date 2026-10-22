@@ -75,7 +75,6 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
 
   // Дом под охраной (Away, Vacation): интерфейс перекрыт окном, нажимать можно только его кнопку
   const guarded = mode !== 'home'
-  const modeAt = useHome((s) => s.modeAt)
 
   const go = (next: Tab) => { setTab(next); setSub(null) }
   const title =
@@ -114,8 +113,6 @@ export function PhoneApp({ user = 'marina' }: { user?: PhoneUser }) {
       {guarded && !alert && (
         <CriticalAlert tone="armed" icon={mode === 'vacation' ? 'case' : 'lock'} chip={t('Home is armed')}
           title={mode === 'vacation' ? t('Vacation mode') : t('Away mode')}
-          where={mode === 'vacation' ? t('Long absence · Turned on by Alexey') : t('Alarm is on · Lights and media are off')}
-          at={modeAt} sound={t('All sensors are watching')} soundIcon="motion"
           actionLabel={t('Switch to Home')} actionIcon="home" onAction={() => act.requestHome(user)} compact />
       )}
       {sheet && <ModeSheet rows={rows} onClose={() => setSheet(false)} />}

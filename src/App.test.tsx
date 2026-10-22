@@ -87,7 +87,7 @@ describe('главная страница', () => {
     render(<App />)
     const guard = screen.getByRole('alertdialog', { name: 'Vacation mode' })
     expect(guard.textContent).toContain('Home is armed')
-    expect(guard.textContent).toContain('Since 12:40')
+    expect(guard.textContent).not.toContain('Since')
     // интерфейс под окном недоступен
     expect(document.querySelector('[inert]')?.contains(screen.getByRole('heading', { name: 'Scene', hidden: true }))).toBe(true)
     await user.click(screen.getByRole('button', { name: 'Switch to Home (PIN)' }))

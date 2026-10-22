@@ -9,14 +9,14 @@ type Props = {
   tone: 'intrusion' | 'smoke' | 'armed'
   icon: IconName
   title: string
-  /** Где сработал датчик */
-  where: string
+  /** Где сработал датчик (у окна охраны нет) */
+  where?: string
   /** Время срабатывания или включения режима, ЧЧ:ММ */
   at?: string | null
   /** Момент срабатывания (мс) — для таймера «сколько длится тревога» */
   since?: number
   /** Вторая плашка: что со звуком («Siren is on») или состояние охраны */
-  sound: string
+  sound?: string
   /** Значок второй плашки */
   soundIcon?: IconName
   /** Постоянная надпись в метке сверху вместо таймера (для режима охраны) */
@@ -62,12 +62,14 @@ export function CriticalAlert({ tone, icon, title, where, at, since, sound, soun
         </span>
         <div className={styles.copy}>
           <h1 className={styles.title}>{title}</h1>
-          <p className={styles.where}>{where}</p>
+          {where && <p className={styles.where}>{where}</p>}
         </div>
-        <div className={styles.facts}>
-          {at && <span className={styles.fact}><Icon name="clock" size={compact ? 16 : 22} />{t('Since {at}', { at })}</span>}
-          <span className={styles.fact}><Icon name={soundIcon} size={compact ? 16 : 22} />{sound}</span>
-        </div>
+        {(at || sound) && (
+          <div className={styles.facts}>
+            {at && <span className={styles.fact}><Icon name="clock" size={compact ? 16 : 22} />{t('Since {at}', { at })}</span>}
+            {sound && <span className={styles.fact}><Icon name={soundIcon} size={compact ? 16 : 22} />{sound}</span>}
+          </div>
+        )}
       </div>
       <Button variant="inverse" size={compact ? "lg" : "xl"} icon={actionIcon} onClick={onAction} className={styles.action}>{actionLabel}</Button>
     </div>
